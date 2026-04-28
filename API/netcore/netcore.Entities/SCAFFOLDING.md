@@ -1,0 +1,2 @@
+# Scaffolding DB
+dotnet ef dbcontext scaffold "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=XEPDB1)));User ID=fshop_db;Password=fshop_db;Persist Security Info=True" Oracle.EntityFrameworkCore -o Entities -n netcore.Entities.Entities -f --no-build -c ApplicationDbContext --context-dir ./ --context-namespace netcore.Entities

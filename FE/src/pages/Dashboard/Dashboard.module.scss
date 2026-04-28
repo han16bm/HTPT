@@ -1,0 +1,34 @@
+.dashboard {
+  .title {
+    margin-bottom: 24px !important;
+    color: #212529 !important;
+  }
+
+  .statsRow {
+    margin-bottom: 16px;
+  }
+
+  .statCard {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    transition: box-shadow 0.2s;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  .chartsRow {
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  .chartCard {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .quickInfo {
+    margin-top: 16px;
+  }
+}

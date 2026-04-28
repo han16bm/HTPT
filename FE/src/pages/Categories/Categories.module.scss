@@ -1,0 +1,239 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.headerHint {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.summaryStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summaryCard {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid #dfe7dc;
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbf6 100%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+
+  strong {
+    display: block;
+    margin-top: 4px;
+    color: #14532d;
+    font-size: 26px;
+    line-height: 1.1;
+  }
+}
+
+.summaryLabel {
+  color: #5f6b66;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tableShell {
+  border: 1px solid #e5ece7;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+}
+
+.categoryTable {
+  :global(.ant-table) {
+    background: transparent;
+  }
+
+  :global(.ant-table-thead > tr > th) {
+    background: linear-gradient(180deg, #f8faf8 0%, #f1f6f2 100%);
+    color: #22312b;
+    font-size: 15px;
+    font-weight: 700;
+    border-bottom: 1px solid #e5ece7;
+  }
+
+  :global(.ant-table-tbody > tr > td) {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #edf2ee;
+    vertical-align: middle;
+  }
+
+  :global(.ant-table-row-expand-icon) {
+    border-radius: 999px;
+    border-color: #7cc49d;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
+  }
+}
+
+.parentTableRow {
+  :global(td) {
+    background: linear-gradient(180deg, rgba(244, 249, 246, 0.96) 0%, rgba(255, 255, 255, 0.96) 100%);
+  }
+}
+
+.childTableRow {
+  :global(td:first-child) {
+    position: relative;
+  }
+}
+
+.codeCell {
+  display: flex;
+  align-items: center;
+}
+
+.codeTag {
+  margin: 0;
+  padding-inline: 10px;
+  border-radius: 999px;
+  border-color: #d6dfd9;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+}
+
+.parentTag {
+  border-color: #b6dfc0;
+  background: #eefbf1;
+  color: #166534;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+}
+
+.nameMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.treeBranch {
+  position: relative;
+  flex: 0 0 auto;
+  height: 40px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: -8px;
+    bottom: 18px;
+    width: 1px;
+    background: #c8d7ce;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 18px;
+    width: calc(100% - 8px);
+    height: 1px;
+    background: #c8d7ce;
+  }
+}
+
+.nameContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nameText {
+  color: #111827;
+  font-size: 17px;
+}
+
+.parentName {
+  font-weight: 700;
+}
+
+.levelTag {
+  margin: 0;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.rootLevel {
+  color: #14532d;
+  background: #e9f9ee;
+  border-color: #b5e0c1;
+}
+
+.childLevel {
+  color: #0f766e;
+  background: #ecfeff;
+  border-color: #b7eaeb;
+}
+
+.childCount {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.slugText {
+  color: #7b8794 !important;
+  font-size: 13px;
+}
+
+.orderBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f3f6f4;
+  color: #334155;
+  font-weight: 700;
+}
+
+.statusTag {
+  margin: 0;
+  border-radius: 999px;
+  padding-inline: 10px;
+  font-weight: 700;
+}
+
+.activeStatus {
+  color: #15803d;
+  border-color: #a3e0b3;
+  background: #f0fdf4;
+}
+
+.inactiveStatus {
+  color: #9a3412;
+  border-color: #fdc9b4;
+  background: #fff7ed;
+}

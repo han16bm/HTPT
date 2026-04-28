@@ -1,0 +1,245 @@
+.categoriesPage {
+  padding: 8px 0;
+}
+
+.emptySelect {
+  padding: 80px 0;
+  text-align: center;
+}
+
+// ── Banner danh mục ───────────────────────────────────────────────────────────
+.categoryBanner {
+  width: 100%;
+  min-height: 140px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #0c2a4a 0%, #0a3d6b 100%);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.categoryBannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(2, 14, 36, 0.85) 0%, rgba(2, 14, 36, 0.35) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 32px;
+  gap: 6px;
+}
+
+.categoryBannerName {
+  font-size: 26px;
+  font-weight: 800;
+  color: #e0f7ff;
+  margin: 0;
+  letter-spacing: -0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.categoryBannerDesc {
+  font-size: 14px;
+  color: rgba(180, 230, 255, 0.80);
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .categoryBanner { min-height: 100px; }
+  .categoryBannerOverlay { padding: 16px 20px; }
+  .categoryBannerName { font-size: 20px; }
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #e0f7ff;
+  margin: 0 0 8px;
+}
+
+.pageSubtitle {
+  color: rgba(180, 225, 255, 0.70);
+  font-size: 15px;
+  margin: 0 0 16px;
+}
+
+// ── Filter bar ────────────────────────────────────────────────────────────────
+.filterBar {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0;
+  align-items: start;
+  background: rgba(2, 28, 50, 0.65);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.filterColPrice {
+  padding-right: 20px;
+  border-right: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.filterCol {
+  padding: 0 20px;
+  border-right: 1px solid rgba(56, 189, 248, 0.15);
+
+  &:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #7dd3fc;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.filterSelect {
+  width: 180px;
+}
+
+.breadcrumb {
+  margin-bottom: 10px;
+}
+
+.breadLink {
+  cursor: pointer;
+  color: #1890ff;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+// ── Price range filter ────────────────────────────────────────────────────────
+
+.priceFilterValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pricePill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  background: rgba(3, 105, 161, 0.35);
+  border: 1px solid rgba(56, 189, 248, 0.40);
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7dd3fc;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.priceSep {
+  color: rgba(180, 225, 255, 0.45);
+  font-size: 12px;
+}
+
+.resetBtn {
+  margin-left: auto;
+  font-size: 12px !important;
+  height: 26px !important;
+  padding: 0 10px !important;
+  border-color: rgba(56, 189, 248, 0.45) !important;
+  color: #7dd3fc !important;
+  background: rgba(56, 189, 248, 0.08) !important;
+  border-radius: 6px !important;
+
+  &:hover {
+    background: rgba(56, 189, 248, 0.18) !important;
+    border-color: #38bdf8 !important;
+  }
+}
+
+.priceSlider {
+  margin: 4px 0 0 !important;
+
+  :global(.ant-slider-rail) {
+    background: rgba(56, 189, 248, 0.15);
+    height: 5px;
+    border-radius: 99px;
+  }
+
+  :global(.ant-slider-track) {
+    background: linear-gradient(90deg, #0369a1, #38bdf8);
+    height: 5px;
+    border-radius: 99px;
+  }
+
+  :global(.ant-slider-handle) {
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+    border: 2px solid #38bdf8 !important;
+    background: #0c4a6e !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22) !important;
+    transition: box-shadow 0.2s;
+
+    &:hover,
+    &:focus {
+      border-color: #7dd3fc !important;
+      box-shadow: 0 0 0 5px rgba(56, 189, 248, 0.30) !important;
+    }
+  }
+}
+
+.priceMarks {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 2px 0;
+
+  span {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(125, 211, 252, 0.70);
+    letter-spacing: 0.2px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filterBar {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .filterColPrice {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+    padding-bottom: 16px;
+  }
+
+  .filterCol {
+    padding: 0;
+    border-right: none;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .resetBtn {
+    margin-left: 0 !important;
+  }
+}

@@ -1,0 +1,20 @@
+.productsPage {
+  .pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    .pageTitle {
+      margin: 0 !important;
+      color: #212529 !important;
+    }
+  }
+
+  .tableActions {
+    display: flex;
+    gap: 4px;
+  }
+}

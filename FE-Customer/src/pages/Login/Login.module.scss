@@ -1,0 +1,404 @@
+// ── Page layout ───────────────────────────────────────────────────────────────
+.page {
+  display: flex;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+// ── Left panel ────────────────────────────────────────────────────────────────
+.leftPanel {
+  position: relative;
+  flex: 1 1 55%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(145deg, #042f4b 0%, #0a5c7a 40%, #0e7490 70%, #148f77 100%);
+
+  // Subtle radial glow in centre
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 65% 65% at 50% 45%, rgba(20,143,119,0.28) 0%, transparent 70%);
+    pointer-events: none;
+  }
+}
+
+.bubbleCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+// Fish emoji decorators
+@keyframes fishSwim1 {
+  0%   { transform: translateX(-60px) translateY(0)   scaleX(1); }
+  48%  { transform: translateX(200px) translateY(-18px) scaleX(1); }
+  50%  { transform: translateX(200px) translateY(-18px) scaleX(-1); }
+  100% { transform: translateX(-60px) translateY(0)   scaleX(-1); }
+}
+@keyframes fishSwim2 {
+  0%   { transform: translateX(60px) translateY(0)    scaleX(-1); }
+  48%  { transform: translateX(-180px) translateY(14px) scaleX(-1); }
+  50%  { transform: translateX(-180px) translateY(14px) scaleX(1); }
+  100% { transform: translateX(60px) translateY(0)    scaleX(1); }
+}
+@keyframes fishFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-14px); }
+}
+
+.fishDeco1 {
+  position: absolute;
+  font-size: 28px;
+  top: 22%;
+  left: 8%;
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.3));
+  animation: fishSwim1 14s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.75;
+}
+.fishDeco2 {
+  position: absolute;
+  font-size: 22px;
+  top: 70%;
+  right: 10%;
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.3));
+  animation: fishSwim2 18s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.65;
+}
+.fishDeco3 {
+  position: absolute;
+  font-size: 18px;
+  top: 44%;
+  left: 14%;
+  filter: drop-shadow(0 3px 10px rgba(0,0,0,0.3));
+  animation: fishFloat 6s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+// Brand content
+.brandBlock {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  padding: 0 40px;
+  max-width: 440px;
+  animation: fadeSlideUp 0.9s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+.brandLogo {
+  font-size: 72px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.4));
+  display: block;
+  animation: fishFloat 4s ease-in-out infinite;
+}
+
+.brandName {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  margin: 0 0 2px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.brandTagline {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.72);
+  margin: 0 0 20px;
+}
+
+.brandDesc {
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.82);
+  margin: 0 0 28px;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 auto;
+  width: fit-content;
+}
+
+.featureItem {
+  font-size: 14px;
+  color: rgba(255,255,255,0.88);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  span {
+    color: #5eead4;
+    font-size: 16px;
+  }
+}
+
+// Bottom wave
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  pointer-events: none;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// ── Right panel ───────────────────────────────────────────────────────────────
+.rightPanel {
+  flex: 0 0 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f9ff;
+  padding: 40px 24px;
+}
+
+// ── Form card ─────────────────────────────────────────────────────────────────
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.formCard {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 44px 40px;
+  box-shadow:
+    0 4px 6px rgba(0,0,0,0.04),
+    0 20px 48px rgba(14,116,144,0.12);
+  animation: fadeSlideUp 0.72s cubic-bezier(0.22,1,0.36,1) 0.1s both;
+}
+
+.mobileLogo {
+  display: none;
+  font-size: 42px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.formTitle {
+  font-size: 26px;
+  font-weight: 800;
+  color: #042f4b;
+  margin: 0 0 4px;
+  text-align: center;
+}
+
+.formSubtitle {
+  font-size: 14px;
+  color: #64748b;
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+.form {
+  :global(.ant-form-item-label > label) {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #1e3a5f;
+  }
+
+  :global(.ant-form-item) {
+    margin-bottom: 18px;
+  }
+}
+
+.input {
+  border-radius: 10px !important;
+  border-color: #cbd5e1 !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover,
+  &:focus-within {
+    border-color: #0e7490 !important;
+    box-shadow: 0 0 0 3px rgba(14,116,144,0.12) !important;
+  }
+
+  :global(.ant-input) {
+    font-size: 14px;
+  }
+}
+
+.inputIcon {
+  color: #94a3b8;
+}
+
+.formRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.remember {
+  font-size: 13.5px;
+  color: #475569;
+
+  :global(.ant-checkbox-checked .ant-checkbox-inner) {
+    background-color: #0e7490;
+    border-color: #0e7490;
+  }
+}
+
+.forgotLink {
+  font-size: 13.5px;
+  color: #0e7490;
+  font-weight: 500;
+
+  &:hover {
+    color: #0a5c7a;
+    text-decoration: underline;
+  }
+}
+
+.loginBtn {
+  border-radius: 10px !important;
+  height: 46px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  background: linear-gradient(90deg, #0a5c7a 0%, #0e7490 50%, #148f77 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 18px rgba(14,116,144,0.32) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 28px rgba(14,116,144,0.42) !important;
+    background: linear-gradient(90deg, #083d55 0%, #0a5c7a 50%, #0e7490 100%) !important;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0) !important;
+  }
+}
+
+.dividerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 18px;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.dividerText {
+  font-size: 12.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.registerPrompt {
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 12px;
+}
+
+.registerLink {
+  color: #0e7490;
+  font-weight: 700;
+
+  &:hover {
+    color: #148f77;
+    text-decoration: underline;
+  }
+}
+
+.backHome {
+  text-align: center;
+  font-size: 13px;
+  margin: 0;
+
+  a {
+    color: #94a3b8;
+
+    &:hover {
+      color: #0e7490;
+    }
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 900px) {
+  .page {
+    flex-direction: column;
+  }
+
+  .leftPanel {
+    flex: 0 0 200px;
+    min-height: 200px;
+  }
+
+  .brandBlock {
+    padding: 0 20px;
+  }
+
+  .brandName {
+    font-size: 22px;
+  }
+
+  .brandLogo {
+    font-size: 44px;
+  }
+
+  .brandDesc,
+  .features {
+    display: none;
+  }
+
+  .rightPanel {
+    flex: 1;
+    background: #f0f9ff;
+  }
+}
+
+@media (max-width: 480px) {
+  .leftPanel {
+    flex: 0 0 140px;
+    min-height: 140px;
+  }
+
+  .brandTagline {
+    display: none;
+  }
+
+  .formCard {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+
+  .mobileLogo {
+    display: block;
+  }
+
+  .formTitle {
+    font-size: 22px;
+  }
+}
+

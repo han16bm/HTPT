@@ -1,0 +1,25 @@
+using System.Linq.Expressions;
+
+namespace netcore.Entities.Interfaces;
+
+/// <summary>
+/// Generic repository interface — CRUD cơ bản cho tất cả entity.
+/// </summary>
+public interface IRepository<T> where T : class
+{
+    Task<T?> GetByIdAsync(long id, CancellationToken ct = default);
+    Task<List<T>> GetAllAsync(CancellationToken ct = default);
+    Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
+    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
+    Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default);
+    Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken ct = default);
+
+    Task AddAsync(T entity, CancellationToken ct = default);
+    Task AddRangeAsync(IEnumerable<T> entities, CancellationToken ct = default);
+    void Update(T entity);
+    void UpdateRange(IEnumerable<T> entities);
+    void Remove(T entity);
+    void RemoveRange(IEnumerable<T> entities);
+
+    IQueryable<T> Query();
+}

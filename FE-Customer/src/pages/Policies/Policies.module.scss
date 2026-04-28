@@ -1,0 +1,317 @@
+/* ========================================
+   Policies Page – Dark Ocean Theme
+   ======================================== */
+
+.policiesPage {
+  padding: 0 0 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ──────────────────────────────────────────
+   Hero Banner
+────────────────────────────────────────── */
+.heroBanner {
+  position: relative;
+  height: 260px;
+  border-radius: 16px;
+  margin-bottom: 32px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #010d1e 0%, #012b52 45%, #014f86 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 50%, rgba(0, 120, 255, 0.22) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(0, 200, 255, 0.16) 0%, transparent 70%);
+  }
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 5, 18, 0.35);
+  z-index: 1;
+}
+
+.bannerContent {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.bannerEmoji {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+  filter: drop-shadow(0 0 12px rgba(0, 180, 255, 0.6));
+}
+
+.bannerTitle {
+  font-size: 34px;
+  font-weight: 800;
+  color: #e0f7ff;
+  margin: 0 0 10px;
+  text-shadow: 0 2px 12px rgba(0, 120, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+.bannerSubtitle {
+  font-size: 15px;
+  color: rgba(180, 225, 255, 0.78);
+  margin: 0;
+}
+
+/* ──────────────────────────────────────────
+   Policy Navigation Cards
+────────────────────────────────────────── */
+.policyNav {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+  padding: 0 8px;
+}
+
+.navCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 110px;
+  padding: 16px 20px;
+  background: rgba(6, 20, 46, 0.88);
+  border: 1px solid rgba(0, 180, 255, 0.16);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 180, 255, 0.38);
+    box-shadow: 0 6px 22px rgba(0, 100, 200, 0.25);
+  }
+}
+
+.navCardActive {
+  background: rgba(6, 20, 54, 0.92);
+  transform: translateY(-3px);
+}
+
+.navEmoji {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.navLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(200, 235, 255, 0.82);
+  transition: color 0.22s ease;
+  white-space: nowrap;
+}
+
+/* ──────────────────────────────────────────
+   Policy Panel
+────────────────────────────────────────── */
+.policyPanel {
+  background: rgba(6, 20, 46, 0.88);
+  border: 1px solid rgba(0, 180, 255, 0.14);
+  border-radius: 16px;
+  padding: 28px 28px 20px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fadeInUp 0.35s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 180, 255, 0.12);
+  border-left: 4px solid;
+  padding-left: 18px;
+}
+
+.panelIcon {
+  font-size: 26px;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e0f7ff;
+  margin: 0 0 6px;
+}
+
+.panelIntro {
+  color: rgba(180, 225, 255, 0.72);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ──────────────────────────────────────────
+   FAQ Accordion
+────────────────────────────────────────── */
+.faqCollapse {
+  background: transparent;
+
+  :global(.ant-collapse-item) {
+    background: rgba(4, 14, 36, 0.72) !important;
+    border: 1px solid rgba(0, 180, 255, 0.12) !important;
+    border-radius: 10px !important;
+    margin-bottom: 10px;
+    overflow: hidden;
+
+    &:last-child { margin-bottom: 0; }
+  }
+
+  :global(.ant-collapse-header) {
+    padding: 14px 18px !important;
+    align-items: center !important;
+  }
+
+  :global(.ant-collapse-content) {
+    background: rgba(2, 10, 28, 0.70) !important;
+    border-top: 1px solid rgba(0, 180, 255, 0.10) !important;
+  }
+
+  :global(.ant-collapse-content-box) {
+    padding: 14px 18px !important;
+  }
+}
+
+.faqQuestion {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(200, 235, 255, 0.92);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.faqAnswer {
+  font-size: 14px;
+  color: rgba(180, 215, 255, 0.78);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ──────────────────────────────────────────
+   Support / Contact Section
+────────────────────────────────────────── */
+.supportSection {
+  position: relative;
+  background: rgba(4, 16, 38, 0.85);
+  border: 1px solid rgba(0, 180, 255, 0.16);
+  border-radius: 16px;
+  padding: 36px 24px;
+  overflow: hidden;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.supportGlow {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(0, 120, 255, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.supportContent {
+  position: relative;
+  z-index: 1;
+}
+
+.supportTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #e0f7ff;
+  margin: 0 0 8px;
+}
+
+.supportSub {
+  font-size: 14px;
+  color: rgba(180, 225, 255, 0.70);
+  margin: 0 0 28px;
+}
+
+.contactRow {
+  max-width: 800px;
+  margin: 0 auto !important;
+}
+
+.contactCard {
+  background: rgba(6, 20, 50, 0.80);
+  border: 1px solid rgba(0, 180, 255, 0.14);
+  border-radius: 14px;
+  padding: 22px 16px;
+  text-align: center;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 100, 200, 0.2);
+  }
+}
+
+.contactIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin: 0 auto 12px;
+}
+
+.contactLabel {
+  font-size: 12px;
+  color: rgba(140, 200, 255, 0.60);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.contactValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c8ebff;
+  margin-bottom: 4px;
+}
+
+.contactNote {
+  font-size: 12px;
+  color: rgba(160, 210, 255, 0.58);
+}

@@ -1,0 +1,23 @@
+.page {}
+.pageHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.filterBar { display: flex; gap: 8px; margin-bottom: 12px; }
+:global(.row-low-stock td) { background: #fff9e6 !important; }
+:global(.row-out-of-stock td) { background: #fff1f0 !important; }
+
+.stockTable {
+  :global(.ant-table-placeholder > td) {
+    padding: 0 !important;
+  }
+
+  :global(.ant-table-placeholder .ant-empty) {
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  :global(.ant-table-placeholder .ant-empty-image) {
+    margin-bottom: 12px;
+  }
+}

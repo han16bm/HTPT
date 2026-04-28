@@ -1,0 +1,6 @@
+@FishShop.Gateway_HostAddress = http://localhost:5207
+
+GET {{FishShop.Gateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,479 @@
+.checkout {
+  min-height: calc(100vh - 200px);
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+
+  :global(.ant-breadcrumb-link),
+  :global(.ant-breadcrumb-link a) {
+    color: rgba(180, 220, 255, 0.75) !important;
+    &:hover { color: #7dd3fc !important; }
+  }
+  :global(.ant-breadcrumb-separator) {
+    color: rgba(180, 220, 255, 0.40) !important;
+  }
+  :global(.ant-breadcrumb-link:last-child) {
+    color: #e0f7ff !important;
+  }
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 28px;
+  color: #e0f7ff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.40);
+}
+
+.steps {
+  margin: 0 auto 32px;
+  width: min(100%, 1080px);
+  padding: 18px 24px;
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(7, 24, 39, 0.82), rgba(13, 90, 143, 0.56));
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  box-shadow: 0 14px 30px rgba(3, 20, 39, 0.22);
+  backdrop-filter: blur(12px);
+
+  :global(.ant-steps-item-icon) {
+    box-shadow: 0 0 0 4px rgba(224, 247, 255, 0.12);
+  }
+
+  // Step title
+  :global(.ant-steps-item-title) {
+    color: rgba(240, 249, 255, 0.92) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    text-shadow: 0 1px 10px rgba(2, 12, 27, 0.34);
+  }
+
+  // Active step title
+  :global(.ant-steps-item-process .ant-steps-item-title) {
+    color: #ffffff !important;
+  }
+
+  // Finished step title
+  :global(.ant-steps-item-finish .ant-steps-item-title) {
+    color: #d9f7ff !important;
+  }
+
+  // Waiting step title
+  :global(.ant-steps-item-wait .ant-steps-item-title) {
+    color: rgba(224, 247, 255, 0.78) !important;
+  }
+
+  :global(.ant-steps-item-process .ant-steps-item-icon) {
+    background: linear-gradient(135deg, #7dd3fc, #1890ff) !important;
+    border-color: #7dd3fc !important;
+
+    :global(.ant-steps-icon) {
+      color: #ffffff !important;
+    }
+  }
+
+  :global(.ant-steps-item-finish .ant-steps-item-icon) {
+    background: rgba(34, 197, 94, 0.18) !important;
+    border-color: #86efac !important;
+
+    :global(.ant-steps-icon) {
+      color: #dcfce7 !important;
+    }
+  }
+
+  // Waiting step icon
+  :global(.ant-steps-item-wait .ant-steps-item-icon) {
+    border-color: rgba(186, 230, 253, 0.55) !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+
+    :global(.ant-steps-icon) { color: rgba(240, 249, 255, 0.88) !important; }
+  }
+
+  // Connector line
+  :global(.ant-steps-item-finish > .ant-steps-item-container > .ant-steps-item-tail::after) {
+    background: linear-gradient(90deg, #38bdf8, #22c55e) !important;
+  }
+
+  :global(.ant-steps-item-wait > .ant-steps-item-container > .ant-steps-item-tail::after),
+  :global(.ant-steps-item-process > .ant-steps-item-container > .ant-steps-item-tail::after) {
+    background: rgba(224, 247, 255, 0.24) !important;
+  }
+}
+
+.loadingWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.hidden {
+  display: none;
+}
+
+// ── Form Cards ────────────────────────────────────────────────────────────────
+.formCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  color: #111827;
+
+  // Form labels
+  :global(.ant-form-item-label > label) {
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+  }
+
+  // Required asterisk
+  :global(.ant-form-item-label > label.ant-form-item-required::before) {
+    color: #ef4444 !important;
+  }
+
+  // Input text
+  :global(.ant-input),
+  :global(.ant-input-affix-wrapper) {
+    color: #111827 !important;
+    background: #f9fafb !important;
+    border-color: #d1d5db !important;
+
+    &:hover  { border-color: #1890ff !important; }
+    &:focus,
+    &:focus-within { border-color: #1890ff !important; box-shadow: 0 0 0 2px rgba(24,144,255,0.15) !important; }
+  }
+
+  :global(.ant-input::placeholder) {
+    color: #9ca3af !important;
+  }
+
+  :global(.ant-input-prefix) {
+    color: #6b7280 !important;
+  }
+
+  // Textarea
+  :global(.ant-input-textarea textarea) {
+    color: #111827 !important;
+    background: #f9fafb !important;
+    border-color: #d1d5db !important;
+
+    &::placeholder { color: #9ca3af !important; }
+  }
+
+  // Validation error text
+  :global(.ant-form-item-explain-error) {
+    color: #ef4444 !important;
+    font-size: 12px !important;
+  }
+
+  // Divider inside card
+  :global(.ant-divider) {
+    border-color: #e5e7eb !important;
+  }
+
+  // "Số lượng" label in qty row
+  span { color: #1f2937; }
+}
+
+.cardTitle {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 24px;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+// ── Payment options ───────────────────────────────────────────────────────────
+.payRadioGroup {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.payOption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: #91caff;
+    background: #f8fbff;
+  }
+}
+
+.paySelected {
+  border-color: #1890ff;
+  background: #f0f7ff;
+}
+
+.payIcon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.payText {
+  flex: 1;
+}
+
+.payName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.payDesc {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.bankInfo {
+  background: #f0f7ff;
+  border: 1px solid #91caff;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.bankInfoTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0958d9;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bankBody {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+// ── QR code ──────────────────────────────────────────────────────────────────
+.qrWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.qrImg {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 2px solid #91caff;
+  background: #fff;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+}
+
+.qrLabel {
+  font-size: 11px;
+  color: #595959;
+  text-align: center;
+}
+
+// ── Bank account details ──────────────────────────────────────────────────────
+.bankDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bankRow {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 8px;
+  border-left: 3px solid #1890ff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.bankKey {
+  font-size: 11px;
+  color: #595959;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+}
+
+.bankVal {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.bankNote {
+  border-left-color: #d97706;
+  background: #fffbeb;
+
+  .bankKey { color: #92400e; }
+  .bankVal  { color: #78350f; }
+}
+
+.stepBtns {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+
+  button:last-child { flex: 1; }
+}
+
+// ── Summary Card ──────────────────────────────────────────────────────────────
+.summaryCard {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 124px;
+  color: #111827;
+}
+
+.orderItems {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb {
+    background: #e8e8e8;
+    border-radius: 4px;
+  }
+}
+
+.orderItemRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.orderItemImg {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.orderItemDetail {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.orderItemName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #262626;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.orderItemQty {
+  font-size: 12px;
+  color: #888;
+}
+
+.orderItemPrice {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff4d4f;
+  flex-shrink: 0;
+}
+
+.summaryRows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sumRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.freeShip {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.grandTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.grandAmt {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ff4d4f;
+}
+
+.shippingNote {
+  text-align: center;
+  font-size: 12px;
+  color: #52c41a;
+  margin: 8px 0 0;
+}
+
+// ── Success ───────────────────────────────────────────────────────────────────
+.successWrap {
+  background: #fff;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 992px) {
+  .summaryCard {
+    position: static;
+  }
+
+  .steps {
+    width: 100%;
+    padding: 16px 14px;
+  }
+}

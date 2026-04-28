@@ -1,0 +1,466 @@
+/* ========================================
+   About Page – Dark Ocean Theme
+   ======================================== */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatBubble {
+  0%   { transform: translateY(0) scale(1); opacity: 0.6; }
+  50%  { opacity: 0.3; }
+  100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+}
+
+.aboutPage {
+  padding: 0 0 64px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ──────────────────────────────────────────
+   Hero Banner
+────────────────────────────────────────── */
+.heroBanner {
+  position: relative;
+  height: 300px;
+  border-radius: 18px;
+  margin-bottom: 36px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #010d1e 0%, #012b52 40%, #014f86 80%, #005fa3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 15% 60%, rgba(0, 140, 255, 0.28) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 70% at 85% 25%, rgba(0, 210, 255, 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 40% at 50% 90%, rgba(0, 80, 180, 0.20) 0%, transparent 70%);
+  }
+}
+
+.bannerOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 4, 18, 0.32);
+  z-index: 1;
+}
+
+.bannerBubbles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bubble {
+  position: absolute;
+  bottom: 0;
+  left: calc(10% + var(--i) * 11%);
+  width: calc(8px + var(--i) * 3px);
+  height: calc(8px + var(--i) * 3px);
+  border-radius: 50%;
+  background: rgba(120, 200, 255, 0.28);
+  border: 1px solid rgba(180, 230, 255, 0.35);
+  animation: floatBubble calc(3s + var(--i) * 0.6s) ease-in infinite;
+  animation-delay: calc(var(--i) * 0.4s);
+}
+
+.bannerContent {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 0 32px;
+  animation: fadeInUp 0.6s ease;
+}
+
+.bannerFish {
+  font-size: 58px;
+  display: block;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 16px rgba(0, 180, 255, 0.7));
+  animation: floatBubble 4s ease-in-out infinite alternate;
+}
+
+.bannerTitle {
+  font-size: 42px;
+  font-weight: 800;
+  color: #e0f7ff;
+  margin: 0 0 12px;
+  text-shadow: 0 2px 16px rgba(0, 130, 255, 0.55);
+  letter-spacing: 1.5px;
+}
+
+.bannerSub {
+  font-size: 17px;
+  color: rgba(180, 225, 255, 0.82);
+  margin: 0;
+  font-style: italic;
+}
+
+/* ──────────────────────────────────────────
+   Stats Row
+────────────────────────────────────────── */
+.statsRow {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+
+.statItem {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+  background: rgba(6, 20, 46, 0.88);
+  border: 1px solid rgba(0, 180, 255, 0.18);
+  border-radius: 14px;
+  padding: 22px 16px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  animation: fadeInUp 0.5s ease both;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 100, 200, 0.22);
+  }
+}
+
+.statValue {
+  font-size: 34px;
+  font-weight: 800;
+  color: #40a9ff;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: rgba(180, 225, 255, 0.68);
+  font-weight: 500;
+}
+
+/* ──────────────────────────────────────────
+   Generic Section
+────────────────────────────────────────── */
+.section {
+  margin-bottom: 56px;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.sectionTitle {
+  font-size: 26px;
+  font-weight: 700;
+  color: #e0f7ff;
+  margin-bottom: 24px;
+}
+
+/* ──────────────────────────────────────────
+   Store Introduction
+────────────────────────────────────────── */
+.storeImageWrap {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 60, 140, 0.35);
+  border: 1px solid rgba(0, 180, 255, 0.16);
+
+  &:hover .storeImageInner {
+    transform: scale(1.04);
+  }
+}
+
+.storeImageInner {
+  transition: transform 0.4s ease;
+  height: 320px;
+  background: linear-gradient(160deg, #012040 0%, #013e78 60%, #01568a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.storeImagePlaceholder {
+  text-align: center;
+
+  span {
+    font-size: 72px;
+    display: block;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 0 16px rgba(0, 180, 255, 0.6));
+  }
+
+  p {
+    font-size: 15px;
+    color: rgba(180, 225, 255, 0.70);
+    margin: 0;
+  }
+}
+
+.storeInfo {
+  p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(200, 235, 255, 0.82);
+    margin-bottom: 16px;
+  }
+}
+
+.timelineBox {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: rgba(4, 16, 40, 0.82);
+  border: 1px solid rgba(0, 180, 255, 0.14);
+  border-radius: 12px;
+
+  :global(.ant-timeline-item-content) {
+    color: rgba(190, 230, 255, 0.80);
+    font-size: 14px;
+
+    strong { color: #40a9ff; }
+  }
+
+  :global(.ant-timeline-item-tail) {
+    border-color: rgba(0, 180, 255, 0.25);
+  }
+}
+
+/* ──────────────────────────────────────────
+   Mission / Vision / Values
+────────────────────────────────────────── */
+.missionSection {
+  margin-bottom: 56px;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.missionCard {
+  background: rgba(6, 20, 46, 0.88);
+  border: 1px solid rgba(0, 180, 255, 0.14);
+  border-radius: 16px;
+  padding: 28px 24px;
+  height: 100%;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  transition: transform 0.24s ease, box-shadow 0.24s ease, border-color 0.24s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 28px rgba(0, 100, 200, 0.22);
+    border-color: var(--accent, rgba(0, 180, 255, 0.36));
+  }
+}
+
+.missionIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+
+.missionLabel {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e0f7ff;
+  margin: 0 0 12px;
+}
+
+.missionText {
+  font-size: 14px;
+  color: rgba(180, 225, 255, 0.74);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ──────────────────────────────────────────
+   Highlights
+────────────────────────────────────────── */
+.highlightCard {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  background: rgba(6, 20, 46, 0.82);
+  border: 1px solid rgba(0, 180, 255, 0.12);
+  border-radius: 14px;
+  padding: 20px 18px;
+  backdrop-filter: blur(8px);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(0, 100, 200, 0.2);
+  }
+}
+
+.highlightIcon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.highlightBody {
+  flex: 1;
+}
+
+.highlightTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #c8ebff;
+  margin: 0 0 6px;
+}
+
+.highlightDesc {
+  font-size: 13px;
+  color: rgba(170, 215, 255, 0.70);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ──────────────────────────────────────────
+   Gallery
+────────────────────────────────────────── */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.galleryItem {
+  background: rgba(4, 16, 44, 0.85);
+  border: 1px solid rgba(0, 180, 255, 0.14);
+  border-radius: 14px;
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.30s ease, box-shadow 0.30s ease, border-color 0.30s ease;
+
+  &:hover {
+    transform: scale(1.04);
+    box-shadow: 0 10px 28px rgba(0, 120, 255, 0.25);
+    border-color: rgba(0, 180, 255, 0.35);
+
+    .galleryEmoji {
+      transform: scale(1.18) rotate(8deg);
+    }
+  }
+}
+
+.galleryEmoji {
+  font-size: 48px;
+  transition: transform 0.30s ease;
+  filter: drop-shadow(0 0 10px rgba(0, 180, 255, 0.45));
+}
+
+.galleryLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(180, 225, 255, 0.72);
+}
+
+/* ──────────────────────────────────────────
+   CTA Section
+────────────────────────────────────────── */
+.ctaSection {
+  position: relative;
+  background: rgba(4, 14, 38, 0.88);
+  border: 1px solid rgba(0, 180, 255, 0.18);
+  border-radius: 18px;
+  padding: 52px 32px;
+  text-align: center;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.ctaGlow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  height: 260px;
+  background: radial-gradient(ellipse, rgba(0, 130, 255, 0.20) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ctaContent {
+  position: relative;
+  z-index: 1;
+}
+
+.ctaTitle {
+  font-size: 28px;
+  font-weight: 800;
+  color: #e0f7ff;
+  margin: 0 0 12px;
+  text-shadow: 0 2px 10px rgba(0, 100, 255, 0.35);
+}
+
+.ctaSub {
+  font-size: 15px;
+  color: rgba(180, 225, 255, 0.72);
+  margin: 0 0 32px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ctaBtnPrimary {
+  min-width: 160px;
+  height: 46px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1890ff, #096dd9) !important;
+  border: none !important;
+  box-shadow: 0 4px 18px rgba(24, 144, 255, 0.40) !important;
+  transition: transform 0.20s ease, box-shadow 0.20s ease !important;
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(24, 144, 255, 0.55) !important;
+  }
+}
+
+.ctaBtnOutline {
+  min-width: 160px;
+  height: 46px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  background: transparent !important;
+  border: 1px solid rgba(0, 180, 255, 0.45) !important;
+  color: #40a9ff !important;
+  transition: transform 0.20s ease, background 0.20s ease, border-color 0.20s ease !important;
+
+  &:hover {
+    transform: translateY(-2px) !important;
+    background: rgba(0, 120, 255, 0.10) !important;
+    border-color: rgba(0, 180, 255, 0.75) !important;
+  }
+}

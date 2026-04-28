@@ -1,0 +1,110 @@
+.heroBanner {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+
+  :global(.slick-dots) {
+    bottom: 16px;
+
+    li button {
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 4px;
+      width: 24px;
+      height: 4px;
+    }
+
+    li.slick-active button {
+      background: #fff;
+      width: 32px;
+    }
+  }
+}
+
+.dots {
+  bottom: 16px;
+}
+
+.slide {
+  height: 380px;
+  display: flex !important;
+  align-items: center;
+  padding: 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.slideContent {
+  max-width: 600px;
+  z-index: 2;
+}
+
+.tag {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.title {
+  color: #fff;
+  font-size: 36px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.ctaBtn {
+  font-weight: 600;
+  font-size: 15px;
+  height: 44px;
+  padding: 0 28px;
+  border-color: #fff;
+  color: #fff;
+
+  &:hover {
+    background: #fff !important;
+    color: #1890ff !important;
+  }
+}
+
+.decorEmoji {
+  position: absolute;
+  right: 80px;
+  font-size: 160px;
+  opacity: 0.15;
+  user-select: none;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .slide {
+    height: 260px;
+    padding: 0 24px;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .description {
+    font-size: 13px;
+  }
+
+  .decorEmoji {
+    display: none;
+  }
+}

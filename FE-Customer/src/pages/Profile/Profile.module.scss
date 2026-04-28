@@ -1,0 +1,78 @@
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+
+  // ── Fix label text color for ALL form items in ALL tabs ──
+  :global(.ant-form-item-label > label) {
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+  }
+
+  // Keep required asterisk red
+  :global(.ant-form-item-label > label.ant-form-item-required::before) {
+    color: #ef4444 !important;
+  }
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: linear-gradient(135deg, #0066cc 0%, #00b4d8 100%);
+  color: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.username {
+  margin: 4px 0 0;
+  opacity: 0.85;
+}
+
+.meta {
+  margin: 6px 0 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+
+  // Force gender Select to look identical to other white inputs
+  :global(.ant-select:not(.ant-select-disabled) .ant-select-selector) {
+    background-color: #ffffff !important;
+    border-color: #d9d9d9 !important;
+    color: #1f2937 !important;
+  }
+
+  :global(.ant-select-selection-item) {
+    color: #1f2937 !important;
+  }
+
+  :global(.ant-select-selection-placeholder) {
+    color: #9ca3af !important;
+  }
+}
+
+.formFooter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}

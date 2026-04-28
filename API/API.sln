@@ -1,0 +1,92 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+
+# ── Solution Folders ──────────────────────────────
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcore", "netcore", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{AAB11111-1111-1111-1111-111111111101}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Gateway", "Gateway", "{AAB11111-1111-1111-1111-111111111102}"
+EndProject
+
+# ── netcore libs ─────────────────────────────────
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "netcore.Commons", "netcore\netcore.Commons\netcore.Commons.csproj", "{A1000001-0000-0000-0000-000000000001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "netcore.Entities", "netcore\netcore.Entities\netcore.Entities.csproj", "{21F3B72D-DE03-5DBC-2A90-872B0D7A9ECD}"
+EndProject
+
+# ── Services ─────────────────────────────────────
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Auth", "Services\API.Auth\API.Auth.csproj", "{B2000001-0000-0000-0000-000000000001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Products", "Services\API.Products\API.Products.csproj", "{B2000001-0000-0000-0000-000000000002}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Orders", "Services\API.Orders\API.Orders.csproj", "{B2000001-0000-0000-0000-000000000003}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Admin", "Services\API.Admin\API.Admin.csproj", "{B2000001-0000-0000-0000-000000000004}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Content", "Services\API.Content\API.Content.csproj", "{B2000001-0000-0000-0000-000000000005}"
+EndProject
+
+# ── Gateway ──────────────────────────────────────
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FishShop.Gateway", "Gateway\FishShop.Gateway\FishShop.Gateway.csproj", "{C3000001-0000-0000-0000-000000000001}"
+EndProject
+
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A1000001-0000-0000-0000-000000000001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1000001-0000-0000-0000-000000000001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1000001-0000-0000-0000-000000000001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1000001-0000-0000-0000-000000000001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21F3B72D-DE03-5DBC-2A90-872B0D7A9ECD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21F3B72D-DE03-5DBC-2A90-872B0D7A9ECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21F3B72D-DE03-5DBC-2A90-872B0D7A9ECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21F3B72D-DE03-5DBC-2A90-872B0D7A9ECD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000003}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000004}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000004}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000004}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000004}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2000001-0000-0000-0000-000000000005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2000001-0000-0000-0000-000000000005}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3000001-0000-0000-0000-000000000001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3000001-0000-0000-0000-000000000001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3000001-0000-0000-0000-000000000001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3000001-0000-0000-0000-000000000001}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A1000001-0000-0000-0000-000000000001} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{21F3B72D-DE03-5DBC-2A90-872B0D7A9ECD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{B2000001-0000-0000-0000-000000000001} = {AAB11111-1111-1111-1111-111111111101}
+		{B2000001-0000-0000-0000-000000000002} = {AAB11111-1111-1111-1111-111111111101}
+		{B2000001-0000-0000-0000-000000000003} = {AAB11111-1111-1111-1111-111111111101}
+		{B2000001-0000-0000-0000-000000000004} = {AAB11111-1111-1111-1111-111111111101}
+		{B2000001-0000-0000-0000-000000000005} = {AAB11111-1111-1111-1111-111111111101}
+		{C3000001-0000-0000-0000-000000000001} = {AAB11111-1111-1111-1111-111111111102}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B7AB5DF2-CEB3-4D3A-8D6B-EF2AC0F184F2}
+	EndGlobalSection
+EndGlobal

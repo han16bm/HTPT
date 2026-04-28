@@ -1,0 +1,271 @@
+// ── Base banner ───────────────────────────────────────────────────────────────
+.banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  margin: 48px 0;
+  min-height: 252px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 14px 48px rgba(0, 0, 0, 0.18);
+
+  // Entry animation (triggered by .visible class)
+  opacity: 0;
+  transform: translateY(52px);
+  transition:
+    opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s ease;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &:hover {
+    box-shadow: 0 22px 64px rgba(0, 0, 0, 0.28);
+
+    .ctaBtn {
+      background: rgba(255, 255, 255, 0.32);
+      border-color: white;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    .emoji {
+      transform: scale(1.22) translateY(-12px) rotate(8deg);
+    }
+
+    .ctaArrow {
+      transform: translateX(5px);
+    }
+  }
+}
+
+// ── Parallax background layer ─────────────────────────────────────────────────
+.bgLayer {
+  position: absolute;
+  top: -80px;
+  left: 0;
+  right: 0;
+  bottom: -80px;
+  will-change: transform;
+}
+
+// ── 4 colour themes ───────────────────────────────────────────────────────────
+.koi .bgLayer {
+  background: linear-gradient(132deg, #0a2342 0%, #1a5276 44%, #148f77 100%);
+}
+
+.promo .bgLayer {
+  background: linear-gradient(132deg, #922b21 0%, #d35400 46%, #f39c12 100%);
+}
+
+.dragon .bgLayer {
+  background: linear-gradient(132deg, #17101f 0%, #6c3483 52%, #922b21 100%);
+}
+
+.store .bgLayer {
+  background: linear-gradient(132deg, #0e6655 0%, #1a9974 50%, #5dade2 100%);
+}
+
+// ── Decorative circles ────────────────────────────────────────────────────────
+.decorCircle1,
+.decorCircle2,
+.decorCircle3 {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  background: white;
+}
+
+.decorCircle1 {
+  width: 420px;
+  height: 420px;
+  right: -110px;
+  top: -110px;
+  opacity: 0.09;
+}
+
+.decorCircle2 {
+  width: 230px;
+  height: 230px;
+  left: 38%;
+  bottom: -80px;
+  opacity: 0.07;
+}
+
+.decorCircle3 {
+  width: 130px;
+  height: 130px;
+  right: 12%;
+  bottom: 10%;
+  opacity: 0.05;
+}
+
+// ── Content ───────────────────────────────────────────────────────────────────
+.content {
+  position: relative;
+  z-index: 2;
+  padding: 48px 56px;
+  color: #fff;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(6px);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 14px;
+}
+
+.emoji {
+  font-size: 52px;
+  line-height: 1;
+  margin-bottom: 14px;
+  display: block;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.32));
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.title {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 10px;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.28);
+  letter-spacing: -0.4px;
+}
+
+.subtitle {
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.65;
+  margin: 0 0 28px;
+  max-width: 440px;
+}
+
+.ctaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.2px;
+}
+
+.ctaArrow {
+  display: inline-block;
+  font-size: 16px;
+  transition: transform 0.28s ease;
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+  .content {
+    padding: 40px 40px;
+    max-width: 100%;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 768px) {
+  .banner {
+    border-radius: 14px;
+    min-height: 210px;
+    margin: 32px 0;
+  }
+
+  .content {
+    padding: 32px 28px;
+  }
+
+  .emoji {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+
+  .title {
+    font-size: 21px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .ctaBtn {
+    padding: 10px 22px;
+    font-size: 13px;
+  }
+
+  .decorCircle1 {
+    width: 260px;
+    height: 260px;
+    right: -65px;
+    top: -65px;
+  }
+
+  .decorCircle2 {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    border-radius: 10px;
+    margin: 24px 0;
+  }
+
+  .content {
+    padding: 24px 20px;
+  }
+
+  .emoji {
+    font-size: 32px;
+  }
+
+  .title {
+    font-size: 18px;
+    letter-spacing: 0;
+  }
+
+  .subtitle {
+    font-size: 12.5px;
+  }
+
+  .tag {
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    padding: 3px 10px;
+  }
+
+  .ctaBtn {
+    padding: 9px 18px;
+    font-size: 13px;
+  }
+}

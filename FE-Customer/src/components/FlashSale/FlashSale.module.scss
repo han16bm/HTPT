@@ -1,0 +1,106 @@
+.flashSale {
+  background: linear-gradient(135deg, #fff1e6, #fff);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #ffd591;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #d4380d;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.icon {
+  color: #fa8c16;
+  font-size: 22px;
+}
+
+.countdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.countLabel {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeBlock {
+  background: #d4380d;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  min-width: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.sep {
+  color: #d4380d;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.viewAll {
+  font-weight: 600;
+  color: #fa8c16;
+  padding: 0;
+
+  &:hover {
+    color: #d46b08;
+  }
+}
+
+.saleProductWrapper {
+  position: relative;
+}
+
+.discountBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #d4380d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  z-index: 10;
+}
+
+@media (max-width: 576px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,6 @@
+export const env = {
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  isDevelopment: import.meta.env.DEV,
+  isProduction: import.meta.env.PROD,
+  ENABLE_DEBUG: import.meta.env.VITE_ENABLE_DEBUG === 'true',
+};

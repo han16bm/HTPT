@@ -1,0 +1,77 @@
+.categoryGrid {
+  padding: 0;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #262626;
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin: 0;
+}
+
+.categoryCard {
+  border-radius: 12px;
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid #f0f0f0;
+  transition: all 0.25s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: 120px;
+  justify-content: center;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: #1890ff;
+  }
+}
+
+.icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.count {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+@media (max-width: 576px) {
+  .categoryCard {
+    height: 100px;
+  }
+
+  .icon {
+    font-size: 28px;
+  }
+
+  .name {
+    font-size: 12px;
+  }
+}

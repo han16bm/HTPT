@@ -1,0 +1,235 @@
+.loginPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('/assets/images/nen.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(24, 144, 255, 0.08) 0%, 
+      rgba(9, 109, 217, 0.12) 50%, 
+      rgba(0, 80, 179, 0.06) 100%
+    );
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 15% 30%, rgba(255, 255, 255, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 85% 70%, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(24, 144, 255, 0.03) 0%, transparent 60%);
+    animation: wave 20s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  @keyframes wave {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  
+  .loginBox {
+    background: linear-gradient(145deg, 
+      rgba(224, 247, 250, 0.95) 0%, 
+      rgba(178, 235, 242, 0.95) 50%,
+      rgba(224, 247, 250, 0.95) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    padding: 50px 45px;
+    border-radius: 28px;
+    box-shadow: 
+      0 25px 80px rgba(0, 188, 212, 0.25),
+      0 10px 40px rgba(0, 172, 193, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    z-index: 2;
+    border: 2px solid rgba(0, 188, 212, 0.3);
+
+    .logoSection {
+      text-align: center;
+      margin-bottom: 28px;
+      
+      .fishLogo {
+        width: 84px;
+        height: 84px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: swim 4s ease-in-out infinite;
+        filter: drop-shadow(0 4px 12px rgba(0, 188, 212, 0.4));
+      }
+
+      @keyframes swim {
+        0% { 
+          transform: translateX(-20px) scaleX(1) rotate(-3deg); 
+        }
+        25% {
+          transform: translateX(0px) scaleX(1) rotate(0deg);
+        }
+        50% { 
+          transform: translateX(20px) scaleX(-1) rotate(3deg); 
+        }
+        75% {
+          transform: translateX(0px) scaleX(-1) rotate(0deg);
+        }
+        100% {
+          transform: translateX(-20px) scaleX(1) rotate(-3deg);
+        }
+      }
+    }
+
+    .title {
+      text-align: center;
+      background: linear-gradient(135deg, #00acc1 0%, #0097a7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #00838f;
+      margin-bottom: 36px;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+
+    .loginBtn {
+      width: 100%;
+      height: 52px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #00acc1 0%, #0097a7 100%);
+      border: none;
+      border-radius: 26px;
+      box-shadow: 
+        0 8px 20px rgba(0, 172, 193, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        background: linear-gradient(135deg, #0097a7 0%, #00838f 100%) !important;
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 
+          0 12px 28px rgba(0, 172, 193, 0.5),
+          0 4px 12px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      &:active {
+        transform: translateY(-1px) scale(0.99);
+      }
+    }
+
+    .registerLink {
+      text-align: center;
+      margin-top: 20px;
+      color: #00838f;
+      font-size: 14px;
+
+      span {
+        color: #00acc1;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+
+        &:hover {
+          color: #0097a7;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+:global {
+  .ant-form-item {
+    margin-bottom: 20px;
+  }
+
+  .ant-form-item-label {
+    display: none;
+  }
+
+  .ant-input,
+  .ant-input-password,
+  .ant-input-affix-wrapper {
+    height: 50px;
+    border-radius: 12px;
+    border: 2px solid #b2ebf2;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.85);
+
+    &:hover {
+      border-color: #00acc1;
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    &:focus,
+    &.ant-input-focused,
+    &.ant-input-affix-wrapper-focused {
+      border-color: #00acc1;
+      box-shadow: 0 0 0 4px rgba(0, 172, 193, 0.15);
+      background: white;
+    }
+  }
+
+  .ant-input-affix-wrapper {
+    padding: 0 16px;
+
+    input {
+      height: auto;
+      border: none;
+      background: transparent;
+
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+
+  .ant-input-prefix {
+    color: #00acc1;
+    font-size: 18px;
+    margin-right: 12px;
+  }
+
+  .ant-input-suffix {
+    color: #00acc1;
+    font-size: 16px;
+  }
+
+  .ant-form-item-explain-error {
+    font-size: 13px;
+    margin-top: 6px;
+    color: #ff4d4f;
+  }
+}

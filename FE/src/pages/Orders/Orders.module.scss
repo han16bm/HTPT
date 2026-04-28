@@ -1,0 +1,134 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 18px 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faf8 100%);
+  border: 1px solid #dfe8e2;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+}
+
+.tableShell {
+  border: 1px solid #dfe8e2;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.05);
+}
+
+.ordersTable {
+  :global(.ant-table) {
+    background: transparent;
+  }
+
+  :global(.ant-table-container) {
+    border-inline-start: none !important;
+    border-inline-end: none !important;
+  }
+
+  :global(.ant-table-thead > tr > th) {
+    background: linear-gradient(180deg, #f8fbf9 0%, #eef5f1 100%);
+    color: #22312b;
+    font-size: 15px;
+    font-weight: 700;
+    border-bottom: 1px solid #dfe8e2;
+  }
+
+  :global(.ant-table-tbody > tr > td) {
+    padding-top: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e8efea;
+    vertical-align: middle;
+    background: #ffffff;
+  }
+
+  :global(.ant-table-expanded-row > td) {
+    padding: 14px 18px 18px !important;
+    background: #f5f8f6 !important;
+    border-bottom: 1px solid #dfe8e2;
+  }
+
+  :global(.ant-table-expanded-row-fixed) {
+    margin: 0 !important;
+  }
+
+  :global(.ant-table-row-expand-icon) {
+    border-radius: 999px;
+    border-color: #7cc49d;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.08);
+    background: #ffffff;
+  }
+}
+
+.expandedPanel {
+  border: 1px solid #d8e6dc;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fcfefd 0%, #f4f8f6 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.detailTable {
+  :global(.ant-table) {
+    background: transparent;
+  }
+
+  :global(.ant-table-thead > tr > th) {
+    background: #eef4f0;
+    color: #22312b;
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 1px solid #dbe7df;
+  }
+
+  :global(.ant-table-tbody > tr > td) {
+    background: transparent;
+    border-bottom: 1px solid #e4ece7;
+  }
+}
+
+.loadingBlock {
+  padding: 28px;
+  text-align: center;
+}
+
+.drawerDetail {
+  padding: 2px 0 8px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid #edf2ee;
+  font-size: 14px;
+
+  span:first-child {
+    color: #5f6b66;
+  }
+
+  &.total {
+    margin-top: 10px;
+    padding-top: 14px;
+    border-top: 2px solid #198754;
+    border-bottom: none;
+    font-size: 16px;
+    font-weight: 700;
+    color: #198754;
+  }
+}
