@@ -11,7 +11,8 @@ var configuration = builder.Configuration;
 builder.Host.UseSerilog((ctx, cfg) =>
     cfg.ReadFrom.Configuration(ctx.Configuration)
        .WriteTo.Console()
-       .WriteTo.File("logs/gateway-.log", rollingInterval: RollingInterval.Day));
+       .WriteTo.File("logs/gateway-.log", rollingInterval: RollingInterval.Day)
+       .WriteTo.Seq(ctx.Configuration["Seq:ServerUrl"] ?? "http://seq:5341"));
 
 // ── YARP ─────────────────────────────────────────
 builder.Services.AddReverseProxy()

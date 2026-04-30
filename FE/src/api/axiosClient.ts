@@ -31,8 +31,6 @@ const isApiResponse = (data: unknown): data is ApiResponse =>
 
 class AxiosClient {
   private instance: AxiosInstance;
-  private isRefreshing = false;
-  private refreshWaiters: Array<() => void> = [];
 
   constructor() {
     this.instance = axios.create({

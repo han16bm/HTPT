@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Button, Card, Col, Empty, Row, Select, Space, Table, Tabs, Typography,
+  Button, Card, Col, Empty, Row, Select, Table, Tabs, Typography,
   DatePicker, Statistic,
 } from 'antd';
 import {
@@ -16,7 +16,7 @@ import { reportService } from '@/api';
 import { useAsync } from '@/hooks';
 import { formatCurrency, formatCompact } from '@/shared/utils/format';
 import { ORDER_STATUS_LABEL } from '@/shared/utils/constants';
-import type { RevenueReportRow, TopProductReportRow, OrderSummaryReport } from '@/interfaces';
+import type { RevenueReportRow, TopProductReportRow, OrderSummaryReport, OrderStatus } from '@/interfaces';
 import type { RevenueReportParams } from '@/api';
 
 const cx = classNames.bind(styles);
@@ -123,7 +123,11 @@ const Reports: React.FC = () => {
                           <XAxis dataKey="period" />
                           <YAxis yAxisId="left" tickFormatter={formatCompact} />
                           <YAxis yAxisId="right" orientation="right" allowDecimals={false} />
-                          <Tooltip formatter={(v: number, name: string) => name === 'Doanh thu' ? formatCurrency(v) : v} />
+                          <Tooltip
+                            formatter={(value, name) =>
+                              name === 'Doanh thu' ? formatCurrency(Number(value ?? 0)) : Number(value ?? 0)
+                            }
+                          />
                           <Legend />
                           <Bar dataKey="revenue" fill="#198754" name="Doanh thu" yAxisId="left" radius={[6, 6, 0, 0]} barSize={28} />
                           <Line type="monotone" dataKey="orders" stroke="#0d6efd" strokeWidth={2} name="Số đơn" yAxisId="right" />
@@ -261,7 +265,7 @@ const Reports: React.FC = () => {
                               {
                                 title: 'Trạng thái',
                                 dataIndex: 'status',
-                                render: (s) => ORDER_STATUS_LABEL[s],
+                                render: (s: OrderStatus) => ORDER_STATUS_LABEL[s],
                               },
                               { title: 'Số đơn', dataIndex: 'count', width: 80, align: 'right' },
                               {

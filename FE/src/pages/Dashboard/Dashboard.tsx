@@ -28,11 +28,10 @@ import {
 } from 'recharts';
 import styles from './Dashboard.module.scss';
 import { MasterLayout } from '@/components/Layout';
-import { dashboardService } from '@/api';
+import { dashboardService, type DashboardOverview } from '@/api';
 import { useAsync } from '@/hooks';
 import { formatCurrency, formatCompact, formatDate } from '@/shared/utils/format';
 import { ORDER_STATUS_LABEL } from '@/shared/utils/constants';
-import type { DashboardOverview } from '@/api/services/dashboardService';
 import type { OrderStatus } from '@/interfaces';
 
 const cx = classNames.bind(styles);
@@ -165,7 +164,7 @@ const Dashboard: React.FC = () => {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="label" />
                     <YAxis tickFormatter={formatCompact} />
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Tooltip formatter={(value) => formatCurrency(Number(value ?? 0))} />
                     <Line
                       type="monotone"
                       dataKey="revenue"

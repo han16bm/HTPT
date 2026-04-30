@@ -62,6 +62,7 @@ export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
 };
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+  PENDING: 'Chờ thanh toán',
   UNPAID: 'Chưa thanh toán',
   PARTIAL: 'Thanh toán 1 phần',
   PAID: 'Đã thanh toán',
@@ -69,6 +70,7 @@ export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
 };
 
 export const PAYMENT_STATUS_COLOR: Record<PaymentStatus, string> = {
+  PENDING: 'gold',
   UNPAID: 'red',
   PARTIAL: 'orange',
   PAID: 'green',

@@ -1,5 +1,5 @@
 // ──────────────────────────────────────────────────────────────────────────────
-// Auth Service — Kết nối với API.Auth thông qua Gateway
+// Auth Service — kết nối User service thông qua Gateway
 // Gateway: http://localhost:8080
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -61,7 +61,7 @@ const REFRESH_TOKEN_KEY = 'customer_refresh_token';
 const USER_KEY = 'customer_user';
 
 export const authService = {
-  /** Đăng nhập — gọi POST /api/auth/auth/dang-nhap */
+  /** Dang nhap - POST /api/user/auth/login */
   login: async (data: LoginRequest): Promise<ApiResponse<LoginResponse>> => {
     const resp = await axiosClient.post<LoginResponse>(API_ENDPOINTS.LOGIN, data);
     if (resp.success && resp.data) {
@@ -75,12 +75,12 @@ export const authService = {
     return resp;
   },
 
-  /** Đăng ký — gọi POST /api/auth/auth/dang-ky */
+  /** Dang ky - POST /api/user/auth/register */
   register: async (data: RegisterRequest): Promise<ApiResponse<User>> => {
     return axiosClient.post<User>(API_ENDPOINTS.REGISTER, data);
   },
 
-  /** Đăng xuất — gọi POST /api/auth/auth/dang-xuat */
+  /** Đăng xuất — gọi POST /api/user/auth/dang-xuat */
   logout: async (): Promise<void> => {
     try {
       await axiosClient.post(API_ENDPOINTS.LOGOUT);
@@ -100,12 +100,12 @@ export const authService = {
 
   /** Cập nhật thông tin cá nhân */
   updateProfile: async (data: UpdateProfileRequest): Promise<ApiResponse<User>> => {
-    return axiosClient.post<User>(API_ENDPOINTS.UPDATE_PROFILE, data);
+    return axiosClient.put<User>(API_ENDPOINTS.UPDATE_PROFILE, data);
   },
 
   /** Đổi mật khẩu */
   changePassword: async (data: ChangePasswordRequest): Promise<ApiResponse<void>> => {
-    return axiosClient.post<void>(API_ENDPOINTS.CHANGE_PASSWORD, data);
+    return axiosClient.put<void>(API_ENDPOINTS.CHANGE_PASSWORD, data);
   },
 
   /** Lấy user từ localStorage (không gọi API) */

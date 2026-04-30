@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-service
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - fishshop_network
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq-service
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: Y
+    volumes:
+      - seq_data:/data
+    networks:
+      - fishshop_network
+
+  api.user:
+    build:
+      context: ./API
+      dockerfile: Services/API.User/Dockerfile
+    container_name: api-user
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Seq__ServerUrl=http://seq:80
+      - RabbitMQ__Host=rabbitmq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - rabbitmq
+      - seq
+    networks:
+      - fishshop_network
+
+  api.product:
+    build:
+      context: ./API
+      dockerfile: Services/API.Product/Dockerfile
+    container_name: api-product
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Seq__ServerUrl=http://seq:80
+      - RabbitMQ__Host=rabbitmq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - rabbitmq
+      - seq
+    networks:
+      - fishshop_network
+
+  api.order:
+    build:
+      context: ./API
+      dockerfile: Services/API.Order/Dockerfile
+    container_name: api-order
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Seq__ServerUrl=http://seq:80
+      - RabbitMQ__Host=rabbitmq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - rabbitmq
+      - seq
+    networks:
+      - fishshop_network
+
+  api.content:
+    build:
+      context: ./API
+      dockerfile: Services/API.Content/Dockerfile
+    container_name: api-content
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Seq__ServerUrl=http://seq:80
+      - RabbitMQ__Host=rabbitmq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - rabbitmq
+      - seq
+    networks:
+      - fishshop_network
+
+  fishshop.gateway:
+    build:
+      context: ./API
+      dockerfile: Gateway/FishShop.Gateway/Dockerfile
+    container_name: fishshop-gateway
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Seq__ServerUrl=http://seq:80
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - api.user
+      - api.product
+      - api.order
+      - api.content
+      - seq
+    networks:
+      - fishshop_network
+
+networks:
+  fishshop_network:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
+  seq_data:

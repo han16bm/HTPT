@@ -11,7 +11,7 @@ export interface Order {
   customerPhone?: string;
   orderStatus: string;       // PENDING | CONFIRMED | SHIPPING | COMPLETED | CANCELLED
   paymentMethod: string;     // COD | BANK_TRANSFER | CASH
-  paymentStatus: string;     // UNPAID | PARTIAL | PAID | REFUNDED
+  paymentStatus: string;     // PENDING | UNPAID | PARTIAL | PAID | REFUNDED
   totalAmount: number;
   itemCount?: number;
   source?: string;
@@ -48,7 +48,7 @@ interface PagedResult<T> {
 }
 
 /**
- * CreateOrderRequest — khớp với BE API.Orders.Models.Commands.CreateOrderRequest
+ * CreateOrderRequest — khớp với BE API.Order.Models.Commands.CreateOrderRequest
  * BE tự lấy items từ Cart của user (CreateOrderFromCartAsync)
  */
 export interface CreateOrderRequest {
@@ -66,7 +66,7 @@ export interface CancelOrderRequest {
 
 export const orderService = {
   /**
-   * GET /api/orders/orders/don-hang-cua-toi
+   * GET /api/order/orders/don-hang-cua-toi
    * BE trả PagedResult<OrderListDto> — ta unwrap ra mảng items
    */
   getOrders: async (): Promise<ApiResponse<Order[]>> => {
@@ -82,21 +82,23 @@ export const orderService = {
     return res as unknown as ApiResponse<Order[]>;
   },
 
-  /** GET /api/orders/orders/chi-tiet?order_code=DH2024001 */
+  /** GET /api/order/orders/DH2024001 */
   getOrderByCode: (code: string | number): Promise<ApiResponse<Order>> => {
     return axiosClient.get(API_ENDPOINTS.ORDER_DETAIL(code));
   },
 
   /**
-   * POST /api/orders/orders/dat-hang
+   * POST /api/order/orders
    * BE tự lấy items từ Cart, chỉ cần địa chỉ + phương thức thanh toán
    */
   createOrder: (data: CreateOrderRequest): Promise<ApiResponse<Order>> => {
     return axiosClient.post(API_ENDPOINTS.ORDER_CREATE, data);
   },
 
-  /** POST /api/orders/orders/huy-don */
+  /** DELETE /api/order/orders/{orderCode} */
   cancelOrder: (data: CancelOrderRequest): Promise<ApiResponse<Order>> => {
-    return axiosClient.post(API_ENDPOINTS.ORDER_CANCEL, data);
+    return axiosClient.delete(API_ENDPOINTS.ORDER_CANCEL(data.orderCode), {
+      params: { reason: data.reason },
+    });
   },
 };

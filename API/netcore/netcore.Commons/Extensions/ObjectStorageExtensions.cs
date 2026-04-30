@@ -10,15 +10,8 @@ public static class ObjectStorageExtensions
 {
     public static IServiceCollection AddObjectStorage(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<CloudinaryOptions>(options =>
-        {
-            configuration.GetSection("Cloudinary").Bind(options);
-            if (string.IsNullOrWhiteSpace(options.CloudinaryUrl))
-            {
-                options.CloudinaryUrl = configuration["CLOUDINARY_URL"] ?? string.Empty;
-            }
-        });
-        services.AddScoped<IObjectStorageService, CloudinaryObjectStorageService>();
+        services.Configure<LocalAssetStorageOptions>(configuration.GetSection("LocalAssetStorage"));
+        services.AddScoped<IObjectStorageService, LocalAssetStorageService>();
         return services;
     }
 }

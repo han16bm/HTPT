@@ -6,8 +6,8 @@ using System.Text;
 namespace FishShop.Gateway.Services;
 
 /// <summary>
-/// Validates JWT tokens locally without calling API.Auth — fast path for Gateway.
-/// Only basic validation (signature + expiry). Full permission check via API.Auth.
+/// Validates JWT tokens locally without calling API.User — fast path for Gateway.
+/// Only basic validation (signature + expiry). Full permission check via API.User.
 /// </summary>
 public class TokenValidator
 {

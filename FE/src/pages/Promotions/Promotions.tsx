@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Button, DatePicker, Form, Input, InputNumber, Modal,
+  Button, Form, Input, InputNumber, Modal,
   Popconfirm, Select, Space, Table, Tag, Typography, message,
 } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, GiftOutlined } from '@ant-design/icons';
@@ -241,7 +241,7 @@ const Promotions: React.FC = () => {
                 rules={[{ required: true, message: 'Bắt buộc!' }]}
                 style={{ flex: 1 }}
               >
-                <InputNumber
+                <InputNumber<number>
                   style={{ width: '100%' }}
                   min={0}
                   formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}

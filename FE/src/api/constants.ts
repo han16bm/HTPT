@@ -29,66 +29,66 @@ export const ERROR_MESSAGES = {
 
 export const API_ENDPOINTS = {
   // ===== Auth =====
-  AUTH_LOGIN: '/auth/auth/dang-nhap',
-  AUTH_LOGOUT: '/auth/auth/dang-xuat',
-  AUTH_REFRESH: '/auth/auth/lam-moi-token',
-  AUTH_ME: '/auth/auth/thong-tin-nguoi-dung',
+  AUTH_LOGIN: '/user/auth/login',
+  AUTH_LOGOUT: '/user/auth/logout',
+  AUTH_REFRESH: '/user/auth/refresh-token',
+  AUTH_ME: '/user/auth/me',
 
   // ===== Products =====
-  PRODUCT_SEARCH: '/products/products/tim-kiem',
-  PRODUCT_DETAIL: '/products/products/chi-tiet',
-  PRODUCT_BY_SLUG: '/products/products/theo-slug',
-  PRODUCT_UPSERT: '/products/products/them-moi-cap-nhat',
-  PRODUCT_DELETE: '/products/products/xoa',
+  PRODUCT_SEARCH: '/product/products',
+  PRODUCT_DETAIL: '/product/products',
+  PRODUCT_BY_SLUG: '/product/products/slug',
+  PRODUCT_UPSERT: '/product/products',
+  PRODUCT_DELETE: '/product/products',
 
   // ===== Categories =====
-  CATEGORY_SEARCH: '/products/categories/tim-kiem',
-  CATEGORY_TREE: '/products/categories/cay-phan-cap',
-  CATEGORY_UPSERT: '/products/categories/them-moi-cap-nhat',
-  CATEGORY_DELETE: '/products/categories/xoa',
+  CATEGORY_SEARCH: '/product/categories',
+  CATEGORY_TREE: '/product/categories/tree',
+  CATEGORY_UPSERT: '/product/categories',
+  CATEGORY_DELETE: '/product/categories',
 
   // ===== Inventory =====
-  INVENTORY_HISTORY: '/products/inventory/lich-su-giao-dich',
-  INVENTORY_IMPORT: '/products/inventory/nhap-hang',
+  INVENTORY_HISTORY: '/product/inventory/transactions',
+  INVENTORY_IMPORT: '/product/inventory/imports',
 
   // ===== Customers (admin) =====
-  CUSTOMER_SEARCH: '/admin/customers/tim-kiem',
-  CUSTOMER_DETAIL: '/admin/customers/chi-tiet',
-  CUSTOMER_UPSERT: '/admin/customers/them-moi-cap-nhat',
-  CUSTOMER_CREATE_WALKIN: '/admin/customers/tao-khach-vang-lai',
-  CUSTOMER_DELETE: '/admin/customers/xoa',
+  CUSTOMER_SEARCH: '/user/customers',
+  CUSTOMER_DETAIL: '/user/customers',
+  CUSTOMER_UPSERT: '/user/customers',
+  CUSTOMER_CREATE_WALKIN: '/user/customers/walk-ins',
+  CUSTOMER_DELETE: '/user/customers',
 
   // ===== Orders (admin) =====
-  ORDER_SEARCH: '/orders/orders/tim-kiem',
-  ORDER_DETAIL: '/orders/orders/chi-tiet',
-  ORDER_UPDATE_STATUS: '/orders/orders/cap-nhat-trang-thai',
-  ORDER_CANCEL: '/orders/orders/huy-don',
-  ORDER_CREATE: '/orders/orders/dat-hang',
-  ORDER_CREATE_DIRECT: '/orders/orders/dat-hang-truc-tiep',
+  ORDER_SEARCH: '/order/orders',
+  ORDER_DETAIL: '/order/orders',
+  ORDER_UPDATE_STATUS: '/order/orders',
+  ORDER_CANCEL: '/order/orders',
+  ORDER_CREATE: '/order/orders',
+  ORDER_CREATE_DIRECT: '/order/orders/direct',
 
   // ===== Promotions =====
-  PROMOTION_SEARCH: '/orders/promotions/tim-kiem',
-  PROMOTION_UPSERT: '/orders/promotions/them-moi-cap-nhat',
-  PROMOTION_DELETE: '/orders/promotions/xoa',
-  PROMOTION_VERIFY: '/orders/promotions/kiem-tra-ma',
+  PROMOTION_SEARCH: '/order/promotions',
+  PROMOTION_UPSERT: '/order/promotions',
+  PROMOTION_DELETE: '/order/promotions',
+  PROMOTION_VERIFY: '/order/promotions/validate',
 
   // ===== Dashboard =====
-  DASHBOARD_STATS: '/admin/dashboard/thong-ke-tong-quat',
-  DASHBOARD_CHARTS: '/admin/dashboard/bieu-do',
+  DASHBOARD_STATS: '/order/dashboard/stats',
+  DASHBOARD_CHARTS: '/order/dashboard/charts',
 
   // ===== Reports =====
-  REPORT_REVENUE: '/admin/reports/doanh-thu',
-  REPORT_TOP_PRODUCTS: '/admin/reports/san-pham-ban-chay',
-  REPORT_ORDER_SUMMARY: '/admin/reports/tong-hop-don-hang',
+  REPORT_REVENUE: '/order/reports/revenue',
+  REPORT_TOP_PRODUCTS: '/order/reports/top-products',
+  REPORT_ORDER_SUMMARY: '/order/reports/order-summary',
 
   // ===== Blog =====
-  BLOG_SEARCH: '/content/blog/tim-kiem',
-  BLOG_DETAIL: '/content/blog/chi-tiet-theo-slug',
-  BLOG_UPSERT: '/content/blog/them-moi-cap-nhat',
-  BLOG_DELETE: '/content/blog/xoa',
-  BLOG_CATEGORIES: '/content/blog/danh-muc',
+  BLOG_SEARCH: '/content/blogs',
+  BLOG_DETAIL: '/content/blogs/slug',
+  BLOG_UPSERT: '/content/blogs',
+  BLOG_DELETE: '/content/blogs',
+  BLOG_CATEGORIES: '/content/blog-categories',
 
   // ===== Contact =====
-  CONTACT_SEARCH: '/content/contact/tim-kiem',
-  CONTACT_UPDATE_STATUS: '/content/contact/cap-nhat-trang-thai',
+  CONTACT_SEARCH: '/content/contacts',
+  CONTACT_UPDATE_STATUS: '/content/contacts',
 } as const;

@@ -2,43 +2,43 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 
 export const API_ENDPOINTS = {
   // Auth
-  LOGIN: '/auth/auth/dang-nhap',
-  REGISTER: '/auth/auth/dang-ky',
-  LOGOUT: '/auth/auth/dang-xuat',
-  REFRESH_TOKEN: '/auth/auth/lam-moi-token',
+  LOGIN: '/user/auth/login',
+  REGISTER: '/user/auth/register',
+  LOGOUT: '/user/auth/logout',
+  REFRESH_TOKEN: '/user/auth/refresh-token',
 
   // Products
-  PRODUCTS: '/products/products/tim-kiem',
-  PRODUCT_DETAIL: (id: string | number) => `/products/products/chi-tiet?id=${id}`,
-  PRODUCT_BY_SLUG: (slug: string) => `/products/products/theo-slug?slug=${encodeURIComponent(slug)}`,
-  PRODUCT_SEARCH: '/products/products/tim-kiem',
-  PRODUCT_FEATURED: '/products/products/san-pham-noi-bat',
+  PRODUCTS: '/product/products',
+  PRODUCT_DETAIL: (id: string | number) => `/product/products/${id}`,
+  PRODUCT_BY_SLUG: (slug: string) => `/product/products/slug/${encodeURIComponent(slug)}`,
+  PRODUCT_SEARCH: '/product/products',
+  PRODUCT_FEATURED: '/product/products/featured',
 
-  // Cart  (tất cả dùng POST theo BE design)
-  CART: '/orders/cart/gio-hang-hien-tai',
-  CART_ADD: '/orders/cart/them-san-pham',
-  CART_UPDATE: '/orders/cart/cap-nhat-so-luong',   // POST {cartItemId, quantity}
-  CART_REMOVE: '/orders/cart/xoa-san-pham',         // POST {cartItemId}
-  CART_CLEAR: '/orders/cart/xoa-gio-hang',
+  // Cart
+  CART: '/order/cart',
+  CART_ADD: '/order/cart/items',
+  CART_UPDATE: (cartItemId: string | number) => `/order/cart/items/${cartItemId}`,
+  CART_REMOVE: (cartItemId: string | number) => `/order/cart/items/${cartItemId}`,
+  CART_CLEAR: '/order/cart',
 
   // Orders
-  ORDERS: '/orders/orders/don-hang-cua-toi',
-  ORDER_DETAIL: (code: string | number) => `/orders/orders/chi-tiet?order_code=${code}`,
-  ORDER_CREATE: '/orders/orders/dat-hang',
-  ORDER_CANCEL: '/orders/orders/huy-don',
-  PROMOTION_SEARCH: '/orders/promotions/tim-kiem',
-  PROMOTION_VERIFY: '/orders/promotions/kiem-tra-ma',
+  ORDERS: '/order/orders/me',
+  ORDER_DETAIL: (code: string | number) => `/order/orders/${encodeURIComponent(String(code))}`,
+  ORDER_CREATE: '/order/orders',
+  ORDER_CANCEL: (code: string | number) => `/order/orders/${encodeURIComponent(String(code))}`,
+  PROMOTION_SEARCH: '/order/promotions',
+  PROMOTION_VERIFY: '/order/promotions/validate',
 
   // User Profile
-  PROFILE: '/auth/auth/thong-tin-nguoi-dung',
-  UPDATE_PROFILE: '/auth/auth/cap-nhat-thong-tin',
-  CHANGE_PASSWORD: '/auth/auth/doi-mat-khau',
+  PROFILE: '/user/auth/me',
+  UPDATE_PROFILE: '/user/auth/me',
+  CHANGE_PASSWORD: '/user/auth/password',
 
   // Categories
-  CATEGORIES: '/products/categories/tim-kiem',
+  CATEGORIES: '/product/categories',
 
   // Blog and Content
-  BLOG: '/content/blog/tim-kiem',
-  BLOG_DETAIL: (slug: string) => `/content/blog/chi-tiet?slug=${slug}`,
-  CONTACT_SEND: '/content/contact/gui-lien-he',
+  BLOG: '/content/blogs',
+  BLOG_DETAIL: (slug: string) => `/content/blogs/slug/${encodeURIComponent(slug)}`,
+  CONTACT_SEND: '/content/contacts',
 };

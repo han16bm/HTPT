@@ -11,57 +11,73 @@ namespace API.Content.Controllers;
 
 [Audit]
 [ApiKey]
-[Route("[controller]")]
+[Route("blogs")]
 public class BlogController : BaseApiController
 {
     private readonly IBlogService _service;
 
     public BlogController(IBlogService service) => _service = service;
 
-    // GET /api/content/blog/tim-kiem
-    [HttpGet("tim-kiem")]
-    public async Task<ApiResponse<PagedResult<BlogPostListDto>>> TimKiem([FromQuery] BlogQuery query, CancellationToken ct)
+    // GET /api/content/blogs
+    [HttpGet]
+    public async Task<ApiResponse<PagedResult<BlogPostListDto>>> GetAll([FromQuery] BlogQuery query, CancellationToken ct)
     {
         var result = await _service.GetAllAsync(query, ct);
         return ApiResponse.Ok(result);
     }
 
-    // GET /api/content/blog/chi-tiet-theo-slug?slug=ten-bai-viet
-    [HttpGet("chi-tiet-theo-slug")]
-    public async Task<ApiResponse<BlogPostDto>> ChiTiet([FromQuery] string slug, CancellationToken ct)
-    {
-        var result = await _service.GetBySlugAsync(slug, ct);
-        return ApiResponse.Ok(result);
-    }
-
-    // GET /api/content/blog/theo-id?id=1
-    [HttpGet("theo-id")]
-    public async Task<ApiResponse<BlogPostDto>> TheoId([FromQuery] long id, CancellationToken ct)
+    // GET /api/content/blogs/1
+    [HttpGet("{id:long}")]
+    public async Task<ApiResponse<BlogPostDto>> GetById([FromRoute] long id, CancellationToken ct)
     {
         var result = await _service.GetByIdAsync(id, ct);
         return ApiResponse.Ok(result);
     }
 
-    // POST /api/content/blog/them-moi-cap-nhat
+    // GET /api/content/blogs/slug/ten-bai-viet
+    [HttpGet("slug/{slug}")]
+    public async Task<ApiResponse<BlogPostDto>> GetBySlug([FromRoute] string slug, CancellationToken ct)
+    {
+        var result = await _service.GetBySlugAsync(slug, ct);
+        return ApiResponse.Ok(result);
+    }
+
+    // POST /api/content/blogs
     [Consumes("multipart/form-data")]
-    [HttpPost("them-moi-cap-nhat")]
-    public async Task<ApiResponse<BlogPostDto>> ThemMoiCapNhat([FromForm] UpsertBlogPostRequest request, CancellationToken ct)
+    [HttpPost]
+    [RequireAdmin]
+    public async Task<ApiResponse<BlogPostDto>> Create([FromForm] UpsertBlogPostRequest request, CancellationToken ct)
     {
+        request.Id = null;
         var result = await _service.UpsertAsync(request, GetUserId(), ct);
-        var msg = request.Id.HasValue ? "Cập nhật bài viết thành công" : "Thêm bài viết thành công";
-        return ApiResponse.Ok(result, msg);
+        return ApiResponse.Ok(result, "Them bai viet thanh cong");
     }
 
-    // POST /api/content/blog/xoa
-    [HttpPost("xoa")]
-    public async Task<ApiResponse> Xoa([FromBody] DeleteByIdRequest request, CancellationToken ct)
+    // PUT /api/content/blogs/1
+    [Consumes("multipart/form-data")]
+    [HttpPut("{id:long}")]
+    [RequireAdmin]
+    public async Task<ApiResponse<BlogPostDto>> Update(
+        [FromRoute] long id,
+        [FromForm] UpsertBlogPostRequest request,
+        CancellationToken ct)
     {
-        await _service.DeleteAsync(request.Id, ct);
-        return ApiResponse.OkEmpty("Xóa bài viết thành công");
+        request.Id = id;
+        var result = await _service.UpsertAsync(request, GetUserId(), ct);
+        return ApiResponse.Ok(result, "Cap nhat bai viet thanh cong");
     }
 
-    // GET /api/content/blog/healthcheck
-    [HttpGet("healthcheck")]
-    public Task<ApiResponse<HealthCheckStatus>> Healthcheck()
+    // DELETE /api/content/blogs/1
+    [HttpDelete("{id:long}")]
+    [RequireAdmin]
+    public async Task<ApiResponse> Delete([FromRoute] long id, CancellationToken ct)
+    {
+        await _service.DeleteAsync(id, ct);
+        return ApiResponse.OkEmpty("Xoa bai viet thanh cong");
+    }
+
+    // GET /api/content/blogs/health
+    [HttpGet("health")]
+    public Task<ApiResponse<HealthCheckStatus>> Health()
         => Task.FromResult(ApiResponse.Ok(new HealthCheckStatus("Healthy", "API.Content", DateTime.UtcNow)));
 }

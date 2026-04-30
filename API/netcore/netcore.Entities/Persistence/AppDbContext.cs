@@ -4,7 +4,7 @@ using netcore.Entities.Entities;
 namespace netcore.Entities.Persistence;
 
 /// <summary>
-/// EF Core DbContext cho FISH_SHOP — map với Oracle schema FSHOP_DB.
+/// EF Core DbContext cho FISH_SHOP — map với SQL Server schema dbo.
 /// Cấu hình cột/khóa/quan hệ được tách sang <see cref="IEntityTypeConfiguration{T}"/>
 /// trong thư mục <c>Persistence/Configurations/</c> (1 file / entity).
 /// Kết nối được nạp từ <c>IConfiguration</c> qua <c>EntityServicesExtensions</c>;
@@ -38,8 +38,7 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .HasDefaultSchema("FSHOP_DB")
-            .UseCollation("USING_NLS_COMP");
+            .HasDefaultSchema("dbo");
 
         // Auto-pick mọi IEntityTypeConfiguration<T> nằm trong assembly này.
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

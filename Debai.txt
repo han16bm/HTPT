@@ -1,0 +1,82 @@
+Chủ đề 4: Phát triển ứng dụng Microservice
+Yêu cầu: sử dụng RESTful API và giao tiếp hàng đợi thông điệp (message queue)
+1. Mục tiêu
+Xây dựng một ứng dụng theo kiến trúc microservice, trong đó các dịch vụ được tách rời, triển khai độc lập và giao tiếp với nhau bằng:
+•	RESTful API cho giao tiếp đồng bộ
+•	Message Queue cho giao tiếp bất đồng bộ
+Đồ án nhằm giúp sinh viên vận dụng kiến thức về phân tách dịch vụ, giao tiếp liên dịch vụ, tính mở rộng, chịu lỗi và nhất quán dữ liệu trong hệ phân tán.
+2. Yêu cầu bài toán
+Nhóm tự chọn một bài toán phù hợp với mô hình microservice, ví dụ:
+•	hệ thống bán hàng trực tuyến
+•	hệ thống đặt đồ ăn
+•	hệ thống quản lý thư viện
+•	hệ thống đặt vé
+•	hệ thống quản lý học tập
+Ứng dụng phải được tách thành nhiều service độc lập, mỗi service phụ trách một miền chức năng riêng.
+3. Yêu cầu chức năng bắt buộc
+3.1. Kiến trúc microservice
+Hệ thống phải có ít nhất 3 microservice, ví dụ:
+•	User Service
+•	Product/Item Service
+•	Order Service
+Hoặc các service tương đương tùy bài toán.
+3.2. RESTful API
+Mỗi service phải cung cấp RESTful API để:
+•	tạo, đọc, cập nhật, xóa dữ liệu
+•	cho phép service khác hoặc client truy cập
+Yêu cầu API phải rõ ràng, đúng nguyên tắc tài nguyên và phương thức HTTP.
+3.3. Giao tiếp hàng đợi
+Hệ thống phải sử dụng message queue trong ít nhất một luồng xử lý nghiệp vụ.
+Ví dụ:
+•	Order Service gửi sự kiện tạo đơn hàng vào queue
+•	Notification Service nhận message để gửi thông báo
+•	Inventory Service nhận message để cập nhật tồn kho
+Có thể dùng:
+•	RabbitMQ
+•	Kafka
+•	Redis Stream
+•	hoặc công cụ tương đương
+3.4. Cơ sở dữ liệu
+Mỗi microservice nên có cơ sở dữ liệu riêng hoặc ít nhất vùng dữ liệu tách biệt để thể hiện tính độc lập của service.
+3.5. Xử lý lỗi cơ bản
+Hệ thống cần xử lý được một số tình huống như:
+•	service tạm thời không phản hồi
+•	message bị xử lý lỗi
+•	retry hoặc logging lỗi ở mức cơ bản
+4. Yêu cầu kỹ thuật
+Hệ thống cần thể hiện được các đặc điểm sau:
+•	giao tiếp đồng bộ bằng RESTful API
+•	giao tiếp bất đồng bộ bằng message queue
+•	triển khai được nhiều service chạy độc lập
+•	có cơ chế kiểm thử luồng nghiệp vụ liên service
+•	có log để theo dõi request và message
+Khuyến khích sử dụng:
+•	Docker / Docker Compose
+•	API Gateway
+•	service discovery đơn giản
+•	JWT hoặc cơ chế xác thực cơ bản
+5. Chức năng nâng cao khuyến khích
+Nhóm có thể cộng điểm nếu triển khai thêm:
+•	API Gateway
+•	centralized logging
+•	tracing giữa các service
+•	circuit breaker / retry policy
+•	saga pattern hoặc event-driven workflow
+•	triển khai trên cloud hoặc Kubernetes
+•	dashboard giám sát service
+6. Sản phẩm cần nộp
+1.	Mã nguồn đầy đủ và hướng dẫn chạy
+2.	Báo cáo đồ án gồm:
+o	mô tả bài toán
+o	kiến trúc hệ thống
+o	mô tả các microservice
+o	thiết kế RESTful API
+o	luồng message queue
+o	thử nghiệm và đánh giá
+7. Mức đạt tối thiểu
+Một đồ án đạt yêu cầu cần chứng minh được:
+•	có ít nhất 3 microservice
+•	có RESTful API hoạt động đúng
+•	có ít nhất 1 luồng nghiệp vụ dùng message queue
+•	các service có thể chạy độc lập và phối hợp đúng
+•	có demo và đánh giá kết quả

@@ -16,7 +16,8 @@ var configuration = builder.Configuration;
 builder.Host.UseSerilog((ctx, cfg) =>
     cfg.ReadFrom.Configuration(ctx.Configuration)
        .WriteTo.Console()
-       .WriteTo.File("logs/api-content-.log", rollingInterval: RollingInterval.Day));
+       .WriteTo.File("logs/api-content-.log", rollingInterval: RollingInterval.Day)
+       .WriteTo.Seq(ctx.Configuration["Seq:ServerUrl"] ?? "http://seq:5341"));
 
 services.AddApplicationServices(configuration);
 services.AddEntityServices(configuration);
@@ -51,6 +52,10 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    RequestPath = configuration["LocalAssetStorage:RequestPath"] ?? "/api/content/assets"
+});
 app.UseSerilogRequestLogging();
 app.UseCors("AllowOrigin");
 app.UseAuthentication();

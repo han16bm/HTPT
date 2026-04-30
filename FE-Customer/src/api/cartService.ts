@@ -22,12 +22,12 @@ export interface Cart {
 }
 
 export const cartService = {
-  /** GET /api/orders/cart/gio-hang-hien-tai */
+  /** GET /api/order/cart */
   getCart: (): Promise<ApiResponse<Cart>> => {
     return axiosClient.get(API_ENDPOINTS.CART);
   },
 
-  /** POST /api/orders/cart/them-san-pham */
+  /** POST /api/order/cart/them-san-pham */
   addToCart: (productId: number, quantity: number): Promise<ApiResponse<Cart>> => {
     return axiosClient.post(API_ENDPOINTS.CART_ADD, {
       productId,
@@ -35,13 +35,13 @@ export const cartService = {
     });
   },
 
-  /** POST /api/orders/cart/cap-nhat-so-luong  (BE dùng POST, không phải PUT) */
+  /** POST /api/order/cart/cap-nhat-so-luong  (BE dùng POST, không phải PUT) */
   updateQuantity: (cartItemId: number, quantity: number): Promise<ApiResponse<Cart>> => {
-    return axiosClient.post(API_ENDPOINTS.CART_UPDATE, { cartItemId, quantity });
+    return axiosClient.put(API_ENDPOINTS.CART_UPDATE(cartItemId), { quantity });
   },
 
-  /** POST /api/orders/cart/xoa-san-pham  (BE dùng POST, không phải DELETE) */
+  /** DELETE /api/order/cart/items/{cartItemId} */
   removeItem: (cartItemId: number): Promise<ApiResponse<Cart>> => {
-    return axiosClient.post(API_ENDPOINTS.CART_REMOVE, { cartItemId });
+    return axiosClient.delete(API_ENDPOINTS.CART_REMOVE(cartItemId));
   },
 };

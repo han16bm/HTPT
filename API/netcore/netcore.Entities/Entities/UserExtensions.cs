@@ -4,7 +4,7 @@ namespace netcore.Entities.Entities;
 
 /// <summary>
 /// Partial extension — thêm navigation properties cho User.
-/// File gốc User.cs được scaffold từ Oracle, file này bổ sung relationships.
+/// File gốc User.cs được scaffold từ database, file này bổ sung relationships.
 /// </summary>
 public partial class User
 {

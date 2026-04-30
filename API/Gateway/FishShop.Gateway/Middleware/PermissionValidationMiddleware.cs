@@ -40,7 +40,7 @@ public class PermissionValidationMiddleware
 
         // Check if this path is public (no auth required)
         var unauthPaths = _config.GetSection("Gateway:UnauthenticatedPaths").Get<List<string>>() ?? [];
-        bool isPublic = unauthPaths.Any(pub => path.StartsWith(pub.ToLowerInvariant(), StringComparison.OrdinalIgnoreCase));
+        bool isPublic = unauthPaths.Any(pub => IsPublicPath(pub, context.Request.Method, path));
 
         if (isPublic)
         {
@@ -98,5 +98,26 @@ public class PermissionValidationMiddleware
             errors = (object?)null,
         });
         return context.Response.WriteAsync(body);
+    }
+
+    private static bool IsPublicPath(string rule, string requestMethod, string requestPath)
+    {
+        var normalizedRule = rule.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedRule))
+        {
+            return false;
+        }
+
+        var spaceIndex = normalizedRule.IndexOf(' ');
+        if (spaceIndex > 0)
+        {
+            var method = normalizedRule[..spaceIndex].Trim();
+            var path = normalizedRule[(spaceIndex + 1)..].Trim().ToLowerInvariant();
+
+            return requestMethod.Equals(method, StringComparison.OrdinalIgnoreCase)
+                && requestPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+        }
+
+        return requestPath.StartsWith(normalizedRule.ToLowerInvariant(), StringComparison.OrdinalIgnoreCase);
     }
 }

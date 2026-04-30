@@ -1,7 +1,6 @@
 using API.Content.Interfaces;
 using API.Content.Services;
 using netcore.Commons.Extensions;
-using netcore.Commons.Services;
 
 namespace API.Content.Extensions;
 
@@ -12,10 +11,7 @@ public static class ServiceRegistrationExtensions
         IConfiguration configuration)
     {
         services.AddSingleton(TimeProvider.System);
-        services.AddHttpClient(nameof(CloudinaryObjectStorageService), client =>
-        {
-            client.Timeout = TimeSpan.FromSeconds(60);
-        });
+        services.AddHttpClient();
         services.AddHttpContextAccessor();
         services.AddAuthentication();
         services.AddAuthorization();

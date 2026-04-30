@@ -293,7 +293,7 @@ const Inventory: React.FC = () => {
                 rules={[{ required: true, message: 'Bắt buộc' }]}
                 style={{ flex: 1 }}
               >
-                <InputNumber
+                <InputNumber<number>
                   style={{ width: '100%' }}
                   min={0}
                   formatter={(v) => `${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}

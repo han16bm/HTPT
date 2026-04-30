@@ -15,7 +15,7 @@ export type OrderStatus =
 
 export type PaymentMethod = 'COD' | 'BANK_TRANSFER' | 'CASH';
 
-export type PaymentStatus = 'UNPAID' | 'PARTIAL' | 'PAID' | 'REFUNDED';
+export type PaymentStatus = 'PENDING' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'REFUNDED';
 
 export type OrderSource = 'ONLINE' | 'POS';
 

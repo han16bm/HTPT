@@ -246,7 +246,9 @@ const Cart: React.FC = () => {
                         closable
                         onClose={() => { setAppliedPromo(null); setPromoCode(''); }}
                       >
-                        {appliedPromo.code} – -{appliedPromo.pct}%
+                        {appliedPromo.code} - {appliedPromo.discountType === 'PERCENT'
+                          ? `-${appliedPromo.discountValue}%`
+                          : `-${formatVND(appliedPromo.discountValue)}`}
                       </Tag>
                     </div>
                   ) : (

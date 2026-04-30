@@ -11,34 +11,38 @@ namespace API.Content.Controllers;
 
 [Audit]
 [ApiKey]
-[Route("[controller]")]
+[Route("contacts")]
 public class ContactController : BaseApiController
 {
     private readonly IContactService _service;
 
     public ContactController(IContactService service) => _service = service;
 
-    // POST /api/content/contact/gui-lien-he
-    [HttpPost("gui-lien-he")]
-    public async Task<ApiResponse<ContactDto>> GuiLienHe([FromBody] SubmitContactRequest request, CancellationToken ct)
-    {
-        var result = await _service.SubmitAsync(request, ct);
-        return ApiResponse.Ok(result, "Gửi liên hệ thành công. Chúng tôi sẽ phản hồi sớm nhất!");
-    }
-
-    // GET /api/content/contact/tim-kiem  (Admin)
-    [HttpGet("tim-kiem")]
-    public async Task<ApiResponse<PagedResult<ContactDto>>> TimKiem([FromQuery] ContactQuery query, CancellationToken ct)
+    // GET /api/content/contacts
+    [HttpGet]
+    public async Task<ApiResponse<PagedResult<ContactDto>>> GetAll([FromQuery] ContactQuery query, CancellationToken ct)
     {
         var result = await _service.GetAllAsync(query, ct);
         return ApiResponse.Ok(result);
     }
 
-    // POST /api/content/contact/cap-nhat-trang-thai  (Admin)
-    [HttpPost("cap-nhat-trang-thai")]
-    public async Task<ApiResponse<ContactDto>> CapNhatTrangThai([FromBody] UpdateContactStatusRequest request, CancellationToken ct)
+    // POST /api/content/contacts
+    [HttpPost]
+    public async Task<ApiResponse<ContactDto>> Create([FromBody] SubmitContactRequest request, CancellationToken ct)
     {
+        var result = await _service.SubmitAsync(request, ct);
+        return ApiResponse.Ok(result, "Gui lien he thanh cong");
+    }
+
+    // PATCH /api/content/contacts/1/status
+    [HttpPatch("{id:long}/status")]
+    public async Task<ApiResponse<ContactDto>> UpdateStatus(
+        [FromRoute] long id,
+        [FromBody] UpdateContactStatusRequest request,
+        CancellationToken ct)
+    {
+        request.Id = id;
         var result = await _service.UpdateStatusAsync(request, ct);
-        return ApiResponse.Ok(result, "Cập nhật trạng thái thành công");
+        return ApiResponse.Ok(result, "Cap nhat trang thai thanh cong");
     }
 }

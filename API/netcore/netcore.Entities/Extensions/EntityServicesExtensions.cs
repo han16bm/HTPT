@@ -11,7 +11,7 @@ namespace netcore.Entities.Extensions;
 public static class EntityServicesExtensions
 {
     /// <summary>
-    /// Đăng ký DbContext (Oracle) + IUnitOfWork vào DI container.
+    /// Đăng ký DbContext (SQL Server) + IUnitOfWork vào DI container.
     /// Gọi trong Program.cs của mỗi API service.
     /// </summary>
     public static IServiceCollection AddEntityServices(
@@ -24,12 +24,9 @@ public static class EntityServicesExtensions
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
             var logger = sp.GetRequiredService<ILogger<AppDbContext>>();
-            logger.LogInformation("Oracle ConnectionString loaded.");
+            logger.LogInformation("SQL Server ConnectionString loaded.");
 
-            options.UseOracle(connectionString, o =>
-            {
-                o.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion19);
-            });
+            options.UseSqlServer(connectionString);
         });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();

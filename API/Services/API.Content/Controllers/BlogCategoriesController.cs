@@ -10,27 +10,41 @@ namespace API.Content.Controllers;
 
 [Audit]
 [ApiKey]
-[Route("[controller]")]
+[Route("blog-categories")]
 public class BlogCategoriesController : BaseApiController
 {
     private readonly IBlogService _service;
 
     public BlogCategoriesController(IBlogService service) => _service = service;
 
-    // GET /api/content/blog-categories/danh-sach
-    [HttpGet("danh-sach")]
-    public async Task<ApiResponse<List<BlogCategoryDto>>> DanhSach(CancellationToken ct)
+    // GET /api/content/blog-categories
+    [HttpGet]
+    public async Task<ApiResponse<List<BlogCategoryDto>>> GetAll(CancellationToken ct)
     {
         var result = await _service.GetCategoriesAsync(ct);
         return ApiResponse.Ok(result);
     }
 
-    // POST /api/content/blog-categories/them-moi-cap-nhat
-    [HttpPost("them-moi-cap-nhat")]
-    public async Task<ApiResponse<BlogCategoryDto>> ThemMoiCapNhat([FromBody] UpsertBlogCategoryRequest request, CancellationToken ct)
+    // POST /api/content/blog-categories
+    [HttpPost]
+    [RequireAdmin]
+    public async Task<ApiResponse<BlogCategoryDto>> Create([FromBody] UpsertBlogCategoryRequest request, CancellationToken ct)
     {
+        request.Id = null;
         var result = await _service.UpsertCategoryAsync(request, ct);
-        var msg = request.Id.HasValue ? "Cập nhật danh mục thành công" : "Thêm danh mục thành công";
-        return ApiResponse.Ok(result, msg);
+        return ApiResponse.Ok(result, "Them danh muc thanh cong");
+    }
+
+    // PUT /api/content/blog-categories/1
+    [HttpPut("{id:long}")]
+    [RequireAdmin]
+    public async Task<ApiResponse<BlogCategoryDto>> Update(
+        [FromRoute] long id,
+        [FromBody] UpsertBlogCategoryRequest request,
+        CancellationToken ct)
+    {
+        request.Id = id;
+        var result = await _service.UpsertCategoryAsync(request, ct);
+        return ApiResponse.Ok(result, "Cap nhat danh muc thanh cong");
     }
 }

@@ -15,7 +15,7 @@ export interface Category {
 }
 
 export const categoryService = {
-  /** GET /api/products/categories/tim-kiem — lấy danh sách danh mục đang active */
+  /** GET /api/product/categories - lay danh sach danh muc dang active */
   getAll: (): Promise<ApiResponse<Category[]>> => {
     return axiosClient.get(API_ENDPOINTS.CATEGORIES, {
       params: { status: true },
