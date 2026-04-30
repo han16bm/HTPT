@@ -11,6 +11,7 @@ import { CustomerLayout } from '@/components/Layout';
 import { ProductCard } from '@/components/ProductCard';
 import { productService, cartService, authService, categoryService, type Product, type Category } from '@/api';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import { dedupeProducts, getCategoryBranchIds, sortProducts } from '@/utils/productCategory';
 import styles from './Home.module.scss';
 
@@ -427,8 +428,9 @@ const Home: React.FC = () => {
                     <div className={styles.catSectionTitle}>
                       {section.category.imageUrl && (
                         <img
-                          src={section.category.imageUrl}
+                          src={resolveImageUrl(section.category.imageUrl)}
                           alt={section.category.name}
+                          onError={useImageFallback}
                           className={styles.catSectionIcon}
                         />
                       )}

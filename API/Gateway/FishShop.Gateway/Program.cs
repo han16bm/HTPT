@@ -24,7 +24,10 @@ builder.Services.AddSingleton<TokenValidator>();
 // ── CORS ─────────────────────────────────────────
 builder.Services.AddCors(opts =>
     opts.AddPolicy("AllowOrigin", p =>
-        p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
+        p.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+         .AllowAnyMethod()
+         .AllowAnyHeader()
+         .AllowCredentials()));
 
 var app = builder.Build();
 

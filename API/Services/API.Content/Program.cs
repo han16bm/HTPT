@@ -1,5 +1,6 @@
 using API.Content;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.FileProviders;
 using netcore.Commons.Extensions;
 using netcore.Commons.Filters;
 using netcore.Commons.Models;
@@ -52,8 +53,17 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+var configuredAssetsPath = configuration["LocalAssetStorage:RootPath"];
+var contentAssetsPath = string.IsNullOrWhiteSpace(configuredAssetsPath)
+    ? Path.Combine(app.Environment.ContentRootPath, "wwwroot", "assets")
+    : Path.IsPathRooted(configuredAssetsPath)
+        ? configuredAssetsPath
+        : Path.Combine(app.Environment.ContentRootPath, configuredAssetsPath);
+contentAssetsPath = Path.GetFullPath(contentAssetsPath);
+Directory.CreateDirectory(contentAssetsPath);
 app.UseStaticFiles(new StaticFileOptions
 {
+    FileProvider = new PhysicalFileProvider(contentAssetsPath),
     RequestPath = configuration["LocalAssetStorage:RequestPath"] ?? "/api/content/assets"
 });
 app.UseSerilogRequestLogging();

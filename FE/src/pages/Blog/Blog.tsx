@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Button, Drawer, Form, Image, Input, Modal, Popconfirm, Select,
   Space, Table, Tag, Typography, message,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined, ReadOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, ReadOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import classNames from 'classnames/bind';
 import styles from './Blog.module.scss';
@@ -11,6 +11,7 @@ import { MasterLayout } from '@/components/Layout';
 import { blogService } from '@/api';
 import { usePagedQuery, useAsync } from '@/hooks';
 import { formatDate } from '@/shared/utils/format';
+import { IMAGE_PLACEHOLDER, resolveContentImageUrl } from '@/shared/utils/image';
 import { BLOG_STATUS_LABEL, BLOG_STATUS_COLOR } from '@/shared/utils/constants';
 import type { BlogPost, BlogPostUpsertRequest, BlogCategory, BlogStatus } from '@/interfaces';
 import type { BlogSearchParams } from '@/api';
@@ -22,6 +23,10 @@ const Blog: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<BlogPost | null>(null);
   const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | undefined>();
+  const [removeThumbnail, setRemoveThumbnail] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const [form] = Form.useForm<BlogPostUpsertRequest>();
 
   const {
@@ -48,14 +53,43 @@ const Blog: React.FC = () => {
         categoryId: editing.categoryId,
         status: editing.status,
       });
+      setThumbnailFile(null);
+      setThumbnailPreview(resolveContentImageUrl(editing.thumbnailUrl));
+      setRemoveThumbnail(false);
     } else {
       form.resetFields();
       form.setFieldsValue({ status: 'DRAFT' });
+      setThumbnailFile(null);
+      setThumbnailPreview(undefined);
+      setRemoveThumbnail(false);
     }
   }, [editing, form]);
 
+  useEffect(() => () => {
+    if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+  }, [thumbnailPreview]);
+
   const handleAdd = () => { setEditing(null); setIsModalOpen(true); };
   const handleEdit = (r: BlogPost) => { setEditing(r); setIsModalOpen(true); };
+
+  const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailFile(file);
+    setThumbnailPreview(URL.createObjectURL(file));
+    setRemoveThumbnail(false);
+    form.setFieldValue('thumbnailUrl', undefined);
+    e.target.value = '';
+  };
+
+  const handleThumbnailRemove = () => {
+    if (thumbnailPreview?.startsWith('blob:')) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailFile(null);
+    setThumbnailPreview(undefined);
+    setRemoveThumbnail(true);
+    form.setFieldValue('thumbnailUrl', undefined);
+  };
 
   const handleDelete = async (id: number) => {
     try {
@@ -69,7 +103,12 @@ const Blog: React.FC = () => {
 
   const handleSubmit = async (values: BlogPostUpsertRequest) => {
     try {
-      await blogService.upsert({ ...values, id: editing?.id });
+      await blogService.upsert({
+        ...values,
+        id: editing?.id,
+        thumbnailFile: thumbnailFile ?? undefined,
+        removeThumbnail,
+      });
       message.success(editing ? 'Cập nhật thành công' : 'Đăng bài viết thành công');
       setIsModalOpen(false);
       refetch();
@@ -84,14 +123,22 @@ const Blog: React.FC = () => {
       dataIndex: 'thumbnailUrl',
       key: 'thumbnail',
       width: 80,
-      render: (url?: string) =>
-        url ? (
-          <Image src={url} width={60} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} />
+      render: (url?: string) => {
+        const resolvedUrl = resolveContentImageUrl(url);
+        return resolvedUrl ? (
+          <Image
+            src={resolvedUrl}
+            fallback={IMAGE_PLACEHOLDER}
+            width={60}
+            height={40}
+            style={{ objectFit: 'cover', borderRadius: 4 }}
+          />
         ) : (
           <div style={{ width: 60, height: 40, background: '#f5f5f5', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <ReadOutlined style={{ color: '#bbb' }} />
           </div>
-        ),
+        );
+      },
     },
     {
       title: 'Tiêu đề',
@@ -221,6 +268,41 @@ const Blog: React.FC = () => {
               <Input placeholder="https://..." />
             </Form.Item>
 
+            <Form.Item label="Upload thumbnail">
+              <Space align="start">
+                {thumbnailPreview ? (
+                  <Image
+                    src={thumbnailPreview}
+                    fallback={IMAGE_PLACEHOLDER}
+                    width={120}
+                    height={80}
+                    style={{ objectFit: 'cover', borderRadius: 4 }}
+                  />
+                ) : (
+                  <div style={{ width: 120, height: 80, background: '#f5f5f5', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ReadOutlined style={{ color: '#bbb' }} />
+                  </div>
+                )}
+                <Space direction="vertical">
+                  <Button icon={<UploadOutlined />} onClick={() => thumbnailInputRef.current?.click()}>
+                    Chon file
+                  </Button>
+                  {thumbnailPreview && (
+                    <Button danger onClick={handleThumbnailRemove}>
+                      Xoa anh
+                    </Button>
+                  )}
+                </Space>
+              </Space>
+              <input
+                ref={thumbnailInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                style={{ display: 'none' }}
+                onChange={handleThumbnailSelect}
+              />
+            </Form.Item>
+
             <Form.Item name="summary" label="Tóm tắt">
               <Input.TextArea rows={2} placeholder="Tóm tắt ngắn về bài viết..." />
             </Form.Item>
@@ -245,7 +327,12 @@ const Blog: React.FC = () => {
           {previewPost && (
             <div className={cx('preview')}>
               {previewPost.thumbnailUrl && (
-                <img src={previewPost.thumbnailUrl} alt="" className={cx('previewImg')} />
+                <img
+                  src={resolveContentImageUrl(previewPost.thumbnailUrl) ?? IMAGE_PLACEHOLDER}
+                  alt=""
+                  className={cx('previewImg')}
+                  onError={(e) => { e.currentTarget.src = IMAGE_PLACEHOLDER; }}
+                />
               )}
               <div className={cx('previewMeta')}>
                 <Tag color={BLOG_STATUS_COLOR[previewPost.status]}>{BLOG_STATUS_LABEL[previewPost.status]}</Tag>

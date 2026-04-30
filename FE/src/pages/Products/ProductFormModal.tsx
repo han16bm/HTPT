@@ -191,7 +191,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           imageFile: g.file,
           imageUrl: g.file ? undefined : g.url,
           altText: g.altText,
-          displayOrder: order++,
+          displayOrder: g.markedRemove ? 0 : order++,
           remove: g.markedRemove,
         });
       });

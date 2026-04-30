@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import { authService, cartService, categoryService, type Category } from '@/api';
 import { OceanBackground } from '@/components/OceanBackground';
+import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import styles from './CustomerLayout.module.scss';
 
 const { Header, Content, Footer } = Layout;
@@ -216,7 +217,14 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
                         navigate('/danhmuc', { state: { slug: cat.slug } });
                       }}
                     >
-                      {cat.imageUrl && <img src={cat.imageUrl} alt={cat.name} className={styles.dropItemIcon} />}
+                      {cat.imageUrl && (
+                        <img
+                          src={resolveImageUrl(cat.imageUrl)}
+                          alt={cat.name}
+                          className={styles.dropItemIcon}
+                          onError={useImageFallback}
+                        />
+                      )}
                       <span className={styles.dropItemName}>{cat.name}</span>
                       {categories.some(c => c.parentId === cat.id) && <span className={styles.childArrow}>›</span>}
                     </div>

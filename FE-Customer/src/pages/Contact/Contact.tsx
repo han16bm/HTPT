@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Row, Col, Form, Input, Button, message } from 'antd';
+import { contactService } from '@/api/contactService';
 import {
   PhoneOutlined,
   MailOutlined,
@@ -20,12 +21,22 @@ const Contact: React.FC = () => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = async (_values: Record<string, string>) => {
+  const handleSubmit = async (values: Record<string, string>) => {
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    message.success('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
-    form.resetFields();
-    setSubmitting(false);
+    try {
+      await contactService.send({
+        fullName: values.name,
+        phone: values.phone,
+        email: values.email,
+        message: values.message,
+      });
+      message.success('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+      form.resetFields();
+    } catch {
+      message.error('Gửi tin nhắn thất bại, vui lòng thử lại.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const contactCards = [

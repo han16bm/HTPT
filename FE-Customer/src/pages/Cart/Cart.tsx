@@ -11,6 +11,7 @@ import {
 import { CustomerLayout } from '@/components/Layout';
 import { cartService, promotionService, type CartItem, type PromotionDiscountType } from '@/api';
 import { formatVND } from '@/utils/format';
+import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import { FREE_SHIP_THRESHOLD, calcShipping } from '@/constants/shipping';
 import styles from './Cart.module.scss';
 
@@ -178,9 +179,10 @@ const Cart: React.FC = () => {
                       }
                     />
                     <img
-                      src={item.imageUrl || '/assets/images/default-fish.png'}
+                      src={resolveImageUrl(item.imageUrl)}
                       alt={item.productName}
                       className={styles.itemImg}
+                      onError={useImageFallback}
                       onClick={() => item.productSlug ? navigate(`/products/${item.productSlug}`) : navigate('/danhmuc')}
                     />
                     <div className={styles.itemInfo}>

@@ -9,6 +9,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import type { Product } from '@/api';
 import { formatVND } from '@/utils/format';
+import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import styles from './ProductCard.module.scss';
 
 interface ProductCardProps {
@@ -46,7 +47,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           <Badge.Ribbon text="Hết hàng" color="red" className={styles.ribbon}>
             <img
               alt={product.name}
-              src={product.imageUrl || '/assets/images/default-fish.png'}
+              src={resolveImageUrl(product.imageUrl)}
+              onError={useImageFallback}
               className={styles.image}
             />
           </Badge.Ribbon>
@@ -59,14 +61,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
           >
             <img
               alt={product.name}
-              src={product.imageUrl || '/assets/images/default-fish.png'}
+              src={resolveImageUrl(product.imageUrl)}
+              onError={useImageFallback}
               className={styles.image}
             />
           </Badge.Ribbon>
         ) : (
           <img
             alt={product.name}
-            src={product.imageUrl || '/assets/images/default-fish.png'}
+            src={resolveImageUrl(product.imageUrl)}
+            onError={useImageFallback}
             className={styles.image}
           />
         )}

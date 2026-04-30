@@ -12,6 +12,7 @@ import {
 import { CustomerLayout } from '@/components/Layout';
 import { cartService, orderService, type CartItem, type CreateOrderRequest, type PromotionDiscountType } from '@/api';
 import { formatVND } from '@/utils/format';
+import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import { calcShipping } from '@/constants/shipping';
 import styles from './Checkout.module.scss';
 
@@ -324,9 +325,10 @@ const Checkout: React.FC = () => {
                     {cartItems.map((item) => (
                       <div key={item.id} className={styles.orderItemRow}>
                         <img
-                          src={item.imageUrl || '/assets/images/default-fish.png'}
+                          src={resolveImageUrl(item.imageUrl)}
                           alt={item.productName}
                           className={styles.orderItemImg}
+                          onError={useImageFallback}
                         />
                         <div className={styles.orderItemDetail}>
                           <span className={styles.orderItemName}>{item.productName}</span>

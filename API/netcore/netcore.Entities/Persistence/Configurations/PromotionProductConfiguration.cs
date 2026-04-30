@@ -11,7 +11,9 @@ public class PromotionProductConfiguration : IEntityTypeConfiguration<PromotionP
         entity.ToTable("PROMOTION_PRODUCTS");
         entity.HasKey(e => new { e.PromotionId, e.ProductId }).HasName("SYS_C008428");
 
-        entity.Property(e => e.PromotionId).HasColumnType("NUMBER").HasColumnName("PROMOTION_ID");
-        entity.Property(e => e.ProductId).HasColumnType("NUMBER").HasColumnName("PRODUCT_ID");
+        entity.Property(e => e.PromotionId).HasColumnName("PROMOTION_ID");
+        entity.Property(e => e.ProductId).HasColumnName("PRODUCT_ID");
     }
 }
+
+

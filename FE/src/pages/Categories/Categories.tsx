@@ -1,15 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Button, Form, Input, InputNumber, Modal,
+  Button, Form, Image, Input, InputNumber, Modal,
   Popconfirm, Select, Space, Table, Tag, Typography, message,
 } from 'antd';
-import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import classNames from 'classnames/bind';
 import styles from './Categories.module.scss';
 import { MasterLayout } from '@/components/Layout';
 import { categoryService } from '@/api';
 import { useAsync } from '@/hooks';
+import { IMAGE_PLACEHOLDER, resolveProductImageUrl } from '@/shared/utils/image';
 import type { Category, CategoryUpsertRequest } from '@/interfaces';
 
 const cx = classNames.bind(styles);
@@ -43,6 +44,10 @@ const Categories: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | undefined>();
+  const [removeImage, setRemoveImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [form] = Form.useForm<CategoryUpsertRequest>();
 
   const { data: categories, loading, refetch } = useAsync<Category[]>({
@@ -70,16 +75,27 @@ const Categories: React.FC = () => {
         name: editing.name,
         slug: editing.slug,
         description: editing.description,
+        imageUrl: editing.imageUrl,
         parentId: editing.parentId ?? undefined,
         displayOrder: editing.displayOrder,
         status: editing.status,
       });
+      setImageFile(null);
+      setImagePreview(resolveProductImageUrl(editing.imageUrl));
+      setRemoveImage(false);
       return;
     }
 
     form.resetFields();
     form.setFieldsValue({ status: true, displayOrder: 1 });
+    setImageFile(null);
+    setImagePreview(undefined);
+    setRemoveImage(false);
   }, [editing, form]);
+
+  useEffect(() => () => {
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+  }, [imagePreview]);
 
   const handleAdd = () => {
     setEditing(null);
@@ -89,6 +105,25 @@ const Categories: React.FC = () => {
   const handleEdit = (record: Category) => {
     setEditing(record);
     setIsModalOpen(true);
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setRemoveImage(false);
+    form.setFieldValue('imageUrl', undefined);
+    e.target.value = '';
+  };
+
+  const handleImageRemove = () => {
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(undefined);
+    setRemoveImage(true);
+    form.setFieldValue('imageUrl', undefined);
   };
 
   const handleDelete = async (id: number) => {
@@ -103,7 +138,12 @@ const Categories: React.FC = () => {
 
   const handleSubmit = async (values: CategoryUpsertRequest) => {
     try {
-      await categoryService.upsert({ ...values, id: editing?.id });
+      await categoryService.upsert({
+        ...values,
+        id: editing?.id,
+        imageFile: imageFile ?? undefined,
+        removeImage,
+      });
       message.success(editing ? 'Cập nhật thành công' : 'Thêm danh mục thành công');
       setIsModalOpen(false);
       refetch();
@@ -305,6 +345,43 @@ const Categories: React.FC = () => {
 
             <Form.Item name="description" label="Mô tả">
               <Input.TextArea rows={2} />
+            </Form.Item>
+
+            <Form.Item name="imageUrl" label="URL anh">
+              <Input placeholder="https://..." />
+            </Form.Item>
+
+            <Form.Item label="Upload anh">
+              <Space align="start">
+                {imagePreview ? (
+                  <Image
+                    src={imagePreview}
+                    fallback={IMAGE_PLACEHOLDER}
+                    width={96}
+                    height={96}
+                    style={{ objectFit: 'cover', borderRadius: 4 }}
+                  />
+                ) : (
+                  <div style={{ width: 96, height: 96, background: '#f1f5f9', borderRadius: 4 }} />
+                )}
+                <Space direction="vertical">
+                  <Button icon={<UploadOutlined />} onClick={() => imageInputRef.current?.click()}>
+                    Chon file
+                  </Button>
+                  {imagePreview && (
+                    <Button danger onClick={handleImageRemove}>
+                      Xoa anh
+                    </Button>
+                  )}
+                </Space>
+              </Space>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                style={{ display: 'none' }}
+                onChange={handleImageSelect}
+              />
             </Form.Item>
 
             <Space style={{ display: 'flex' }} size="large">

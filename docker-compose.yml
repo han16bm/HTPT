@@ -22,6 +22,7 @@ services:
       - "5341:80"
     environment:
       ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_ADMINPASSWORD: admin123
     volumes:
       - seq_data:/data
     networks:
@@ -55,6 +56,8 @@ services:
       - RabbitMQ__Host=rabbitmq
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - product_assets:/app/wwwroot/assets
     depends_on:
       - rabbitmq
       - seq
@@ -89,6 +92,8 @@ services:
       - RabbitMQ__Host=rabbitmq
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - content_assets:/app/wwwroot/assets
     depends_on:
       - rabbitmq
       - seq
@@ -105,6 +110,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - Seq__ServerUrl=http://seq:80
+      - ReverseProxy__Clusters__user-cluster__Destinations__primary__Address=http://api-user:8080/
+      - ReverseProxy__Clusters__product-cluster__Destinations__primary__Address=http://api-product:8080/
+      - ReverseProxy__Clusters__order-cluster__Destinations__primary__Address=http://api-order:8080/
+      - ReverseProxy__Clusters__content-cluster__Destinations__primary__Address=http://api-content:8080/
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -123,3 +132,5 @@ networks:
 volumes:
   rabbitmq_data:
   seq_data:
+  product_assets:
+  content_assets:

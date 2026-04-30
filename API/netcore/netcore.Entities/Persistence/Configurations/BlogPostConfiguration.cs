@@ -13,18 +13,18 @@ public class BlogPostConfiguration : IEntityTypeConfiguration<BlogPost>
         entity.HasIndex(e => e.AuthorId, "IDX_BLOG_POSTS_AUTHOR_ID");
         entity.HasIndex(e => e.CategoryId, "IDX_BLOG_POSTS_CATEGORY_ID");
 
-        entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnType("NUMBER").HasColumnName("ID");
-        entity.Property(e => e.CategoryId).HasColumnType("NUMBER").HasColumnName("CATEGORY_ID");
-        entity.Property(e => e.AuthorId).HasColumnType("NUMBER").HasColumnName("AUTHOR_ID");
+        entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
+        entity.Property(e => e.CategoryId).HasColumnName("CATEGORY_ID");
+        entity.Property(e => e.AuthorId).HasColumnName("AUTHOR_ID");
         entity.Property(e => e.Title).HasMaxLength(250).IsUnicode(false).HasColumnName("TITLE");
         entity.Property(e => e.Slug).HasMaxLength(300).IsUnicode(false).HasColumnName("SLUG");
         entity.Property(e => e.Summary).HasMaxLength(1000).IsUnicode(false).HasColumnName("SUMMARY");
-        entity.Property(e => e.Content).HasColumnType("CLOB").HasColumnName("CONTENT");
+        entity.Property(e => e.Content).HasColumnName("CONTENT");
         entity.Property(e => e.ThumbnailUrl).HasMaxLength(500).IsUnicode(false).HasColumnName("THUMBNAIL_URL");
         entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValueSql("'DRAFT' ").HasColumnName("STATUS");
-        entity.Property(e => e.PublishedAt).HasColumnType("DATE").HasColumnName("PUBLISHED_AT");
-        entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSDATE ").HasColumnType("DATE").HasColumnName("CREATED_AT");
-        entity.Property(e => e.UpdatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("SYSDATE ").HasColumnType("DATE").HasColumnName("UPDATED_AT");
+        entity.Property(e => e.PublishedAt).HasColumnName("PUBLISHED_AT");
+        entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("CREATED_AT");
+        entity.Property(e => e.UpdatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("UPDATED_AT");
 
         // Navigation: BlogPost → BlogCategory
         entity.HasOne(bp => bp.BlogCategory)
@@ -33,3 +33,5 @@ public class BlogPostConfiguration : IEntityTypeConfiguration<BlogPost>
               .HasConstraintName("FK_BLOG_POSTS_CATEGORY");
     }
 }
+
+

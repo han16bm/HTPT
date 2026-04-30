@@ -30,6 +30,7 @@ import { MasterLayout } from '@/components/Layout';
 import { customerService, orderService, productService, promotionService } from '@/api';
 import { usePagedQuery } from '@/hooks';
 import { formatCurrency } from '@/shared/utils/format';
+import { IMAGE_PLACEHOLDER, resolveProductImageUrl } from '@/shared/utils/image';
 import type {
   Customer,
   OrderCreateRequest,
@@ -294,9 +295,10 @@ const Sales: React.FC = () => {
                   onKeyDown={(e) => e.key === 'Enter' && addToCart(product)}
                 >
                   <img
-                    src={product.imageUrl || 'https://placehold.co/72x72/e6f7ff/0066cc?text=Fish'}
+                    src={resolveProductImageUrl(product.imageUrl) ?? IMAGE_PLACEHOLDER}
                     alt={product.name}
                     className={cx('productImg')}
+                    onError={(e) => { e.currentTarget.src = IMAGE_PLACEHOLDER; }}
                   />
                   <div className={cx('productName')}>{product.name}</div>
                   <div className={cx('productPrice')}>{formatCurrency(product.salePrice)}</div>

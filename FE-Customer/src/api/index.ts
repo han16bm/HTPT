@@ -13,6 +13,7 @@ export type {
 } from './promotionService';
 
 // --- Real services connected to BE via Gateway ---
+export { contactService } from './contactService';
 export { productService } from './productService';
 export { categoryService } from './categoryService';
 export { cartService } from './cartService';

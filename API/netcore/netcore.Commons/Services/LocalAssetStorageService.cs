@@ -83,10 +83,17 @@ public sealed class LocalAssetStorageService : IObjectStorageService
             if (removeCurrent)
             {
                 await RemoveIfManagedAsync(currentUrl, ct);
+                return string.IsNullOrWhiteSpace(fallbackUrl) ? null : fallbackUrl;
+            }
+
+            if (!string.IsNullOrWhiteSpace(fallbackUrl) &&
+                !string.Equals(currentUrl, fallbackUrl, StringComparison.Ordinal))
+            {
+                await RemoveIfManagedAsync(currentUrl, ct);
                 return fallbackUrl;
             }
 
-            return currentUrl ?? fallbackUrl;
+            return currentUrl;
         }
 
         var newUrl = await UploadImageAsync(file, directory, ct);
@@ -171,10 +178,15 @@ public sealed class LocalAssetStorageService : IObjectStorageService
         }
 
         var relativePath = candidatePath[requestPath.Length..].TrimStart('/');
-        var fullPath = Path.GetFullPath(Path.Combine(GetStorageRoot(), relativePath.Replace('/', Path.DirectorySeparatorChar)));
         var root = GetStorageRoot();
+        var fullPath = Path.GetFullPath(Path.Combine(root, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+        var rootPrefix = root.EndsWith(Path.DirectorySeparatorChar)
+            ? root
+            : root + Path.DirectorySeparatorChar;
+        var isInsideRoot = fullPath.Equals(root, StringComparison.OrdinalIgnoreCase)
+            || fullPath.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase);
 
-        return fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase) ? fullPath : null;
+        return isInsideRoot ? fullPath : null;
     }
 
     private static string CombineUrl(params string[] parts)

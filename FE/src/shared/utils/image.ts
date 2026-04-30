@@ -7,20 +7,67 @@ const SVG_PLACEHOLDER = `
 
 export const IMAGE_PLACEHOLDER = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(SVG_PLACEHOLDER)}`;
 
-export function resolveProductImageUrl(url?: string | null): string | undefined {
+const MANAGED_PRODUCT_PREFIXES = ['products/', 'categories/'];
+const MANAGED_CONTENT_PREFIXES = ['blogs/'];
+
+function normalizeUrl(url?: string | null): string | undefined {
   if (!url) return undefined;
 
   const normalized = url.trim();
   if (!normalized) return undefined;
 
-  if (
-    normalized.includes('minio.hoctuthien.com') ||
-    normalized.includes('/fishop/') ||
-    normalized.startsWith('products/') ||
-    normalized.startsWith('/products/')
-  ) {
+  return normalized.replace(/\\/g, '/');
+}
+
+function isAbsoluteUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url) || url.startsWith('data:') || url.startsWith('blob:');
+}
+
+function resolveManagedUrl(url: string, prefixes: string[], requestPath: string): string | undefined {
+  const withoutLeadingSlash = url.replace(/^\/+/, '');
+  const matchedPrefix = prefixes.find((prefix) => withoutLeadingSlash.startsWith(prefix));
+
+  if (!matchedPrefix) {
     return undefined;
   }
 
-  return normalized;
+  return `${requestPath}/${withoutLeadingSlash}`;
 }
+
+export function resolveAssetImageUrl(
+  url?: string | null,
+  service: 'product' | 'content' = 'product',
+): string | undefined {
+  const normalized = normalizeUrl(url);
+  if (!normalized) return undefined;
+
+  if (isAbsoluteUrl(normalized) || normalized.startsWith('/api/')) {
+    return normalized;
+  }
+
+  if (normalized.startsWith('api/')) {
+    return `/${normalized}`;
+  }
+
+  const productUrl = resolveManagedUrl(normalized, MANAGED_PRODUCT_PREFIXES, '/api/product/assets');
+  if (productUrl) return productUrl;
+
+  const contentUrl = resolveManagedUrl(normalized, MANAGED_CONTENT_PREFIXES, '/api/content/assets');
+  if (contentUrl) return contentUrl;
+
+  if (normalized.startsWith('/assets/')) {
+    return normalized;
+  }
+
+  if (service === 'content' && normalized.startsWith('content/')) {
+    return `/api/content/assets/${normalized}`;
+  }
+
+  return undefined;
+}
+
+export const resolveProductImageUrl = (url?: string | null): string | undefined =>
+  resolveAssetImageUrl(url, 'product');
+
+export const resolveContentImageUrl = (url?: string | null): string | undefined =>
+  resolveAssetImageUrl(url, 'content');

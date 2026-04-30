@@ -58,7 +58,9 @@ export const customerService = {
   },
 
   upsert: (data: CustomerUpsertRequest) =>
-    axiosClient.put<Customer>(`${API_ENDPOINTS.CUSTOMER_UPSERT}/${data.id}`, data),
+    data.id
+      ? axiosClient.put<Customer>(`${API_ENDPOINTS.CUSTOMER_UPSERT}/${data.id}`, data)
+      : axiosClient.post<Customer>(API_ENDPOINTS.CUSTOMER_UPSERT, data),
 
   createWalkIn: (data: { fullName: string; phone: string; email?: string }) =>
     axiosClient.post<Customer>(API_ENDPOINTS.CUSTOMER_CREATE_WALKIN, data),

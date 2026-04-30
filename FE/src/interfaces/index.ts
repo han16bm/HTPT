@@ -360,6 +360,8 @@ export interface BlogPostUpsertRequest {
   summary?: string;
   content: string;
   thumbnailUrl?: string;
+  thumbnailFile?: File;
+  removeThumbnail?: boolean;
   categoryId?: number;
   status: BlogStatus;
 }

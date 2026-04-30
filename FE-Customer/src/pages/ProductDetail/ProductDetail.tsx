@@ -27,6 +27,7 @@ import {
   authService,
   type Product,
 } from '@/api';
+import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import styles from './ProductDetail.module.scss';
 
 const ProductDetail: React.FC = () => {
@@ -145,8 +146,9 @@ const ProductDetail: React.FC = () => {
           <Col xs={24} md={10}>
             <div className={styles.imageWrap}>
               <img
-                src={product.imageUrl || '/assets/images/default-fish.png'}
+                src={resolveImageUrl(product.imageUrl)}
                 alt={product.name}
+                onError={useImageFallback}
                 className={styles.mainImage}
               />
             </div>

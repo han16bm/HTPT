@@ -8,6 +8,9 @@ using netcore.Commons.Exceptions;
 using netcore.Commons.Interfaces;
 using netcore.Commons.Models;
 using netcore.Entities.Entities;
+using System.Globalization;
+using System.Text;
+using System.Text.RegularExpressions;
 using netcore.Entities.Interfaces;
 using ProductEntity = netcore.Entities.Entities.Product;
 
@@ -282,10 +285,27 @@ public class ProductService : IProductService
 
     private static string GenerateSlug(string name)
     {
-        return name.ToLowerInvariant()
-            .Replace(" ", "-")
-            .Replace("đ", "d")
-            .Trim('-');
+        // Xử lý đ/Đ trước vì NFD không decompose được ký tự này
+        var text = name.ToLowerInvariant()
+                       .Replace("đ", "d");
+
+        // NFD tách ký tự cơ bản ra khỏi dấu thanh/dấu mũ
+        text = text.Normalize(NormalizationForm.FormD);
+
+        var sb = new StringBuilder();
+        foreach (var c in text)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                sb.Append(c);
+        }
+
+        // Giữ lại a-z, 0-9, khoảng trắng rồi đổi thành gạch ngang
+        var slug = Regex.Replace(sb.ToString().Normalize(NormalizationForm.FormC), @"[^a-z0-9\s]", "")
+                        .Trim();
+        slug = Regex.Replace(slug, @"\s+", "-");
+        slug = Regex.Replace(slug, @"-{2,}", "-").Trim('-');
+
+        return slug;
     }
 
     private static ProductListDto MapToListDto(ProductEntity p) => new()

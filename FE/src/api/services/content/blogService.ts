@@ -25,6 +25,8 @@ function buildFormData(data: BlogPostUpsertRequest): FormData {
   if (data.summary) fd.append('summary', data.summary);
   fd.append('content', data.content);
   if (data.thumbnailUrl) fd.append('thumbnailUrl', data.thumbnailUrl);
+  if (data.thumbnailFile) fd.append('thumbnailFile', data.thumbnailFile);
+  if (data.removeThumbnail) fd.append('removeThumbnail', 'true');
   fd.append('status', data.status);
 
   return fd;
