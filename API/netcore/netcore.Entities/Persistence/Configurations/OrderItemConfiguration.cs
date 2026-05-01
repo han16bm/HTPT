@@ -15,7 +15,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
         entity.Property(e => e.OrderId).HasColumnName("ORDER_ID");
         entity.Property(e => e.ProductId).HasColumnName("PRODUCT_ID");
-        entity.Property(e => e.ProductName).HasMaxLength(200).IsUnicode(false).HasColumnName("PRODUCT_NAME");
+        entity.Property(e => e.ProductName).HasMaxLength(250).HasColumnName("PRODUCT_NAME");
+        entity.Property(e => e.ImageUrl).HasMaxLength(500).HasColumnName("IMAGE_URL");
         entity.Property(e => e.Sku).HasMaxLength(50).IsUnicode(false).HasColumnName("SKU");
         entity.Property(e => e.Quantity).HasColumnName("QUANTITY");
         entity.Property(e => e.UnitPrice).HasColumnName("UNIT_PRICE");
@@ -23,13 +24,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         entity.Property(e => e.LineTotal).HasColumnName("LINE_TOTAL");
         entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("CREATED_AT");
 
-        // Navigation: OrderItem → Product
-        entity.HasOne(oi => oi.Product)
-              .WithMany()
-              .HasForeignKey(oi => oi.ProductId)
-              .HasConstraintName("FK_ORDER_ITEMS_PRODUCT");
+        entity.Ignore(oi => oi.Product);
 
-        // Navigation: OrderItem → Order (many-to-one)
         entity.HasOne(oi => oi.Order)
               .WithMany(o => o.OrderItems)
               .HasForeignKey(oi => oi.OrderId)

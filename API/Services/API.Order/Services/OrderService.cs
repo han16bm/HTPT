@@ -31,16 +31,10 @@ public class OrderService : IOrderService
     // ─────────────────────────────────────────────
     public async Task<OrderDto> CreateOrderFromCartAsync(long userId, CreateOrderRequest request, CancellationToken ct = default)
     {
-        // Lấy customer profile
-        var customer = await _uow.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == (decimal)userId, ct)
-            ?? throw new MessageException("Không tìm thấy thông tin khách hàng. Vui lòng cập nhật hồ sơ.");
-
-        // Lấy giỏ hàng
-        var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == customer.Id, ct)
+        var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == (decimal)userId, ct)
             ?? throw new MessageException("Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi đặt hàng.");
 
         var cartItems = await _uow.CartItems.Query()
-            .Include(ci => ci.Product)
             .Where(ci => ci.CartId == cart.Id)
             .ToListAsync(ct);
 
@@ -63,6 +57,13 @@ public class OrderService : IOrderService
             }
         }
 
+        var customerName = !string.IsNullOrWhiteSpace(request.CustomerName)
+            ? request.CustomerName
+            : request.ShippingAddress.Split('|', 3)[0].Trim();
+        var customerPhone = !string.IsNullOrWhiteSpace(request.CustomerPhone)
+            ? request.CustomerPhone
+            : (request.ShippingAddress.Split('|', 3).Length > 1 ? request.ShippingAddress.Split('|', 3)[1].Trim() : string.Empty);
+
         await _uow.BeginTransactionAsync(ct);
         try
         {
@@ -72,15 +73,14 @@ public class OrderService : IOrderService
             var order = new OrderEntity
             {
                 OrderCode = orderCode,
-                CustomerId = customer.Id,
+                CustomerId = (decimal)userId,
                 PromotionId = promotion?.Id,
                 OrderSource = "ONLINE",
                 OrderStatus = "PENDING",
                 PaymentStatus = "PENDING",
                 PaymentMethod = request.PaymentMethod,
-                CustomerName = customer.FullName,
-                CustomerPhone = customer.Phone,
-                CustomerEmail = customer.Email,
+                CustomerName = customerName,
+                CustomerPhone = customerPhone,
                 CustomerAddress = request.ShippingAddress,
                 Note = request.Note,
                 SubtotalAmount = subtotal,
@@ -94,51 +94,28 @@ public class OrderService : IOrderService
             await _uow.Orders.AddAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
 
-            // Tạo order items + trừ kho + ghi inventory TX
             foreach (var ci in cartItems)
             {
-                if (ci.Product!.StockQuantity < ci.Quantity)
-                    throw new MessageException($"Sản phẩm '{ci.Product.Name}' không đủ hàng (còn {ci.Product.StockQuantity}).");
-
                 await _uow.OrderItems.AddAsync(new OrderItem
                 {
                     OrderId = order.Id,
                     ProductId = ci.ProductId,
-                    ProductName = ci.Product!.Name,
+                    ProductName = ci.ProductName ?? string.Empty,
+                    ImageUrl = ci.ImageUrl,
                     Quantity = ci.Quantity,
                     UnitPrice = ci.UnitPrice,
                     DiscountAmount = 0,
                     LineTotal = ci.UnitPrice * ci.Quantity,
                     CreatedAt = DateTime.UtcNow,
                 }, ct);
-
-                // Trừ kho
-                ci.Product.StockQuantity -= ci.Quantity;
-                ci.Product.SoldQuantity += ci.Quantity;
-                _uow.Products.Update(ci.Product);
-
-                // Ghi inventory transaction
-                await _uow.InventoryTransactions.AddAsync(new InventoryTransaction
-                {
-                    ProductId = ci.ProductId,
-                    TransactionType = "SALE",
-                    Quantity = -ci.Quantity,
-                    UnitCost = ci.UnitPrice,
-                    ReferenceType = "ORDER",
-                    ReferenceId = order.Id,
-                    Note = $"Đơn hàng {orderCode}",
-                    CreatedAt = DateTime.UtcNow,
-                }, ct);
             }
 
-            // Cập nhật lần dùng promotion
             if (promotion is not null)
             {
                 promotion.UsedCount += 1;
                 _uow.Promotions.Update(promotion);
             }
 
-            // Xóa giỏ hàng
             foreach (var ci in cartItems)
                 _uow.CartItems.Remove(ci);
 
@@ -195,7 +172,7 @@ public class OrderService : IOrderService
         try
         {
             decimal subtotal = 0;
-            var lines = new List<(OrderLineRequest line, Product product)>();
+            var lines = new List<(OrderLineRequest line, string productName, decimal price)>();
 
             foreach (var line in request.Items)
             {
@@ -207,7 +184,11 @@ public class OrderService : IOrderService
 
                 var price = line.UnitPrice ?? product.SalePrice;
                 subtotal += price * line.Quantity;
-                lines.Add((line, product));
+                lines.Add((line, product.Name, price));
+
+                product.StockQuantity -= line.Quantity;
+                product.SoldQuantity += line.Quantity;
+                _uow.Products.Update(product);
             }
 
             if (promotion is not null)
@@ -240,24 +221,19 @@ public class OrderService : IOrderService
             await _uow.Orders.AddAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
 
-            foreach (var (line, product) in lines)
+            foreach (var (line, productName, price) in lines)
             {
-                var price = line.UnitPrice ?? product.SalePrice;
                 await _uow.OrderItems.AddAsync(new OrderItem
                 {
                     OrderId = order.Id,
                     ProductId = (decimal)line.ProductId,
-                    ProductName = product.Name,
+                    ProductName = productName,
                     Quantity = line.Quantity,
                     UnitPrice = price,
                     DiscountAmount = 0,
                     LineTotal = price * line.Quantity,
                     CreatedAt = DateTime.UtcNow,
                 }, ct);
-
-                product.StockQuantity -= line.Quantity;
-                product.SoldQuantity += line.Quantity;
-                _uow.Products.Update(product);
 
                 await _uow.InventoryTransactions.AddAsync(new InventoryTransaction
                 {
@@ -310,10 +286,7 @@ public class OrderService : IOrderService
     // ─────────────────────────────────────────────
     public async Task<PagedResult<OrderListDto>> GetMyOrdersAsync(long userId, OrderQuery query, CancellationToken ct = default)
     {
-        var customer = await _uow.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == (decimal)userId, ct)
-            ?? throw new MessageException("Khong tim thay thong tin khach hang. Vui long cap nhat ho so.");
-
-        query.CustomerId = (long)customer.Id;
+        query.CustomerId = userId;
         return await GetAllOrdersAsync(query, ct);
     }
 
@@ -395,7 +368,7 @@ public class OrderService : IOrderService
     public async Task<OrderDto> GetByOrderCodeAsync(string orderCode, CancellationToken ct = default)
     {
         var order = await _uow.Orders.Query()
-            .Include(o => o.OrderItems).ThenInclude(oi => oi.Product)
+            .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.OrderCode == orderCode, ct)
             ?? throw new NotFoundException($"Không tìm thấy đơn hàng: {orderCode}");
 
@@ -408,7 +381,7 @@ public class OrderService : IOrderService
     public async Task<OrderDto> GetByIdAsync(long orderId, CancellationToken ct = default)
     {
         var order = await _uow.Orders.Query()
-            .Include(o => o.OrderItems).ThenInclude(oi => oi.Product)
+            .Include(o => o.OrderItems)
             .FirstOrDefaultAsync(o => o.Id == (decimal)orderId, ct)
             ?? throw new NotFoundException("Đơn hàng", orderId);
 
@@ -451,11 +424,8 @@ public class OrderService : IOrderService
     // ─────────────────────────────────────────────
     public async Task<OrderDto> CancelOrderAsync(long userId, CancelOrderRequest request, CancellationToken ct = default)
     {
-        var customer = await _uow.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == (decimal)userId, ct)
-            ?? throw new UnauthorizedException("Không tìm thấy hồ sơ khách hàng");
-
         var order = await _uow.Orders.FirstOrDefaultAsync(
-            o => o.OrderCode == request.OrderCode && o.CustomerId == customer.Id, ct)
+            o => o.OrderCode == request.OrderCode && o.CustomerId == (decimal)userId, ct)
             ?? throw new NotFoundException($"Không tìm thấy đơn hàng: {request.OrderCode}");
 
         if (order.OrderStatus != "PENDING")
@@ -468,37 +438,9 @@ public class OrderService : IOrderService
             order.Note = request.Reason;
 
         _uow.Orders.Update(order);
-
-        // Hoàn lại kho
-        var items = await _uow.OrderItems.Query()
-            .Include(oi => oi.Product)
-            .Where(oi => oi.OrderId == order.Id)
-            .ToListAsync(ct);
-
-        foreach (var item in items)
-        {
-            if (item.Product is not null)
-            {
-                item.Product.StockQuantity += item.Quantity;
-                item.Product.SoldQuantity = Math.Max(0, item.Product.SoldQuantity - item.Quantity);
-                _uow.Products.Update(item.Product);
-
-                await _uow.InventoryTransactions.AddAsync(new InventoryTransaction
-                {
-                    ProductId = item.ProductId,
-                    TransactionType = "RETURN",
-                    Quantity = item.Quantity,
-                    ReferenceType = "ORDER",
-                    ReferenceId = order.Id,
-                    Note = $"Hoàn hàng do hủy đơn {order.OrderCode}",
-                    CreatedAt = DateTime.UtcNow,
-                }, ct);
-            }
-        }
-
         await _uow.SaveChangesAsync(ct);
-        _logger.LogInformation("Order {OrderCode} cancelled by user {UserId}", request.OrderCode, userId);
 
+        _logger.LogInformation("Order {OrderCode} cancelled by user {UserId}", request.OrderCode, userId);
         return await GetByOrderCodeAsync(request.OrderCode, ct);
     }
 
@@ -543,8 +485,8 @@ public class OrderService : IOrderService
         {
             Id = (long)oi.Id,
             ProductId = (long)oi.ProductId,
-            ProductName = oi.Product?.Name ?? oi.ProductName,
-            ImageUrl = oi.Product?.ImageUrl,
+            ProductName = oi.ProductName,
+            ImageUrl = oi.ImageUrl,
             Quantity = (int)oi.Quantity,
             UnitPrice = oi.UnitPrice,
             SubTotal = oi.LineTotal,

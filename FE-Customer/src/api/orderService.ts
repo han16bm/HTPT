@@ -52,11 +52,13 @@ interface PagedResult<T> {
  * BE tự lấy items từ Cart của user (CreateOrderFromCartAsync)
  */
 export interface CreateOrderRequest {
+  customerName: string;
+  customerPhone: string;
   shippingAddress: string;
   paymentMethod: 'COD' | 'BANK_TRANSFER' | 'CASH';
   promotionCode?: string;
   shippingFee?: number;
-  note?: string;   // BE property: Note
+  note?: string;
 }
 
 export interface CancelOrderRequest {

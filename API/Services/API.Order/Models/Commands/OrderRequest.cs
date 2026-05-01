@@ -4,21 +4,19 @@ namespace API.Order.Models.Commands;
 
 public class CreateOrderRequest
 {
-    /// <summary>Địa chỉ giao hàng (JSON hoặc chuỗi)</summary>
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerPhone { get; set; } = string.Empty;
+
     [Required]
     public string ShippingAddress { get; set; } = string.Empty;
 
-    /// <summary>Phương thức thanh toán: COD | BANK_TRANSFER | CASH</summary>
     [Required]
     public string PaymentMethod { get; set; } = "COD";
 
-    /// <summary>Mã giảm giá (tùy chọn)</summary>
     public string? PromotionCode { get; set; }
 
-    /// <summary>Phí vận chuyển</summary>
     public decimal ShippingFee { get; set; } = 0;
 
-    /// <summary>Ghi chú đơn hàng</summary>
     public string? Note { get; set; }
 }
 

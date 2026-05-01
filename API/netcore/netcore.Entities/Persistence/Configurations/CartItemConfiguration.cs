@@ -17,14 +17,12 @@ public class CartItemConfiguration : IEntityTypeConfiguration<CartItem>
         entity.Property(e => e.ProductId).HasColumnName("PRODUCT_ID");
         entity.Property(e => e.Quantity).HasColumnName("QUANTITY");
         entity.Property(e => e.UnitPrice).HasColumnName("UNIT_PRICE");
+        entity.Property(e => e.ProductName).HasMaxLength(250).HasColumnName("PRODUCT_NAME");
+        entity.Property(e => e.ImageUrl).HasMaxLength(500).HasColumnName("IMAGE_URL");
         entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("CREATED_AT");
         entity.Property(e => e.UpdatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("UPDATED_AT");
 
-        // Navigation: CartItem → Product.
-        entity.HasOne(ci => ci.Product)
-              .WithMany()
-              .HasForeignKey(ci => ci.ProductId)
-              .HasConstraintName("FK_CART_ITEMS_PRODUCT");
+        entity.Ignore(ci => ci.Product);
     }
 }
 

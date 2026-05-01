@@ -81,7 +81,7 @@ const SearchResults: React.FC = () => {
       return;
     }
     try {
-      const res = await cartService.addToCart(product.id, 1);
+      const res = await cartService.addToCart(product.id, 1, product.name, product.salePrice, product.imageUrl);
       if (res.success) {
         message.success('Đã thêm vào giỏ hàng');
         if (res.data) {

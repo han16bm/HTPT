@@ -91,6 +91,8 @@ const Checkout: React.FC = () => {
     setSubmitting(true);
     try {
       const orderData: CreateOrderRequest = {
+        customerName: values.customerName,
+        customerPhone: values.customerPhone,
         shippingAddress: `${values.customerName} | ${values.customerPhone} | ${values.addressDetail}, ${values.district}, ${values.province}`,
         paymentMethod: paymentMethod === 'cod' ? 'COD' : 'BANK_TRANSFER',
         note: values.note,

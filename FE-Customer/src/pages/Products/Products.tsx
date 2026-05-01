@@ -172,7 +172,7 @@ const Products: React.FC = () => {
     }
 
     try {
-      const response = await cartService.addToCart(product.id, 1);
+      const response = await cartService.addToCart(product.id, 1, product.name, product.salePrice, product.imageUrl);
       if (response.success) {
         message.success('Đã thêm vào giỏ hàng');
         if (response.data) {

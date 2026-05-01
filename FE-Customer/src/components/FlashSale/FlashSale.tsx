@@ -39,7 +39,7 @@ const FlashSale: React.FC<FlashSaleProps> = ({
   }, [endTime]);
 
   const handleAddToCart = async (product: Product) => {
-    await cartService.addToCart(product.id, 1);
+    await cartService.addToCart(product.id, 1, product.name, product.salePrice, product.imageUrl);
   };
 
   const pad = (n: number) => String(n).padStart(2, '0');

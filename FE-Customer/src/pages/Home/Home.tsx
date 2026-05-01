@@ -305,7 +305,7 @@ const Home: React.FC = () => {
       return;
     }
     try {
-      const response = await cartService.addToCart(product.id, 1);
+      const response = await cartService.addToCart(product.id, 1, product.name, product.salePrice, product.imageUrl);
       if (response.success) {
         message.success('Đã thêm vào giỏ hàng');
         if (response.data) window.dispatchEvent(new CustomEvent('cart-updated', { detail: response.data.totalItems }));

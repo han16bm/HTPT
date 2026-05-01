@@ -15,6 +15,10 @@ public partial class CartItem
 
     public decimal UnitPrice { get; set; }
 
+    public string? ProductName { get; set; }
+
+    public string? ImageUrl { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

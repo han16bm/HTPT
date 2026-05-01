@@ -9,6 +9,14 @@ public class AddToCartRequest
 
     [Required, Range(1, 999)]
     public int Quantity { get; set; } = 1;
+
+    [Required]
+    public string ProductName { get; set; } = string.Empty;
+
+    [Required]
+    public decimal UnitPrice { get; set; }
+
+    public string? ImageUrl { get; set; }
 }
 
 public class UpdateCartItemRequest

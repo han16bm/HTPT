@@ -82,7 +82,7 @@ const ProductDetail: React.FC = () => {
   const handleAddToCart = async () => {
     if (!product) return;
     if (!requireLogin()) return;
-    const res = await cartService.addToCart(product.id, qty);
+    const res = await cartService.addToCart(product.id, qty, product.name, product.salePrice, product.imageUrl);
     if (res.success) {
       message.success('Đã thêm vào giỏ hàng');
       if (res.data) window.dispatchEvent(new CustomEvent('cart-updated', { detail: res.data.totalItems }));
@@ -94,7 +94,7 @@ const ProductDetail: React.FC = () => {
   const handleBuyNow = async () => {
     if (!product) return;
     if (!requireLogin()) return;
-    const res = await cartService.addToCart(product.id, qty);
+    const res = await cartService.addToCart(product.id, qty, product.name, product.salePrice, product.imageUrl);
     if (res.success) {
       if (res.data) window.dispatchEvent(new CustomEvent('cart-updated', { detail: res.data.totalItems }));
       navigate('/checkout');

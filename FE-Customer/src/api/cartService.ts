@@ -28,10 +28,19 @@ export const cartService = {
   },
 
   /** POST /api/order/cart/them-san-pham */
-  addToCart: (productId: number, quantity: number): Promise<ApiResponse<Cart>> => {
+  addToCart: (
+    productId: number,
+    quantity: number,
+    productName: string,
+    unitPrice: number,
+    imageUrl?: string,
+  ): Promise<ApiResponse<Cart>> => {
     return axiosClient.post(API_ENDPOINTS.CART_ADD, {
       productId,
       quantity,
+      productName,
+      unitPrice,
+      imageUrl,
     });
   },
 

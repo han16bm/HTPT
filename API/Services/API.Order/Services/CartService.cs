@@ -12,11 +12,19 @@ public class CartService : ICartService
 {
     private readonly IUnitOfWork _uow;
     private readonly ILogger<CartService> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly IConfiguration _config;
 
-    public CartService(IUnitOfWork uow, ILogger<CartService> logger)
+    public CartService(
+        IUnitOfWork uow, 
+        ILogger<CartService> logger, 
+        IHttpClientFactory httpClientFactory,
+        IConfiguration config)
     {
         _uow = uow;
         _logger = logger;
+        _httpClient = httpClientFactory.CreateClient();
+        _config = config;
     }
 
     // ─────────────────────────────────────────────
@@ -27,7 +35,6 @@ public class CartService : ICartService
         var cart = await GetOrCreateCartAsync(userId, ct);
 
         var items = await _uow.CartItems.Query()
-            .Include(ci => ci.Product)
             .Where(ci => ci.CartId == cart.Id)
             .ToListAsync(ct);
 
@@ -39,27 +46,44 @@ public class CartService : ICartService
     // ─────────────────────────────────────────────
     public async Task<CartDto> AddToCartAsync(long userId, AddToCartRequest request, CancellationToken ct = default)
     {
-        var product = await _uow.Products.FirstOrDefaultAsync(
-            p => p.Id == (decimal)request.ProductId && p.Status == true, ct)
-            ?? throw new NotFoundException("Sản phẩm", request.ProductId);
+        if (request.Quantity <= 0)
+            throw new MessageException("Số lượng không hợp lệ.");
 
-        if (product.StockQuantity < request.Quantity)
-            throw new MessageException($"Sản phẩm '{product.Name}' không đủ hàng. Còn lại: {product.StockQuantity}");
+        // Gọi RESTful API sang Product Service để lấy và xác thực thông tin sản phẩm
+        var productApiUrl = _config["ProductServiceUrl"] ?? "http://api-product:8080";
+        var apiKey = _config["ApiKey:Key"] ?? "fish-gateway-key-2026";
+        var headerName = _config["ApiKey:HeaderName"] ?? "X-Api-Key";
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{productApiUrl}/api/product/products/{request.ProductId}");
+        requestMessage.Headers.Add(headerName, apiKey);
+
+        var response = await _httpClient.SendAsync(requestMessage, ct);
+        if (!response.IsSuccessStatusCode)
+            throw new MessageException($"Không thể kết nối đến Product Service (HTTP {response.StatusCode}).");
+
+        var productResult = await response.Content.ReadFromJsonAsync<netcore.Commons.Models.ApiResponse<ProductDtoInfo>>(cancellationToken: ct);
+        
+        if (productResult is null || !productResult.Success || productResult.Data is null)
+            throw new NotFoundException("Sản phẩm không tồn tại trên hệ thống", request.ProductId);
+
+        var productData = productResult.Data;
+        
+        // Cập nhật lại request với dữ liệu chính xác từ Product Service
+        request.UnitPrice = productData.SalePrice;
+        request.ProductName = productData.Name ?? "Sản phẩm";
+        request.ImageUrl = productData.ImageUrl;
 
         var cart = await GetOrCreateCartAsync(userId, ct);
 
-        // Kiểm tra xem SP đã có trong giỏ chưa
         var existingItem = await _uow.CartItems.FirstOrDefaultAsync(
             ci => ci.CartId == cart.Id && ci.ProductId == (decimal)request.ProductId, ct);
 
         if (existingItem is not null)
         {
-            var newQty = existingItem.Quantity + request.Quantity;
-            if (product.StockQuantity < newQty)
-                throw new MessageException($"Không thể thêm. Tổng số lượng vượt quá tồn kho ({product.StockQuantity}).");
-
-            existingItem.Quantity = newQty;
-            existingItem.UnitPrice = product.SalePrice;
+            existingItem.Quantity += request.Quantity;
+            existingItem.UnitPrice = request.UnitPrice;
+            existingItem.ProductName = request.ProductName;
+            existingItem.ImageUrl = request.ImageUrl;
             _uow.CartItems.Update(existingItem);
         }
         else
@@ -69,7 +93,9 @@ public class CartService : ICartService
                 CartId = cart.Id,
                 ProductId = (decimal)request.ProductId,
                 Quantity = request.Quantity,
-                UnitPrice = product.SalePrice,
+                UnitPrice = request.UnitPrice,
+                ProductName = request.ProductName,
+                ImageUrl = request.ImageUrl,
             };
             await _uow.CartItems.AddAsync(item, ct);
         }
@@ -86,13 +112,9 @@ public class CartService : ICartService
     public async Task<CartDto> UpdateQuantityAsync(long userId, UpdateCartItemRequest request, CancellationToken ct = default)
     {
         var cart = await GetOrCreateCartAsync(userId, ct);
-        var item = await _uow.CartItems.Query()
-            .Include(ci => ci.Product)
-            .FirstOrDefaultAsync(ci => ci.Id == (decimal)request.CartItemId && ci.CartId == cart.Id, ct)
+        var item = await _uow.CartItems.FirstOrDefaultAsync(
+            ci => ci.Id == (decimal)request.CartItemId && ci.CartId == cart.Id, ct)
             ?? throw new NotFoundException("Mục giỏ hàng", request.CartItemId);
-
-        if (item.Product!.StockQuantity < request.Quantity)
-            throw new MessageException($"Sản phẩm '{item.Product.Name}' không đủ hàng. Còn lại: {item.Product.StockQuantity}");
 
         item.Quantity = request.Quantity;
         _uow.CartItems.Update(item);
@@ -122,10 +144,7 @@ public class CartService : ICartService
     // ─────────────────────────────────────────────
     public async Task ClearCartAsync(long userId, CancellationToken ct = default)
     {
-        var customer = await _uow.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == (decimal)userId, ct);
-        if (customer is null) return;
-
-        var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == customer.Id, ct);
+        var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == (decimal)userId, ct);
         if (cart is null) return;
 
         var items = await _uow.CartItems.Query()
@@ -144,13 +163,10 @@ public class CartService : ICartService
     // ─────────────────────────────────────────────
     private async Task<ShoppingCart> GetOrCreateCartAsync(long userId, CancellationToken ct)
     {
-        var customer = await _uow.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == (decimal)userId, ct)
-            ?? throw new MessageException("Không tìm thấy thông tin khách hàng.");
-
-        var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == customer.Id, ct);
+        var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == (decimal)userId, ct);
         if (cart is not null) return cart;
 
-        cart = new ShoppingCart { CustomerId = customer.Id, Status = "ACTIVE", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        cart = new ShoppingCart { CustomerId = (decimal)userId, Status = "ACTIVE", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
         await _uow.ShoppingCarts.AddAsync(cart, ct);
         await _uow.SaveChangesAsync(ct);
         return cart;
@@ -162,13 +178,11 @@ public class CartService : ICartService
         {
             Id = (long)ci.Id,
             ProductId = (long)ci.ProductId,
-            ProductName = ci.Product?.Name ?? string.Empty,
-            ProductSlug = ci.Product?.Slug,
-            ImageUrl = ci.Product?.ImageUrl,
+            ProductName = ci.ProductName ?? string.Empty,
+            ImageUrl = ci.ImageUrl,
             Quantity = (int)ci.Quantity,
             UnitPrice = ci.UnitPrice,
             SubTotal = ci.UnitPrice * ci.Quantity,
-            StockQuantity = (int)(ci.Product?.StockQuantity ?? 0),
         }).ToList();
 
         return new CartDto
@@ -180,4 +194,12 @@ public class CartService : ICartService
             TotalItems = itemDtos.Sum(i => i.Quantity),
         };
     }
+}
+
+public class ProductDtoInfo
+{
+    public long Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public decimal SalePrice { get; set; }
+    public string? ImageUrl { get; set; }
 }
