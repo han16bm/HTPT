@@ -78,17 +78,24 @@ public class ReportService : IReportService
 
     public async Task<List<TopProductDto>> GetTopProductsAsync(int top, DateTime? fromDate, DateTime? toDate, CancellationToken ct = default)
     {
-        return await _uow.Products.Query()
-            .Where(p => p.Status == true)
-            .OrderByDescending(p => p.SoldQuantity)
+        var (fromInclusive, toExclusive) = NormalizeDateRange(fromDate, toDate);
+
+        return await _uow.OrderItems.Query()
+            .Join(
+                _uow.Orders.Query().Where(o => o.CreatedAt >= fromInclusive && o.CreatedAt < toExclusive && o.OrderStatus != "CANCELLED"),
+                item => item.OrderId,
+                order => order.Id,
+                (item, order) => item)
+            .GroupBy(oi => new { oi.ProductId, oi.ProductName, oi.ImageUrl })
+            .OrderByDescending(g => g.Sum(oi => oi.Quantity))
             .Take(top)
-            .Select(p => new TopProductDto
+            .Select(g => new TopProductDto
             {
-                Id = (long)p.Id,
-                Name = p.Name,
-                ImageUrl = p.ImageUrl,
-                SoldQuantity = (int)p.SoldQuantity,
-                Revenue = p.SalePrice * p.SoldQuantity,
+                Id = (long)g.Key.ProductId,
+                Name = g.Key.ProductName,
+                ImageUrl = g.Key.ImageUrl,
+                SoldQuantity = (int)g.Sum(oi => oi.Quantity),
+                Revenue = g.Sum(oi => oi.LineTotal),
             })
             .ToListAsync(ct);
     }
@@ -138,16 +145,23 @@ public class ReportService : IReportService
 
     public async Task<List<TopProductReportRowDto>> GetTopProductReportAsync(int top, DateTime? fromDate, DateTime? toDate, CancellationToken ct = default)
     {
-        return await _uow.Products.Query()
-            .Where(p => p.Status == true)
-            .OrderByDescending(p => p.SoldQuantity)
+        var (fromInclusive, toExclusive) = NormalizeDateRange(fromDate, toDate);
+
+        return await _uow.OrderItems.Query()
+            .Join(
+                _uow.Orders.Query().Where(o => o.CreatedAt >= fromInclusive && o.CreatedAt < toExclusive && o.OrderStatus != "CANCELLED"),
+                item => item.OrderId,
+                order => order.Id,
+                (item, order) => item)
+            .GroupBy(oi => new { oi.ProductId, oi.ProductName })
+            .OrderByDescending(g => g.Sum(oi => oi.Quantity))
             .Take(top)
-            .Select(p => new TopProductReportRowDto
+            .Select(g => new TopProductReportRowDto
             {
-                ProductId = (long)p.Id,
-                ProductName = p.Name,
-                Sold = (int)p.SoldQuantity,
-                Revenue = p.SalePrice * p.SoldQuantity,
+                ProductId = (long)g.Key.ProductId,
+                ProductName = g.Key.ProductName,
+                Sold = (int)g.Sum(oi => oi.Quantity),
+                Revenue = g.Sum(oi => oi.LineTotal),
             })
             .ToListAsync(ct);
     }

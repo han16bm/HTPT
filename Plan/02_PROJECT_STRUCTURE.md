@@ -1,4 +1,4 @@
-# 📁 Cấu Trúc Thư Mục — FISH SHOP
+﻿# 📁 Cấu Trúc Thư Mục — FISH SHOP
 
 > Theo phong cách dự án nguồn `byt_csdl_nkt` (NKT.Internal)
 
@@ -208,11 +208,11 @@ Services/API.Auth/
 │
 ├── Controllers/
 │   ├── BaseApiController.cs
-│   ├── AuthController.cs            ← [Route("[controller]")] → /api/auth/auth/...
-│   │   ├── dang-nhap                POST
-│   │   ├── dang-ky                  POST (customer only)
-│   │   ├── lam-moi-token            POST
-│   │   ├── dang-xuat                POST
+│   ├── AuthController.cs            ← [Route("[controller]")] → /api/user/auth/...
+│   │   ├── login                POST
+│   │   ├── register                  POST (customer only)
+│   │   ├── refresh-token            POST
+│   │   ├── logout                POST
 │   │   ├── thong-tin-nguoi-dung     GET
 │   │   └── healthcheck              GET
 │   │
@@ -261,7 +261,7 @@ Services/API.Auth/
 Services/API.Products/
 ├── Controllers/
 │   ├── ProductsController.cs
-│   │   ├── tim-kiem            GET  — filter: name, category, price range, isFeatured
+│   │   ├── list            GET  — filter: name, category, price range, isFeatured
 │   │   ├── chi-tiet            GET  — by id
 │   │   ├── theo-slug           GET  — by slug (SEO)
 │   │   ├── san-pham-noi-bat    GET  — featured list
@@ -269,7 +269,7 @@ Services/API.Products/
 │   │   └── xoa                 POST — Admin
 │   │
 │   ├── CategoriesController.cs
-│   │   ├── tim-kiem            GET  — với cây con (parent/children)
+│   │   ├── list            GET  — với cây con (parent/children)
 │   │   ├── chi-tiet            GET
 │   │   ├── theo-slug           GET
 │   │   ├── them-moi-cap-nhat   POST — Admin
@@ -322,11 +322,11 @@ Services/API.Orders/
 │   │   └── xoa-gio-hang        POST — clear cart
 │   │
 │   ├── OrdersController.cs
-│   │   ├── dat-hang            POST — tạo đơn (public + auth)
-│   │   ├── don-hang-cua-toi    GET  — lịch sử đơn (auth)
+│   │   ├── create            POST — tạo đơn (public + auth)
+│   │   ├── me    GET  — lịch sử đơn (auth)
 │   │   ├── chi-tiet            GET  — xem chi tiết đơn
 │   │   ├── huy-don             POST — hủy (auth + only PENDING)
-│   │   ├── tim-kiem            GET  — Admin: filter đơn
+│   │   ├── list            GET  — Admin: filter đơn
 │   │   └── cap-nhat-trang-thai POST — Admin: cập nhật status
 │   │
 │   ├── PaymentsController.cs
@@ -334,8 +334,8 @@ Services/API.Orders/
 │   │   └── trang-thai          GET  — kiểm tra trạng thái GD
 │   │
 │   └── PromotionsController.cs
-│       ├── kiem-tra-ma         POST — validate promo code (public)
-│       ├── tim-kiem            GET  — Admin: danh sách
+│       ├── validate         POST — validate promo code (public)
+│       ├── list            GET  — Admin: danh sách
 │       ├── them-moi-cap-nhat   POST — Admin: CRUD
 │       └── xoa                 POST — Admin
 │
@@ -391,7 +391,7 @@ Services/API.Admin/
 │   │   └── thong-ke            GET  — sales stats
 │   │
 │   ├── CustomersController.cs
-│   │   ├── tim-kiem            GET
+│   │   ├── list            GET
 │   │   ├── chi-tiet            GET
 │   │   └── lich-su-don-hang    GET  — lịch sử mua của khách
 │   │
@@ -430,20 +430,20 @@ Services/API.Admin/
 Services/API.Content/
 ├── Controllers/
 │   ├── BlogController.cs
-│   │   ├── tim-kiem            GET  — public: only PUBLISHED
+│   │   ├── list            GET  — public: only PUBLISHED
 │   │   ├── chi-tiet-theo-slug  GET  — public
 │   │   ├── chi-tiet            GET  — Admin (any status)
 │   │   ├── them-moi-cap-nhat   POST — Admin
 │   │   └── xoa                 POST — Admin
 │   │
 │   ├── BlogCategoriesController.cs
-│   │   ├── tim-kiem            GET
+│   │   ├── list            GET
 │   │   ├── them-moi-cap-nhat   POST — Admin
 │   │   └── xoa                 POST — Admin
 │   │
 │   └── ContactController.cs
 │       ├── gui-lien-he         POST — public
-│       ├── tim-kiem            GET  — Admin
+│       ├── list            GET  — Admin
 │       └── cap-nhat-trang-thai POST — Admin
 │
 ├── Services/
@@ -508,7 +508,7 @@ Gateway/FishShop.Gateway/
 | Loại | Quy tắc | Ví dụ |
 |------|---------|-------|
 | Controller | `{Resource}Controller` | `ProductsController` |
-| Route Action | kebab-case tiếng Việt | `tim-kiem`, `chi-tiet`, `them-moi-cap-nhat`, `xoa` |
+| Route Action | kebab-case tiếng Việt | `list`, `chi-tiet`, `them-moi-cap-nhat`, `xoa` |
 | Interface Service | `I{Resource}Service` | `IProductService` |
 | Service Impl | `{Resource}Service` | `ProductService` |
 | Request (write) | `{Action}{Resource}Request` | `UpsertProductRequest`, `DatHangRequest` |

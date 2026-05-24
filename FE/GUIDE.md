@@ -1,4 +1,4 @@
-# Tài liệu Hướng dẫn - Frontend Quản Lý Cửa Hàng Cá Cảnh
+﻿# Tài liệu Hướng dẫn - Frontend Quản Lý Cửa Hàng Cá Cảnh
 
 ## 📚 Tổng quan dự án
 
@@ -238,7 +238,7 @@ VITE_ENABLE_DEBUG=true
 
 ## 📝 Notes
 
-- Backend API phải chạy tại `http://localhost:8080/api`
+- Backend API phải chạy tại `http://localhost:5000/api`
 - Cập nhật API URL trong `.env` nếu khác
 - Token được lưu trong localStorage
 - Clear localStorage nếu gặp vấn đề authentication

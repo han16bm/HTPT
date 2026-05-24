@@ -1,4 +1,4 @@
-# ⚙️ Kế Hoạch Tái Cấu Trúc Backend — FISH SHOP
+﻿# ⚙️ Kế Hoạch Tái Cấu Trúc Backend — FISH SHOP
 
 > Theo phong cách dự án nguồn `byt_csdl_nkt` (NKT.Internal)
 > .NET 8 · EF Core + Oracle · Multi-service architecture
@@ -375,42 +375,42 @@ namespace API.Products.Controllers
             _logger = logger;
         }
 
-        // GET /api/products/products/tim-kiem?name=guppy&page=1&pageSize=10
-        [HttpGet("tim-kiem")]
+        // GET /api/product/products?name=guppy&page=1&pageSize=10
+        [HttpGet]
         public async Task<object> TimKiemSanPham([FromQuery] ProductQuery query, CancellationToken ct)
         {
             return await _service.GetAllAsync(query, ct);
         }
 
-        // GET /api/products/products/chi-tiet?id=1
+        // GET /api/product/products/1
         [HttpGet("chi-tiet")]
         public async Task<object> ChiTietSanPham([FromQuery] long id, CancellationToken ct)
         {
             return await _service.GetByIdAsync(id, ct);
         }
 
-        // GET /api/products/products/theo-slug?slug=ca-betta
+        // GET /api/product/products/slug/ca-betta
         [HttpGet("theo-slug")]
         public async Task<object> SanPhamTheoSlug([FromQuery] string slug, CancellationToken ct)
         {
             return await _service.GetBySlugAsync(slug, ct);
         }
 
-        // POST /api/products/products/them-moi-cap-nhat
+        // POST /api/product/products
         [HttpPost("them-moi-cap-nhat")]
         public async Task<object> ThemMoiCapNhatSanPham([FromBody] UpsertProductRequest request, CancellationToken ct)
         {
             return await _service.UpsertAsync(request, ct);
         }
 
-        // POST /api/products/products/xoa
+        // POST /api/product/products/{id}
         [HttpPost("xoa")]
         public async Task<object> XoaSanPham([FromBody] DeleteProductRequest request, CancellationToken ct)
         {
             return await _service.DeleteAsync(request, ct);
         }
 
-        // GET /api/products/products/healthcheck
+        // GET /api/product/products/health
         [HttpGet("healthcheck")]
         public Task<object> HealthCheck()
         {
@@ -428,11 +428,11 @@ namespace API.Products.Controllers
 Phục vụ cả Customer lẫn Admin login
 ```
 Controllers/
-├── AuthController.cs         → /api/auth/auth/...
-│   ├── dang-nhap             → POST (Customer + Staff + Admin)
-│   ├── dang-ky               → POST (Customer)
-│   ├── lam-moi-token         → POST (refresh JWT)
-│   ├── dang-xuat             → POST
+├── AuthController.cs         → /api/user/auth/...
+│   ├── login             → POST (Customer + Staff + Admin)
+│   ├── register               → POST (Customer)
+│   ├── refresh-token         → POST (refresh JWT)
+│   ├── logout             → POST
 │   ├── thong-tin-nguoi-dung  → GET
 │   └── healthcheck           → GET
 │
@@ -444,16 +444,16 @@ Controllers/
 Sản phẩm + Danh mục + Tồn kho
 ```
 Controllers/
-├── ProductsController.cs     → /api/products/products/...
-│   ├── tim-kiem              → GET (filter, paging)
+├── ProductsController.cs     → /api/product/products/...
+│   ├── list              → GET (filter, paging)
 │   ├── chi-tiet              → GET (by id)
 │   ├── theo-slug             → GET (by slug)
 │   ├── them-moi-cap-nhat     → POST (upsert)
 │   ├── xoa                   → POST
 │   └── san-pham-noi-bat      → GET
 │
-├── CategoriesController.cs   → /api/products/categories/...
-│   ├── tim-kiem              → GET
+├── CategoriesController.cs   → /api/product/categories/...
+│   ├── list              → GET
 │   ├── chi-tiet              → GET
 │   ├── them-moi-cap-nhat     → POST
 │   └── xoa                   → POST
@@ -468,16 +468,16 @@ Controllers/
 Giỏ hàng + Đặt hàng + Thanh toán + Khuyến mãi
 ```
 Controllers/
-├── CartController.cs         → /api/orders/cart/...
+├── CartController.cs         → /api/order/cart/...
 │   ├── gio-hang-hien-tai     → GET
 │   ├── them-san-pham         → POST
 │   ├── cap-nhat-so-luong     → POST
 │   ├── xoa-san-pham          → POST
 │   └── xoa-gio-hang          → POST (clear)
 │
-├── OrdersController.cs       → /api/orders/orders/...
-│   ├── dat-hang              → POST (create order)
-│   ├── don-hang-cua-toi      → GET (customer's orders)
+├── OrdersController.cs       → /api/order/orders/...
+│   ├── create              → POST (create order)
+│   ├── me      → GET (customer's orders)
 │   ├── chi-tiet              → GET (by order code)
 │   ├── huy-don               → POST
 │   └── cap-nhat-trang-thai   → POST (Admin)
@@ -486,9 +486,9 @@ Controllers/
 │   ├── tao-giao-dich         → POST
 │   └── trang-thai            → GET
 │
-└── PromotionsController.cs   → /api/orders/promotions/...
-    ├── kiem-tra-ma            → POST (validate promo code)
-    ├── tim-kiem               → GET (Admin)
+└── PromotionsController.cs   → /api/order/promotions/...
+    ├── validate            → POST (validate promo code)
+    ├── list               → GET (Admin)
     └── them-moi-cap-nhat      → POST (Admin)
 ```
 
@@ -505,7 +505,7 @@ Controllers/
 │   └── thong-ke              → GET
 │
 ├── CustomersController.cs    → /api/admin/customers/...
-│   ├── tim-kiem              → GET
+│   ├── list              → GET
 │   ├── chi-tiet              → GET
 │   └── don-hang              → GET (customer's order history)
 │
@@ -519,17 +519,17 @@ Controllers/
 Blog + Liên hệ
 ```
 Controllers/
-├── BlogController.cs         → /api/content/blog/...
-│   ├── tim-kiem              → GET
+├── BlogController.cs         → /api/content/blogs/...
+│   ├── list              → GET
 │   ├── chi-tiet              → GET (by slug)
 │   ├── them-moi-cap-nhat     → POST (Admin)
 │   └── xoa                   → POST (Admin)
 │
 ├── BlogCategoriesController.cs → /api/content/blog-categories/...
 │
-└── ContactController.cs      → /api/content/contact/...
+└── ContactController.cs      → /api/content/contacts/...
     ├── gui-lien-he           → POST (public)
-    ├── tim-kiem              → GET (Admin)
+    ├── list              → GET (Admin)
     └── cap-nhat-trang-thai   → POST (Admin)
 ```
 
@@ -551,24 +551,24 @@ Controllers/
       "userRoleClaim": "role"
     },
     "UnauthenticatedRoutes": [
-      { "pathPrefix": "/api/auth/auth/dang-nhap", "methods": ["POST", "OPTIONS"] },
-      { "pathPrefix": "/api/auth/auth/dang-ky", "methods": ["POST", "OPTIONS"] },
-      { "pathPrefix": "/api/auth/auth/lam-moi-token", "methods": ["POST"] },
-      { "pathPrefix": "/api/products/products/tim-kiem" },
-      { "pathPrefix": "/api/products/products/chi-tiet" },
-      { "pathPrefix": "/api/products/products/theo-slug" },
-      { "pathPrefix": "/api/products/categories" },
-      { "pathPrefix": "/api/content/blog" },
-      { "pathPrefix": "/api/orders/promotions/kiem-tra-ma" },
-      { "pathPrefix": "/api/orders/orders/dat-hang" },
-      { "pathPrefix": "/api/content/contact/gui-lien-he" },
-      { "pathPrefix": "/api/auth/auth/healthcheck" },
-      { "pathPrefix": "/api/products/products/healthcheck" },
-      { "pathPrefix": "/api/orders/orders/healthcheck" },
+      { "pathPrefix": "/api/user/auth/login", "methods": ["POST", "OPTIONS"] },
+      { "pathPrefix": "/api/user/auth/register", "methods": ["POST", "OPTIONS"] },
+      { "pathPrefix": "/api/user/auth/refresh-token", "methods": ["POST"] },
+      { "pathPrefix": "/api/product/products" },
+      { "pathPrefix": "/api/product/products/{id}" },
+      { "pathPrefix": "/api/product/products/slug/{slug}" },
+      { "pathPrefix": "/api/product/categories" },
+      { "pathPrefix": "/api/content/blogs" },
+      { "pathPrefix": "/api/order/promotions/validate" },
+      { "pathPrefix": "/api/order/orders" },
+      { "pathPrefix": "/api/content/contacts" },
+      { "pathPrefix": "/api/user/auth/health" },
+      { "pathPrefix": "/api/product/products/health" },
+      { "pathPrefix": "/api/order/orders/health" },
       { "pathPrefix": "/api/admin/dashboard/healthcheck" },
-      { "pathPrefix": "/api/content/blog/healthcheck" }
+      { "pathPrefix": "/api/content/blogs/health" }
     ],
-    "validatePermissionEndpoint": "http://localhost:5001/api/auth/permissions/check",
+    "validatePermissionEndpoint": "http://localhost:5001/api/user/permissions/check",
     "tokenValidation": {
       "validateLifetime": true,
       "signingKey": "{{JWT_SECRET_KEY}}",
@@ -638,17 +638,17 @@ Cú pháp: `/api/{service-name}/{controller-name}/{action}`
 
 | Gọi từ FE | Service | Controller | Action |
 |-----------|---------|------------|--------|
-| `POST /api/auth/auth/dang-nhap` | API.Auth | AuthController | DangNhap |
-| `GET /api/products/products/tim-kiem` | API.Products | ProductsController | TimKiem |
-| `GET /api/products/products/theo-slug` | API.Products | ProductsController | TheoSlug |
-| `GET /api/products/categories/tim-kiem` | API.Products | CategoriesController | TimKiem |
-| `POST /api/orders/cart/them-san-pham` | API.Orders | CartController | ThemSanPham |
-| `POST /api/orders/orders/dat-hang` | API.Orders | OrdersController | DatHang |
-| `GET /api/orders/orders/don-hang-cua-toi` | API.Orders | OrdersController | DonHangCuaToi |
+| `POST /api/user/auth/login` | API.Auth | AuthController | DangNhap |
+| `GET /api/product/products` | API.Products | ProductsController | TimKiem |
+| `GET /api/product/products/slug/{slug}` | API.Products | ProductsController | TheoSlug |
+| `GET /api/product/categories` | API.Products | CategoriesController | TimKiem |
+| `POST /api/order/cart/items` | API.Orders | CartController | ThemSanPham |
+| `POST /api/order/orders` | API.Orders | OrdersController | DatHang |
+| `GET /api/order/orders/me` | API.Orders | OrdersController | DonHangCuaToi |
 | `GET /api/admin/dashboard/thong-ke-tong-quat` | API.Admin | DashboardController | ThongKeTongQuat |
 | `POST /api/admin/sales/ban-hang-tai-quay` | API.Admin | SalesController | BanHangTaiQuay |
-| `GET /api/content/blog/tim-kiem` | API.Content | BlogController | TimKiem |
-| `POST /api/content/contact/gui-lien-he` | API.Content | ContactController | GuiLienHe |
+| `GET /api/content/blogs` | API.Content | BlogController | TimKiem |
+| `POST /api/content/contacts` | API.Content | ContactController | GuiLienHe |
 
 ---
 
@@ -717,7 +717,7 @@ Bước 4 — API.Auth (service đầu tiên)
   [ ] IAuthService + AuthService (login, register, refresh, logout)
   [ ] IPasswordService + PasswordService (BCrypt)
   [ ] IJwtService + JwtService
-  [ ] AuthController (dang-nhap, dang-ky, lam-moi-token, dang-xuat)
+  [ ] AuthController (login, register, refresh-token, logout)
   [ ] PermissionsController (check endpoint cho Gateway)
   [ ] ServiceRegistrationExtensions.cs
 
@@ -765,30 +765,30 @@ Sau tái cấu trúc, FE cần cập nhật base URL:
 ```typescript
 // FE/src/api/constants.ts — cập nhật prefix
 export const API_ENDPOINTS = {
-  // Auth → /api/auth/auth/...
-  LOGIN:         '/auth/auth/dang-nhap',
-  REGISTER:      '/auth/auth/dang-ky',
-  REFRESH_TOKEN: '/auth/auth/lam-moi-token',
-  LOGOUT:        '/auth/auth/dang-xuat',
+  // Auth → /api/user/auth/...
+  LOGIN:         '/auth/auth/login',
+  REGISTER:      '/auth/auth/register',
+  REFRESH_TOKEN: '/auth/auth/refresh-token',
+  LOGOUT:        '/auth/auth/logout',
 
-  // Products → /api/products/products/...
-  PRODUCTS:      '/products/products/tim-kiem',
+  // Products → /api/product/products/...
+  PRODUCTS:      '/products/products/list',
   PRODUCT_DETAIL: (id: number) => `/products/products/chi-tiet?id=${id}`,
   PRODUCT_SLUG:  (slug: string) => `/products/products/theo-slug?slug=${slug}`,
-  CATEGORIES:    '/products/categories/tim-kiem',
+  CATEGORIES:    '/products/categories/list',
 
   // Orders → /api/orders/...
   CART:          '/orders/cart/gio-hang-hien-tai',
   ADD_TO_CART:   '/orders/cart/them-san-pham',
-  CREATE_ORDER:  '/orders/orders/dat-hang',
-  MY_ORDERS:     '/orders/orders/don-hang-cua-toi',
+  CREATE_ORDER:  '/orders/orders/create',
+  MY_ORDERS:     '/orders/orders/me',
 
   // Admin → /api/admin/...
   DASHBOARD:     '/admin/dashboard/thong-ke-tong-quat',
   POS_SALE:      '/admin/sales/ban-hang-tai-quay',
 
   // Content → /api/content/...
-  BLOG:          '/content/blog/tim-kiem',
+  BLOG:          '/content/blog/list',
   CONTACT_SEND:  '/content/contact/gui-lien-he',
 } as const;
 ```

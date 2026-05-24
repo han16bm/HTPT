@@ -1,4 +1,4 @@
-# 🏗️ Hạ Tầng Bổ Sung — FISH SHOP
+﻿# 🏗️ Hạ Tầng Bổ Sung — FISH SHOP
 
 > Cloudinary (lưu ảnh) · RabbitMQ (xử lý đơn hàng bất đồng bộ)
 
@@ -169,7 +169,7 @@ public static IServiceCollection AddFileStorageService(
 ```csharp
 // API.Products/Controllers/ProductsController.cs
 
-// POST /api/products/products/upload-anh
+// POST /api/product/products/{id}/images
 [HttpPost("upload-anh")]
 [Consumes("multipart/form-data")]
 public async Task<object> UploadAnhSanPham(
@@ -191,7 +191,7 @@ public async Task<object> UploadAnhSanPham(
     });
 }
 
-// POST /api/products/products/xoa-anh
+// POST /api/product/products/{id}-anh
 [HttpPost("xoa-anh")]
 public async Task<object> XoaAnhSanPham([FromBody] XoaAnhRequest request, CancellationToken ct)
 {
@@ -264,7 +264,7 @@ fish-shop/
 ### Luồng Xử Lý Với RabbitMQ
 
 ```
-FE: POST /api/orders/orders/dat-hang
+FE: POST /api/order/orders
              │
              ▼
     API.Orders (OrdersController)
@@ -396,8 +396,8 @@ public class OrdersController : ControllerBase
         _logger = logger;
     }
 
-    // POST /api/orders/orders/dat-hang
-    [HttpPost("dat-hang")]
+    // POST /api/order/orders
+    [HttpPost]
     public async Task<object> DatHang([FromBody] DatHangRequest request, CancellationToken ct)
     {
         _logger.LogInformation("Nhận đơn hàng từ {Source}", request.OrderSource);
@@ -660,7 +660,7 @@ builder.Services.AddMassTransit(x =>
 
 ### Trạng Thái Đơn Hàng — Polling từ FE
 
-Vì `dat-hang` trả về ngay (không chờ xử lý), FE cần polling để biết kết quả:
+Vì `create` trả về ngay (không chờ xử lý), FE cần polling để biết kết quả:
 
 ```typescript
 // FE-Customer: sau khi nhận { orderCode, status: "PENDING" }

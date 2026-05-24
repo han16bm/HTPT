@@ -1,4 +1,4 @@
-# Fish Store Management System - Frontend
+﻿# Fish Store Management System - Frontend
 
 Hệ thống quản lý cửa hàng cá cảnh - Frontend React + TypeScript + Vite
 
@@ -104,7 +104,7 @@ npm install
 2. **Cấu hình môi trường:**
 Kiểm tra file `.env.development` và cập nhật URL API nếu cần:
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api
+VITE_API_BASE_URL=http://localhost:5000/api
 VITE_ENABLE_DEBUG=true
 ```
 
@@ -137,7 +137,7 @@ npm run preview
 ## 🔌 API Integration
 
 API base URL được cấu hình trong `.env` files:
-- Development: `http://localhost:8080/api`
+- Development: `http://localhost:5000/api`
 - Production: Cập nhật trong `.env.production`
 
 ### API Endpoints

@@ -73,6 +73,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - Seq__ServerUrl=http://seq:80
       - RabbitMQ__Host=rabbitmq
+      - ProductServiceUrl=http://api-product:8080
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

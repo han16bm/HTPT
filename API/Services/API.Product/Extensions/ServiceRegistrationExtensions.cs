@@ -36,6 +36,7 @@ public static class ServiceRegistrationExtensions
                 });
                 cfg.ReceiveEndpoint("order-created-queue", e =>
                 {
+                    e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
                     e.ConfigureConsumer<OrderCreatedEventConsumer>(context);
                 });
             });

@@ -1,6 +1,6 @@
-// ──────────────────────────────────────────────────────────────────────────────
+﻿// ──────────────────────────────────────────────────────────────────────────────
 // Auth Service — kết nối User service thông qua Gateway
-// Gateway: http://localhost:8080
+// Gateway: http://localhost:5000
 // ──────────────────────────────────────────────────────────────────────────────
 
 import axiosClient, { ApiResponse } from './axiosClient';
@@ -80,7 +80,7 @@ export const authService = {
     return axiosClient.post<User>(API_ENDPOINTS.REGISTER, data);
   },
 
-  /** Đăng xuất — gọi POST /api/user/auth/dang-xuat */
+  /** Đăng xuất — gọi POST /api/user/auth/logout */
   logout: async (): Promise<void> => {
     try {
       await axiosClient.post(API_ENDPOINTS.LOGOUT);

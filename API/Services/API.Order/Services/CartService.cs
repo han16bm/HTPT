@@ -50,7 +50,7 @@ public class CartService : ICartService
             throw new MessageException("Số lượng không hợp lệ.");
 
         // Gọi RESTful API sang Product Service để lấy và xác thực thông tin sản phẩm
-        var productApiUrl = _config["ProductServiceUrl"] ?? "http://api-product:8080";
+        var productApiUrl = _config["ProductServiceUrl"] ?? "http://localhost:5002";
         var apiKey = _config["ApiKey:Key"] ?? "fish-gateway-key-2026";
         var headerName = _config["ApiKey:HeaderName"] ?? "X-Api-Key";
 
@@ -67,6 +67,9 @@ public class CartService : ICartService
             throw new NotFoundException("Sản phẩm không tồn tại trên hệ thống", request.ProductId);
 
         var productData = productResult.Data;
+
+        if (productData.StockQuantity < request.Quantity)
+            throw new MessageException($"'{productData.Name}' không đủ hàng (còn {productData.StockQuantity}).");
         
         // Cập nhật lại request với dữ liệu chính xác từ Product Service
         request.UnitPrice = productData.SalePrice;
@@ -201,5 +204,6 @@ public class ProductDtoInfo
     public long Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public decimal SalePrice { get; set; }
+    public int StockQuantity { get; set; }
     public string? ImageUrl { get; set; }
 }

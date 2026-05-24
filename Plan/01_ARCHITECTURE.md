@@ -1,4 +1,4 @@
-# 🏗️ Kiến Trúc Hệ Thống — FISH SHOP
+﻿# 🏗️ Kiến Trúc Hệ Thống — FISH SHOP
 
 > Theo phong cách dự án `byt_csdl_nkt` (NKT.Internal)
 
@@ -30,7 +30,7 @@
 │                                                                 │
 │              ┌────────────────────────────┐                     │
 │              │     FishShop.Gateway        │                     │
-│              │      localhost:8080          │                     │
+│              │      localhost:5000          │                     │
 │              │                             │                     │
 │              │ • Reverse Proxy (YARP)      │                     │
 │              │ • JWT Validation            │                     │
@@ -150,20 +150,20 @@ Program.cs
 
 ---
 
-## URL Pattern (KebabCase + ApiPrefix)
+## URL Pattern RESTful
 
 ```
-Gateway URL: http://localhost:8080
-    /api/{tên-service}/{tên-controller}/{tên-action}
+Gateway URL: http://localhost:5000
+    /api/{service}/{resource}[/{id-or-subresource}]
 
 Ví dụ:
-    POST /api/auth/auth/dang-nhap           → API.Auth → AuthController.DangNhap()
-    GET  /api/products/products/tim-kiem    → API.Products → ProductsController.TimKiem()
-    GET  /api/products/products/theo-slug   → API.Products → ProductsController.TheoSlug()
-    POST /api/orders/orders/dat-hang        → API.Orders → OrdersController.DatHang()
-    GET  /api/orders/orders/don-hang-cua-toi→ API.Orders → OrdersController.DonHangCuaToi()
-    GET  /api/admin/dashboard/thong-ke      → API.Admin → DashboardController.ThongKe()
-    POST /api/content/contact/gui-lien-he   → API.Content → ContactController.GuiLienHe()
+    POST   /api/user/auth/login
+    GET    /api/product/products
+    GET    /api/product/products/slug/{slug}
+    POST   /api/order/orders
+    GET    /api/order/orders/me
+    PATCH  /api/order/orders/{orderCode}/status
+    POST   /api/content/contacts
 ```
 
 ---
@@ -171,7 +171,7 @@ Ví dụ:
 ## Luồng Xác Thực (Auth Flow)
 
 ```
-1. FE → POST /api/auth/auth/dang-nhap { username, password }
+1. FE → POST /api/user/auth/login { username, password }
               │
               ▼ Gateway: route không cần JWT (UnauthenticatedRoutes)
               │
@@ -187,14 +187,14 @@ Ví dụ:
 3. FE → Request bảo vệ: Authorization: Bearer <accessToken>
     │
     ▼ Gateway kiểm tra JWT (TokenValidator)
-    ▼ Gateway gọi /api/auth/permissions/check (nếu cần quyền cụ thể)
+    ▼ Gateway gọi /api/user/permissions/check (nếu cần quyền cụ thể)
     ▼ Gateway set header X-User-Id, X-User-Name, X-User-Info
     ▼ Gateway set header X-Api-Key cho service đích
     │
     ▼ Service nhận request: [ApiKey] validate key → [Audit] log → Controller
               │
 4. Khi AccessToken hết hạn:
-   FE → POST /api/auth/auth/lam-moi-token { refreshToken }
+   FE → POST /api/user/auth/refresh-token { refreshToken }
               │
               ▼ API.Auth: tạo token mới
               ▼ Return new { accessToken, refreshToken }
@@ -207,23 +207,23 @@ Ví dụ:
 ```
 FE-Customer
   │
-  ├─ 1. GET /api/products/products/tim-kiem (duyệt SP)
+  ├─ 1. GET /api/product/products (duyệt SP)
   │
-  ├─ 2. POST /api/orders/cart/them-san-pham (thêm vào giỏ)
+  ├─ 2. POST /api/order/cart/items (thêm vào giỏ)
   │
-  ├─ 3. POST /api/orders/promotions/kiem-tra-ma { code, orderAmount }
+  ├─ 3. POST /api/order/promotions/validate { code, orderAmount }
   │
-  ├─ 4. POST /api/orders/orders/dat-hang (đặt hàng)
+  ├─ 4. POST /api/order/orders (đặt hàng)
   │         └─ OrderService:
   │             - Tạo ORDER record
   │             - Tạo ORDER_ITEMS records
-  │             - Trừ STOCK_QUANTITY
-  │             - Ghi INVENTORY_TRANSACTIONS (SALE)
+  │             - Publish OrderCreatedEvent vào RabbitMQ
   │             - Xóa SHOPPING_CART
+  │             - API.Product consume event để trừ kho và ghi INVENTORY_TRANSACTIONS
   │
-  ├─ 5. POST /api/orders/payments/tao-giao-dich { orderId, method }
+  ├─ 5. POST /api/order/payments { orderId, method }
   │
-  └─ 6. GET /api/orders/orders/don-hang-cua-toi (theo dõi đơn)
+  └─ 6. GET /api/order/orders/me (theo dõi đơn)
 ```
 
 ---
@@ -232,7 +232,7 @@ FE-Customer
 
 | Service | URL Dev | Swagger |
 |---------|---------|---------|
-| FishShop.Gateway | http://localhost:8080 | — |
+| FishShop.Gateway | http://localhost:5000 | — |
 | API.Auth | http://localhost:5001 | http://localhost:5001/swagger |
 | API.Products | http://localhost:5002 | http://localhost:5002/swagger |
 | API.Orders | http://localhost:5003 | http://localhost:5003/swagger |

@@ -23,27 +23,18 @@ public class DashboardService : IDashboardService
             .Where(o => o.CreatedAt >= todayStart && o.OrderStatus != "CANCELLED")
             .ToListAsync(ct);
 
-        var todayPaidOrderIds = todayOrders
-            .Where(o => o.PaymentStatus == "PAID")
-            .Select(o => o.Id)
-            .ToList();
-
-        var todayCost = todayPaidOrderIds.Count == 0
-            ? 0
-            : await _uow.OrderItems.Query()
-                .Include(oi => oi.Product)
-                .Where(oi => todayPaidOrderIds.Contains(oi.OrderId))
-                .SumAsync(oi => oi.Quantity * (oi.Product != null ? oi.Product.CostPrice : 0), ct);
-
         var todayRevenue = todayOrders.Where(o => o.PaymentStatus == "PAID").Sum(o => o.TotalAmount);
 
         var today = new TodayStatsDto
         {
             NewOrders = todayOrders.Count,
             Revenue = todayRevenue,
-            Profit = todayRevenue - todayCost,
-            NewCustomers = await _uow.CustomerProfiles.Query()
-                .Where(c => c.CreatedAt >= todayStart).CountAsync(ct),
+            Profit = 0,
+            NewCustomers = todayOrders
+                .Where(o => o.CustomerId.HasValue)
+                .Select(o => o.CustomerId!.Value)
+                .Distinct()
+                .Count(),
         };
 
         // This month stats
@@ -64,8 +55,15 @@ public class DashboardService : IDashboardService
         {
             TotalOrders = monthOrders.Count,
             TotalRevenue = monthRevenue,
-            TotalCustomers = await _uow.CustomerProfiles.Query().CountAsync(ct),
-            TotalProducts = await _uow.Products.Query().Where(p => p.Status == true).CountAsync(ct),
+            TotalCustomers = await _uow.Orders.Query()
+                .Where(o => o.CustomerId.HasValue)
+                .Select(o => o.CustomerId!.Value)
+                .Distinct()
+                .CountAsync(ct),
+            TotalProducts = await _uow.OrderItems.Query()
+                .Select(oi => oi.ProductId)
+                .Distinct()
+                .CountAsync(ct),
             RevenueGrowth = revenueGrowth,
         };
 
@@ -89,17 +87,17 @@ public class DashboardService : IDashboardService
             }).ToList();
 
         // Top products (this month)
-        var topProducts = await _uow.Products.Query()
-            .Where(p => p.Status == true)
-            .OrderByDescending(p => p.SoldQuantity)
+        var topProducts = await _uow.OrderItems.Query()
+            .GroupBy(oi => new { oi.ProductId, oi.ProductName, oi.ImageUrl })
+            .OrderByDescending(g => g.Sum(oi => oi.Quantity))
             .Take(5)
-            .Select(p => new TopProductDto
+            .Select(g => new TopProductDto
             {
-                Id = (long)p.Id,
-                Name = p.Name,
-                ImageUrl = p.ImageUrl,
-                SoldQuantity = (int)p.SoldQuantity,
-                Revenue = p.SalePrice * p.SoldQuantity,
+                Id = (long)g.Key.ProductId,
+                Name = g.Key.ProductName,
+                ImageUrl = g.Key.ImageUrl,
+                SoldQuantity = (int)g.Sum(oi => oi.Quantity),
+                Revenue = g.Sum(oi => oi.LineTotal),
             })
             .ToListAsync(ct);
 

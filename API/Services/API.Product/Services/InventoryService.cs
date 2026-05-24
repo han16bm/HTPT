@@ -143,29 +143,31 @@ public class InventoryService : IInventoryService
     {
         foreach (var item in items)
         {
-            var product = await _uow.Products.FirstOrDefaultAsync(p => p.Id == (decimal)item.ProductId, ct);
-            if (product != null)
-            {
-                // Ghi transaction
-                var tx = new InventoryTransaction
-                {
-                    ProductId = (decimal)item.ProductId,
-                    TransactionType = "SALE",
-                    Quantity = -(decimal)item.Quantity,
-                    UnitCost = product.SalePrice,
-                    ReferenceType = "ORDER",
-                    ReferenceId = null, // Can map to OrderId if needed
-                    Note = $"Đơn hàng {orderCode} (MQ)",
-                    CreatedAt = DateTime.UtcNow,
-                };
-                await _uow.InventoryTransactions.AddAsync(tx, ct);
+            var product = await _uow.Products.FirstOrDefaultAsync(p => p.Id == (decimal)item.ProductId, ct)
+                ?? throw new NotFoundException("Sản phẩm", item.ProductId);
 
-                // Cập nhật tồn kho
-                product.StockQuantity -= (decimal)item.Quantity;
-                product.SoldQuantity += (decimal)item.Quantity;
-                product.UpdatedAt = DateTime.UtcNow;
-                _uow.Products.Update(product);
-            }
+            if (product.StockQuantity < item.Quantity)
+                throw new MessageException($"'{product.Name}' không đủ hàng (còn {product.StockQuantity}).");
+
+            // Ghi transaction
+            var tx = new InventoryTransaction
+            {
+                ProductId = (decimal)item.ProductId,
+                TransactionType = "SALE",
+                Quantity = -(decimal)item.Quantity,
+                UnitCost = product.SalePrice,
+                ReferenceType = "ORDER",
+                ReferenceId = null, // Can map to OrderId if needed
+                Note = $"Đơn hàng {orderCode} (MQ)",
+                CreatedAt = DateTime.UtcNow,
+            };
+            await _uow.InventoryTransactions.AddAsync(tx, ct);
+
+            // Cập nhật tồn kho
+            product.StockQuantity -= (decimal)item.Quantity;
+            product.SoldQuantity += (decimal)item.Quantity;
+            product.UpdatedAt = DateTime.UtcNow;
+            _uow.Products.Update(product);
         }
         await _uow.SaveChangesAsync(ct);
         _logger.LogInformation("Đã xuất kho cho đơn hàng {OrderCode} qua Message Queue", orderCode);

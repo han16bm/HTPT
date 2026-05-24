@@ -1,4 +1,4 @@
-import axiosClient, { ApiResponse } from './axiosClient';
+﻿import axiosClient, { ApiResponse } from './axiosClient';
 import { API_ENDPOINTS } from './constants';
 
 // ============================================================
@@ -68,7 +68,7 @@ export interface CancelOrderRequest {
 
 export const orderService = {
   /**
-   * GET /api/order/orders/don-hang-cua-toi
+   * GET /api/order/orders/me
    * BE trả PagedResult<OrderListDto> — ta unwrap ra mảng items
    */
   getOrders: async (): Promise<ApiResponse<Order[]>> => {

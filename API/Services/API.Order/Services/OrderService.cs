@@ -10,6 +10,7 @@ using netcore.Entities.Interfaces;
 using OrderEntity = netcore.Entities.Entities.Order;
 using MassTransit;
 using MessageException = netcore.Commons.Exceptions.MessageException;
+using System.Net.Http.Json;
 
 namespace API.Order.Services;
 
@@ -18,12 +19,21 @@ public class OrderService : IOrderService
     private readonly IUnitOfWork _uow;
     private readonly ILogger<OrderService> _logger;
     private readonly MassTransit.IPublishEndpoint _publishEndpoint;
+    private readonly HttpClient _httpClient;
+    private readonly IConfiguration _config;
 
-    public OrderService(IUnitOfWork uow, ILogger<OrderService> logger, MassTransit.IPublishEndpoint publishEndpoint)
+    public OrderService(
+        IUnitOfWork uow,
+        ILogger<OrderService> logger,
+        MassTransit.IPublishEndpoint publishEndpoint,
+        IHttpClientFactory httpClientFactory,
+        IConfiguration config)
     {
         _uow = uow;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
+        _httpClient = httpClientFactory.CreateClient();
+        _config = config;
     }
 
     // ─────────────────────────────────────────────
@@ -151,14 +161,6 @@ public class OrderService : IOrderService
     // ─────────────────────────────────────────────
     public async Task<OrderDto> CreateDirectOrderAsync(DirectOrderRequest request, CancellationToken ct = default)
     {
-        // Nếu có CustomerId → lấy profile, nếu không → dùng thông tin truyền vào
-        CustomerProfile? customer = null;
-        if (request.CustomerId.HasValue)
-        {
-            customer = await _uow.CustomerProfiles.FirstOrDefaultAsync(p => p.Id == (decimal)request.CustomerId.Value, ct)
-                ?? throw new NotFoundException("Khách hàng", request.CustomerId.Value);
-        }
-
         decimal discountAmount = 0;
         Promotion? promotion = null;
 
@@ -172,23 +174,18 @@ public class OrderService : IOrderService
         try
         {
             decimal subtotal = 0;
-            var lines = new List<(OrderLineRequest line, string productName, decimal price)>();
+            var lines = new List<(OrderLineRequest Line, ProductDtoInfo Product, decimal Price)>();
 
             foreach (var line in request.Items)
             {
-                var product = await _uow.Products.FirstOrDefaultAsync(p => p.Id == (decimal)line.ProductId && p.Status == true, ct)
-                    ?? throw new NotFoundException("Sản phẩm", line.ProductId);
+                var product = await GetProductInfoAsync(line.ProductId, ct);
 
                 if (product.StockQuantity < line.Quantity)
                     throw new MessageException($"'{product.Name}' không đủ hàng (còn {product.StockQuantity}).");
 
                 var price = line.UnitPrice ?? product.SalePrice;
                 subtotal += price * line.Quantity;
-                lines.Add((line, product.Name, price));
-
-                product.StockQuantity -= line.Quantity;
-                product.SoldQuantity += line.Quantity;
-                _uow.Products.Update(product);
+                lines.Add((line, product, price));
             }
 
             if (promotion is not null)
@@ -198,15 +195,14 @@ public class OrderService : IOrderService
             var order = new OrderEntity
             {
                 OrderCode = orderCode,
-                CustomerId = customer?.Id,
+                CustomerId = request.CustomerId.HasValue ? (decimal)request.CustomerId.Value : null,
                 PromotionId = promotion?.Id,
                 OrderSource = request.Source,
                 OrderStatus = request.Source == "POS" ? "COMPLETED" : "PENDING",
                 PaymentStatus = request.Source == "POS" ? "PAID" : "PENDING",
                 PaymentMethod = request.PaymentMethod,
-                CustomerName = customer?.FullName ?? request.CustomerName ?? "Khách lẻ",
-                CustomerPhone = customer?.Phone ?? request.CustomerPhone ?? string.Empty,
-                CustomerEmail = customer?.Email,
+                CustomerName = request.CustomerName ?? "Khách lẻ",
+                CustomerPhone = request.CustomerPhone ?? string.Empty,
                 CustomerAddress = request.CustomerAddress ?? "Tại quầy",
                 Note = request.Note,
                 SubtotalAmount = subtotal,
@@ -221,29 +217,18 @@ public class OrderService : IOrderService
             await _uow.Orders.AddAsync(order, ct);
             await _uow.SaveChangesAsync(ct);
 
-            foreach (var (line, productName, price) in lines)
+            foreach (var (line, product, price) in lines)
             {
                 await _uow.OrderItems.AddAsync(new OrderItem
                 {
                     OrderId = order.Id,
                     ProductId = (decimal)line.ProductId,
-                    ProductName = productName,
+                    ProductName = product.Name,
+                    ImageUrl = product.ImageUrl,
                     Quantity = line.Quantity,
                     UnitPrice = price,
                     DiscountAmount = 0,
                     LineTotal = price * line.Quantity,
-                    CreatedAt = DateTime.UtcNow,
-                }, ct);
-
-                await _uow.InventoryTransactions.AddAsync(new InventoryTransaction
-                {
-                    ProductId = (decimal)line.ProductId,
-                    TransactionType = "SALE",
-                    Quantity = -line.Quantity,
-                    UnitCost = price,
-                    ReferenceType = "ORDER",
-                    ReferenceId = order.Id,
-                    Note = $"Đơn {orderCode} ({request.Source})",
                     CreatedAt = DateTime.UtcNow,
                 }, ct);
             }
@@ -266,8 +251,8 @@ public class OrderService : IOrderService
                 CreatedAt = order.CreatedAt,
                 Items = lines.Select(l => new netcore.Commons.Messages.Events.OrderItemEventDto
                 {
-                    ProductId = (long)l.line.ProductId,
-                    Quantity = (int)l.line.Quantity
+                    ProductId = (long)l.Line.ProductId,
+                    Quantity = (int)l.Line.Quantity
                 }).ToList()
             };
             await _publishEndpoint.Publish(eventMsg, ct);
@@ -447,6 +432,26 @@ public class OrderService : IOrderService
     // ─────────────────────────────────────────────
     // HELPERS
     // ─────────────────────────────────────────────
+    private async Task<ProductDtoInfo> GetProductInfoAsync(long productId, CancellationToken ct)
+    {
+        var productApiUrl = _config["ProductServiceUrl"] ?? "http://localhost:5002";
+        var apiKey = _config["ApiKey:Key"] ?? "fish-gateway-key-2026";
+        var headerName = _config["ApiKey:HeaderName"] ?? "X-Api-Key";
+
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{productApiUrl}/api/product/products/{productId}");
+        requestMessage.Headers.Add(headerName, apiKey);
+
+        var response = await _httpClient.SendAsync(requestMessage, ct);
+        if (!response.IsSuccessStatusCode)
+            throw new MessageException($"Không thể kết nối đến Product Service (HTTP {response.StatusCode}).");
+
+        var productResult = await response.Content.ReadFromJsonAsync<ApiResponse<ProductDtoInfo>>(cancellationToken: ct);
+        if (productResult is null || !productResult.Success || productResult.Data is null)
+            throw new NotFoundException("Sản phẩm", productId);
+
+        return productResult.Data;
+    }
+
     private static decimal CalculateDiscount(Promotion promo, decimal subtotal)
     {
         if (subtotal < promo.MinOrderValue)
