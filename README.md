@@ -1,0 +1,353 @@
+# FISH SHOP - Đồ Án Microservice
+
+Website bán cá cảnh và phụ kiện theo kiến trúc microservice. Hệ thống gồm backend .NET 8, API Gateway, RabbitMQ, SQL Server và hai frontend React/Vite cho quản trị và khách hàng.
+
+## Mục Tiêu Đồ Án
+
+Dự án bám theo yêu cầu đề bài:
+
+- Có nhiều microservice chạy độc lập.
+- Giao tiếp đồng bộ bằng RESTful API.
+- Giao tiếp bất đồng bộ bằng message queue.
+- Có API Gateway.
+- Có xác thực JWT và API key nội bộ giữa Gateway và service.
+- Có cơ sở dữ liệu tách theo vùng/service.
+- Có logging và xử lý lỗi cơ bản.
+
+## Kiến Trúc Tổng Quan
+
+```text
+FE Admin      FE Customer
+   |              |
+   +------ REST API qua Gateway ------+
+                                      |
+                             FishShop.Gateway
+                                      |
+        +-------------+---------------+--------------+
+        |             |               |              |
+    API.User     API.Product      API.Order     API.Content
+        |             |               |              |
+ FishShop_User  FishShop_Product FishShop_Order FishShop_Content
+                      ^
+                      |
+          RabbitMQ: OrderCreatedEvent
+          API.Order publish, API.Product consume để trừ kho
+```
+
+## Cấu Trúc Thư Mục
+
+```text
+HTPT/
+|-- API/
+|   |-- API.sln
+|   |-- database/
+|   |-- Gateway/FishShop.Gateway/
+|   |-- netcore/netcore.Commons/
+|   |-- netcore/netcore.Entities/
+|   +-- Services/
+|       |-- API.User/
+|       |-- API.Product/
+|       |-- API.Order/
+|       +-- API.Content/
+|-- FE/                 # Giao diện quản trị
+|-- FE-Customer/        # Giao diện khách hàng
+|-- Plan/               # Tài liệu thiết kế
+|-- Debai.txt
+|-- docker-compose.yml
++-- README.md
+```
+
+## Công Cụ Cần Cài
+
+| Công cụ | Phiên bản khuyến nghị | Mục đích |
+|---|---:|---|
+| .NET SDK | 8.x | Build/chạy backend |
+| Node.js | 18+ hoặc 20 LTS | Chạy frontend React/Vite |
+| npm | Đi kèm Node.js | Cài package frontend |
+| Docker Desktop | Bản mới | Chạy RabbitMQ, Seq và backend bằng Docker Compose |
+| SQL Server | 2019+ / 2022 Developer hoặc Express | Cơ sở dữ liệu |
+| SQL Server Management Studio hoặc Azure Data Studio | Bản mới | Chạy script tạo DB |
+| Git | Bản mới | Quản lý mã nguồn |
+| Postman hoặc REST Client | Tùy chọn | Test API thủ công |
+
+Lưu ý: `docker-compose.yml` hiện chưa tạo container SQL Server. SQL Server cần chạy sẵn trên máy host, hoặc bạn chỉnh lại connection string trong các file `appsettings.json`.
+
+## Cấu Hình Mặc Định
+
+Backend đang dùng connection string mặc định:
+
+```text
+Server=host.docker.internal;Database=FishShop_*;User Id=sa;Password=viet123;TrustServerCertificate=True;
+```
+
+Nếu SQL Server của bạn không dùng tài khoản/mật khẩu trên, sửa các file:
+
+```text
+API/Services/API.User/appsettings.json
+API/Services/API.Product/appsettings.json
+API/Services/API.Order/appsettings.json
+API/Services/API.Content/appsettings.json
+```
+
+Khi chạy backend trực tiếp không qua Docker, có thể đổi `host.docker.internal` thành `localhost`.
+
+## Chuẩn Bị Cơ Sở Dữ Liệu
+
+1. Mở SQL Server và bật đăng nhập bằng tài khoản `sa`, hoặc cập nhật connection string theo tài khoản của bạn.
+2. Chạy script tạo toàn bộ database:
+
+```powershell
+sqlcmd -S localhost -U sa -P viet123 -i API\database\sqlserver_full_setup.sql
+```
+
+Nếu không dùng `sqlcmd`, mở file sau bằng SSMS/Azure Data Studio và chạy toàn bộ:
+
+```text
+API/database/sqlserver_full_setup.sql
+```
+
+Script sẽ tạo 4 database:
+
+```text
+FishShop_User
+FishShop_Product
+FishShop_Order
+FishShop_Content
+```
+
+Tài khoản seed để demo:
+
+| Vai trò | Username | Password |
+|---|---|---|
+| Admin | `admin` | `123456` |
+| Khách hàng | `customer01` | `123456` |
+
+## Cách Chạy Backend Bằng Docker Compose
+
+Từ thư mục gốc dự án:
+
+```powershell
+docker compose up --build
+```
+
+Các dịch vụ chính:
+
+| Dịch vụ | URL |
+|---|---|
+| API Gateway | `http://localhost:5000` |
+| RabbitMQ UI | `http://localhost:15672` |
+| Seq Log UI | `http://localhost:5341` |
+
+RabbitMQ mặc định:
+
+```text
+Username: guest
+Password: guest
+```
+
+Kiểm tra health API qua Gateway:
+
+```text
+GET http://localhost:5000/api/user/auth/health
+GET http://localhost:5000/api/product/products/health
+GET http://localhost:5000/api/order/orders/health
+GET http://localhost:5000/api/content/blogs/health
+```
+
+## Cách Chạy Backend Trực Tiếp Bằng .NET
+
+Cách này phù hợp khi muốn debug từng service. Cần RabbitMQ và SQL Server đang chạy.
+
+Chạy RabbitMQ và Seq:
+
+```powershell
+docker compose up rabbitmq seq
+```
+
+Mở các terminal riêng:
+
+```powershell
+dotnet run --project API\Services\API.User\API.User.csproj --launch-profile http
+```
+
+```powershell
+$env:RabbitMQ__Host='localhost'
+dotnet run --project API\Services\API.Product\API.Product.csproj --launch-profile http
+```
+
+```powershell
+$env:RabbitMQ__Host='localhost'
+dotnet run --project API\Services\API.Order\API.Order.csproj --launch-profile http
+```
+
+```powershell
+dotnet run --project API\Services\API.Content\API.Content.csproj --launch-profile http
+```
+
+```powershell
+dotnet run --project API\Gateway\FishShop.Gateway\FishShop.Gateway.csproj --urls http://localhost:5000
+```
+
+Port mặc định của các service:
+
+| Service | URL |
+|---|---|
+| API.User | `http://localhost:5001` |
+| API.Product | `http://localhost:5002` |
+| API.Order | `http://localhost:5003` |
+| API.Content | `http://localhost:5005` |
+| Gateway | `http://localhost:5000` |
+
+## Cách Chạy Frontend Admin
+
+```powershell
+cd FE
+npm install
+npm run dev
+```
+
+Giao diện admin chạy tại:
+
+```text
+http://localhost:3000
+```
+
+Frontend admin gọi API qua Vite proxy đến:
+
+```text
+http://localhost:5000/api
+```
+
+## Cách Chạy Frontend Khách Hàng
+
+```powershell
+cd FE-Customer
+npm install
+npm run dev
+```
+
+Giao diện khách hàng chạy tại:
+
+```text
+http://localhost:3001
+```
+
+## Kiểm Tra Build
+
+Backend:
+
+```powershell
+dotnet build API\API.sln
+```
+
+Frontend admin:
+
+```powershell
+cd FE
+npm run build
+```
+
+Frontend khách hàng:
+
+```powershell
+cd FE-Customer
+npm run build
+```
+
+## Một Số RESTful API Chính
+
+Base URL qua Gateway:
+
+```text
+http://localhost:5000/api
+```
+
+Auth:
+
+```text
+POST /api/user/auth/login
+POST /api/user/auth/register
+POST /api/user/auth/refresh-token
+GET  /api/user/auth/me
+PUT  /api/user/auth/me
+```
+
+Product:
+
+```text
+GET    /api/product/products
+GET    /api/product/products/{id}
+GET    /api/product/products/slug/{slug}
+POST   /api/product/products
+PUT    /api/product/products/{id}
+DELETE /api/product/products/{id}
+```
+
+Cart và Order:
+
+```text
+GET    /api/order/cart
+POST   /api/order/cart/items
+PUT    /api/order/cart/items/{cartItemId}
+DELETE /api/order/cart/items/{cartItemId}
+POST   /api/order/orders
+GET    /api/order/orders/me
+GET    /api/order/orders/{orderCode}
+PATCH  /api/order/orders/{orderCode}/status
+DELETE /api/order/orders/{orderCode}
+```
+
+Content:
+
+```text
+GET   /api/content/blogs
+GET   /api/content/blogs/slug/{slug}
+POST  /api/content/contacts
+PATCH /api/content/contacts/{id}/status
+```
+
+## Luồng Demo Đề Xuất
+
+1. Chạy SQL Server và script `sqlserver_full_setup.sql`.
+2. Chạy backend:
+
+```powershell
+docker compose up --build
+```
+
+3. Chạy frontend admin và frontend khách hàng.
+4. Đăng nhập bằng `admin / 123456` ở trang admin.
+5. Vào trang khách hàng, đăng nhập `customer01 / 123456`.
+6. Xem danh sách sản phẩm.
+7. Thêm sản phẩm vào giỏ hàng.
+8. Đặt hàng.
+9. Mở RabbitMQ UI kiểm tra queue `order-created-queue`.
+10. Kiểm tra tồn kho sản phẩm giảm và có giao dịch xuất kho.
+
+## Ghi Chú Kỹ Thuật
+
+- API đang dùng RESTful resource URL, không dùng action tiếng Việt trong URL như `tim-kiem`, `dat-hang`, `dang-nhap`.
+- `API.Order` tạo đơn và publish event.
+- `API.Product` chịu trách nhiệm tồn kho, consume event qua RabbitMQ để trừ kho và ghi lịch sử kho.
+- Gateway inject `X-Api-Key` vào request nội bộ để các service xác nhận request đi qua Gateway.
+- Các endpoint cần đăng nhập dùng JWT Bearer token.
+
+## Xử Lý Lỗi Thường Gặp
+
+Nếu frontend báo lỗi mạng:
+
+- Kiểm tra Gateway có chạy ở `http://localhost:5000`.
+- Kiểm tra file `FE/vite.config.ts` và `FE-Customer/vite.config.ts` đang proxy `/api` tới `http://localhost:5000`.
+
+Nếu API báo lỗi kết nối DB:
+
+- Kiểm tra SQL Server đang chạy.
+- Kiểm tra tài khoản `sa` và mật khẩu trong `appsettings.json`.
+- Kiểm tra đã chạy `sqlserver_full_setup.sql`.
+
+Nếu đặt hàng không trừ kho:
+
+- Kiểm tra RabbitMQ đang chạy.
+- Kiểm tra `API.Order` publish event.
+- Kiểm tra `API.Product` đang chạy và consume queue `order-created-queue`.
+
