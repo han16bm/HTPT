@@ -14,12 +14,12 @@ public class CustomerAddressConfiguration : IEntityTypeConfiguration<CustomerAdd
 
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
         entity.Property(e => e.CustomerId).HasColumnName("CUSTOMER_ID");
-        entity.Property(e => e.ReceiverName).HasMaxLength(150).IsUnicode(false).HasColumnName("RECEIVER_NAME");
+        entity.Property(e => e.ReceiverName).HasMaxLength(150).HasColumnName("RECEIVER_NAME");
         entity.Property(e => e.ReceiverPhone).HasMaxLength(20).IsUnicode(false).HasColumnName("RECEIVER_PHONE");
-        entity.Property(e => e.AddressLine).HasMaxLength(255).IsUnicode(false).HasColumnName("ADDRESS_LINE");
-        entity.Property(e => e.Ward).HasMaxLength(100).IsUnicode(false).HasColumnName("WARD");
-        entity.Property(e => e.District).HasMaxLength(100).IsUnicode(false).HasColumnName("DISTRICT");
-        entity.Property(e => e.Province).HasMaxLength(100).IsUnicode(false).HasColumnName("PROVINCE");
+        entity.Property(e => e.AddressLine).HasMaxLength(255).HasColumnName("ADDRESS_LINE");
+        entity.Property(e => e.Ward).HasMaxLength(100).HasColumnName("WARD");
+        entity.Property(e => e.District).HasMaxLength(100).HasColumnName("DISTRICT");
+        entity.Property(e => e.Province).HasMaxLength(100).HasColumnName("PROVINCE");
         entity.Property(e => e.IsDefault).HasDefaultValueSql("0").HasColumnName("IS_DEFAULT");
         entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("CREATED_AT");
         entity.Property(e => e.UpdatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("UPDATED_AT");

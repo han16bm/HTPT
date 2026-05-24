@@ -15,7 +15,7 @@ public partial class ProductImage
 
     public bool? IsPrimary { get; set; }
 
-    public decimal DisplayOrder { get; set; }
+    public int DisplayOrder { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }

@@ -147,16 +147,12 @@ public sealed class LocalAssetStorageService : IObjectStorageService
 
     private string GetStorageRoot()
     {
-        var configuredRoot = string.IsNullOrWhiteSpace(_options.RootPath)
-            ? "wwwroot/assets"
-            : _options.RootPath;
-
-        var root = Path.IsPathRooted(configuredRoot)
-            ? configuredRoot
-            : Path.Combine(_env.ContentRootPath, configuredRoot);
-
+        var root = LocalAssetPathResolver.Resolve(
+            _options.RootPath,
+            _env.ContentRootPath,
+            "assets");
         Directory.CreateDirectory(root);
-        return Path.GetFullPath(root);
+        return root;
     }
 
     private string? TryResolveManagedPath(string? fileUrl)

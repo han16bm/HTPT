@@ -1,0 +1,14 @@
+# Ignore uploaded image files, keep folder structure and docs.
+**/*.jpg
+**/*.jpeg
+**/*.png
+**/*.webp
+**/*.gif
+**/*.bmp
+**/*.svg
+**/*.avif
+**/*.jfif
+
+!.gitignore
+!README.md
+!**/.gitkeep

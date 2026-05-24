@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"\\\\\"Key\\\\\":\" c:/Users/Admin/Desktop/FISH_SHOP/API/Services/*/appsettings.json)",
+      "Bash(npx tsc:*)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(npm run:*)",
+      "Bash(curl -s http://localhost:3001/)",
+      "Bash(curl -s http://localhost:3001 -o /dev/null -w \"%{http_code}\")",
+      "Bash(curl -s http://localhost:8080/api/auth/auth/healthcheck)",
+      "Bash(curl -s \"http://localhost:8080/api/products/products/healthcheck\")",
+      "Bash(curl -s \"http://localhost:8080/api/orders/orders/healthcheck\")",
+      "Bash(python -m json.tool)",
+      "Bash(dotnet build:*)"
+    ]
+  }
+}

@@ -4,11 +4,11 @@ namespace API.Order.Models.Commands;
 
 public class CreateOrderRequest
 {
-    public string CustomerName { get; set; } = string.Empty;
-    public string CustomerPhone { get; set; } = string.Empty;
+    public string? CustomerName { get; set; }
+    public string? CustomerPhone { get; set; }
+    public string? CustomerEmail { get; set; }
 
-    [Required]
-    public string ShippingAddress { get; set; } = string.Empty;
+    public string? ShippingAddress { get; set; }
 
     [Required]
     public string PaymentMethod { get; set; } = "COD";

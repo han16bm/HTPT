@@ -39,6 +39,8 @@ services:
       - RabbitMQ__Host=rabbitmq
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ./API/assets/user:/app/assets/user
     depends_on:
       - rabbitmq
       - seq
@@ -57,7 +59,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - product_assets:/app/wwwroot/assets
+      - ./API/assets/product:/app/assets/product
     depends_on:
       - rabbitmq
       - seq
@@ -74,6 +76,7 @@ services:
       - Seq__ServerUrl=http://seq:80
       - RabbitMQ__Host=rabbitmq
       - ProductServiceUrl=http://api-product:8080
+      - UserServiceUrl=http://api-user:8080
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -94,7 +97,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
-      - content_assets:/app/wwwroot/assets
+      - ./API/assets/content:/app/assets/content
     depends_on:
       - rabbitmq
       - seq
@@ -133,5 +136,3 @@ networks:
 volumes:
   rabbitmq_data:
   seq_data:
-  product_assets:
-  content_assets:

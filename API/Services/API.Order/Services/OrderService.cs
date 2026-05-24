@@ -67,12 +67,29 @@ public class OrderService : IOrderService
             }
         }
 
-        var customerName = !string.IsNullOrWhiteSpace(request.CustomerName)
-            ? request.CustomerName
-            : request.ShippingAddress.Split('|', 3)[0].Trim();
-        var customerPhone = !string.IsNullOrWhiteSpace(request.CustomerPhone)
-            ? request.CustomerPhone
-            : (request.ShippingAddress.Split('|', 3).Length > 1 ? request.ShippingAddress.Split('|', 3)[1].Trim() : string.Empty);
+        var userInfo = await GetUserInfoAsync(userId, ct);
+        var shippingAddress = FirstNonEmpty(
+            request.ShippingAddress,
+            userInfo?.Address,
+            BuildAddress(userInfo?.AddressLine, userInfo?.Ward, userInfo?.District, userInfo?.Province));
+
+        if (string.IsNullOrWhiteSpace(shippingAddress))
+        {
+            throw new MessageException("Vui long cap nhat dia chi giao hang.");
+        }
+
+        var customerName = FirstNonEmpty(
+            request.CustomerName,
+            userInfo?.FullName,
+            TryGetShippingAddressPart(shippingAddress, 0),
+            userInfo?.Username,
+            "Khach hang")!;
+        var customerPhone = FirstNonEmpty(
+            request.CustomerPhone,
+            userInfo?.Phone,
+            TryGetShippingAddressPart(shippingAddress, 1),
+            string.Empty)!;
+        var customerEmail = FirstNonEmpty(request.CustomerEmail, userInfo?.Email);
 
         await _uow.BeginTransactionAsync(ct);
         try
@@ -91,7 +108,8 @@ public class OrderService : IOrderService
                 PaymentMethod = request.PaymentMethod,
                 CustomerName = customerName,
                 CustomerPhone = customerPhone,
-                CustomerAddress = request.ShippingAddress,
+                CustomerEmail = customerEmail,
+                CustomerAddress = shippingAddress,
                 Note = request.Note,
                 SubtotalAmount = subtotal,
                 DiscountAmount = discountAmount,
@@ -452,6 +470,63 @@ public class OrderService : IOrderService
         return productResult.Data;
     }
 
+    private async Task<UserDtoInfo?> GetUserInfoAsync(long userId, CancellationToken ct)
+    {
+        var userApiUrl = _config["UserServiceUrl"] ?? "http://localhost:5001";
+        var apiKey = _config["ApiKey:Key"] ?? "fish-gateway-key-2026";
+        var headerName = _config["ApiKey:HeaderName"] ?? "X-Api-Key";
+
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{userApiUrl}/api/user/auth/me");
+        requestMessage.Headers.Add(headerName, apiKey);
+        requestMessage.Headers.Add("X-User-Id", userId.ToString());
+
+        try
+        {
+            var response = await _httpClient.SendAsync(requestMessage, ct);
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Cannot get user profile from UserService. UserId={UserId}, Status={StatusCode}", userId, response.StatusCode);
+                return null;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<ApiResponse<UserDtoInfo>>(cancellationToken: ct);
+            return result is { Success: true, Data: not null } ? result.Data : null;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, "Cannot connect to UserService when creating order for user {UserId}", userId);
+            return null;
+        }
+        catch (TaskCanceledException ex) when (!ct.IsCancellationRequested)
+        {
+            _logger.LogWarning(ex, "UserService request timed out when creating order for user {UserId}", userId);
+            return null;
+        }
+    }
+
+    private static string? FirstNonEmpty(params string?[] values)
+        => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v))?.Trim();
+
+    private static string? TryGetShippingAddressPart(string? shippingAddress, int index)
+    {
+        if (string.IsNullOrWhiteSpace(shippingAddress))
+        {
+            return null;
+        }
+
+        var parts = shippingAddress.Split('|', 3, StringSplitOptions.TrimEntries);
+        return parts.Length > index ? parts[index] : null;
+    }
+
+    private static string? BuildAddress(params string?[] parts)
+    {
+        var address = string.Join(", ", parts
+            .Where(p => !string.IsNullOrWhiteSpace(p))
+            .Select(p => p!.Trim()));
+
+        return string.IsNullOrWhiteSpace(address) ? null : address;
+    }
+
     private static decimal CalculateDiscount(Promotion promo, decimal subtotal)
     {
         if (subtotal < promo.MinOrderValue)
@@ -497,4 +572,18 @@ public class OrderService : IOrderService
             SubTotal = oi.LineTotal,
         }).ToList(),
     };
+
+    private sealed class UserDtoInfo
+    {
+        public long Id { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string? FullName { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
+        public string? Address { get; set; }
+        public string? AddressLine { get; set; }
+        public string? Ward { get; set; }
+        public string? District { get; set; }
+        public string? Province { get; set; }
+    }
 }

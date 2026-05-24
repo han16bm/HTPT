@@ -22,7 +22,7 @@ public class OrderCreatedEventConsumer : IConsumer<OrderCreatedEvent>
 
         try
         {
-            await _inventoryService.XuatHangAsync(message.OrderCode, message.Items, context.CancellationToken);
+            await _inventoryService.ExportStockAsync(message.OrderCode, message.Items, context.CancellationToken);
             _logger.LogInformation("Xử lý tồn kho qua Message Queue cho đơn hàng: {OrderCode}", message.OrderCode);
         }
         catch (Exception ex)

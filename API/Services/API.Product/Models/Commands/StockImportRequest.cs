@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace API.Product.Models.Commands;
 
-public class NhapHangRequest
+public class StockImportRequest
 {
     [Required]
     public long ProductId { get; set; }

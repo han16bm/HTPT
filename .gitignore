@@ -250,3 +250,12 @@ log.txt
 /api.portal.ThuTuc/param.json
 src/DVC.DanhMuc/Properties/PublishProfiles/FolderProfile.pubxml
 src/DVC.DanhMuc/Properties/PublishProfiles/FolderProfile.pubxml
+
+# Keep source code for the API.User service. The Visual Studio pattern *.user
+# also matches folders named API.User, so explicitly unignore this service.
+!API/Services/API.User/
+!API/Services/API.User/**
+API/Services/API.User/**/bin/
+API/Services/API.User/**/obj/
+API/Services/API.User/**/appsettings.Development.json
+API/Services/API.User/**/appsettings.Local.json

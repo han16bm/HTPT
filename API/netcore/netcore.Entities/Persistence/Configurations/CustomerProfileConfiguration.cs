@@ -15,9 +15,14 @@ public class CustomerProfileConfiguration : IEntityTypeConfiguration<CustomerPro
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
         entity.Property(e => e.UserId).HasColumnName("USER_ID");
         entity.Property(e => e.CustomerCode).HasMaxLength(30).IsUnicode(false).HasColumnName("CUSTOMER_CODE");
-        entity.Property(e => e.FullName).HasMaxLength(150).IsUnicode(false).HasColumnName("FULL_NAME");
+        entity.Property(e => e.FullName).HasMaxLength(150).HasColumnName("FULL_NAME");
         entity.Property(e => e.Email).HasMaxLength(150).IsUnicode(false).HasColumnName("EMAIL");
         entity.Property(e => e.Phone).HasMaxLength(20).IsUnicode(false).HasColumnName("PHONE");
+        entity.Property(e => e.Address).HasMaxLength(500).HasColumnName("ADDRESS");
+        entity.Property(e => e.AddressLine).HasMaxLength(500).HasColumnName("ADDRESS_LINE");
+        entity.Property(e => e.Ward).HasMaxLength(100).HasColumnName("WARD");
+        entity.Property(e => e.District).HasMaxLength(100).HasColumnName("DISTRICT");
+        entity.Property(e => e.Province).HasMaxLength(100).HasColumnName("PROVINCE");
         entity.Property(e => e.Gender).HasMaxLength(10).IsUnicode(false).HasColumnName("GENDER");
         entity.Property(e => e.DateOfBirth).HasColumnName("DATE_OF_BIRTH");
         entity.Property(e => e.Status).HasDefaultValueSql("1").HasColumnName("STATUS");

@@ -25,7 +25,7 @@ public class InventoryService : IInventoryService
     // ─────────────────────────────────────────────
     // LỊCH SỬ GIAO DỊCH
     // ─────────────────────────────────────────────
-    public async Task<PagedResult<InventoryTransactionDto>> GetLichSuAsync(
+    public async Task<PagedResult<InventoryTransactionDto>> GetTransactionsAsync(
         InventoryQuery query, CancellationToken ct = default)
     {
         var q = _uow.InventoryTransactions.Query()
@@ -81,7 +81,7 @@ public class InventoryService : IInventoryService
     // ─────────────────────────────────────────────
     // NHẬP HÀNG
     // ─────────────────────────────────────────────
-    public async Task NhapHangAsync(NhapHangRequest request, CancellationToken ct = default)
+    public async Task ImportStockAsync(StockImportRequest request, CancellationToken ct = default)
     {
         var product = await _uow.Products.FirstOrDefaultAsync(
             p => p.Id == (decimal)request.ProductId, ct)
@@ -92,7 +92,7 @@ public class InventoryService : IInventoryService
         {
             ProductId = (decimal)request.ProductId,
             TransactionType = ProductConstants.TransactionType.Import,
-            Quantity = (decimal)request.Quantity,
+            Quantity = (int)request.Quantity,
             UnitCost = request.UnitCost,
             Note = request.Note,
             CreatedBy = request.CreatedBy.HasValue ? (decimal)request.CreatedBy.Value : null,
@@ -116,7 +116,7 @@ public class InventoryService : IInventoryService
     // ─────────────────────────────────────────────
     // SẮP HẾT HÀNG
     // ─────────────────────────────────────────────
-    public async Task<List<LowStockProductDto>> GetSapHetHangAsync(
+    public async Task<List<LowStockProductDto>> GetLowStockAsync(
         int threshold = 10, CancellationToken ct = default)
     {
         var items = await _uow.Products.Query()
@@ -139,7 +139,7 @@ public class InventoryService : IInventoryService
     // ─────────────────────────────────────────────
     // XUẤT HÀNG (Qua Message Queue)
     // ─────────────────────────────────────────────
-    public async Task XuatHangAsync(string orderCode, List<netcore.Commons.Messages.Events.OrderItemEventDto> items, CancellationToken ct = default)
+    public async Task ExportStockAsync(string orderCode, List<netcore.Commons.Messages.Events.OrderItemEventDto> items, CancellationToken ct = default)
     {
         foreach (var item in items)
         {
@@ -154,7 +154,7 @@ public class InventoryService : IInventoryService
             {
                 ProductId = (decimal)item.ProductId,
                 TransactionType = "SALE",
-                Quantity = -(decimal)item.Quantity,
+                Quantity = -(int)item.Quantity,
                 UnitCost = product.SalePrice,
                 ReferenceType = "ORDER",
                 ReferenceId = null, // Can map to OrderId if needed

@@ -25,16 +25,16 @@ public class InventoryController : BaseApiController
     [HttpGet("transactions")]
     public async Task<ApiResponse<PagedResult<InventoryTransactionDto>>> GetTransactions([FromQuery] InventoryQuery query, CancellationToken ct)
     {
-        var result = await _service.GetLichSuAsync(query, ct);
+        var result = await _service.GetTransactionsAsync(query, ct);
         return ApiResponse.Ok(result, "Lay lich su giao dich thanh cong");
     }
 
     // POST /api/product/inventory/imports
     [HttpPost("imports")]
     [RequireAdmin]
-    public async Task<ApiResponse> Import([FromBody] NhapHangRequest request, CancellationToken ct)
+    public async Task<ApiResponse> Import([FromBody] StockImportRequest request, CancellationToken ct)
     {
-        await _service.NhapHangAsync(request, ct);
+        await _service.ImportStockAsync(request, ct);
         return ApiResponse.OkEmpty("Nhap hang thanh cong");
     }
 
@@ -42,7 +42,7 @@ public class InventoryController : BaseApiController
     [HttpGet("low-stock")]
     public async Task<ApiResponse<List<LowStockProductDto>>> GetLowStock([FromQuery] int threshold = 10, CancellationToken ct = default)
     {
-        var result = await _service.GetSapHetHangAsync(threshold, ct);
+        var result = await _service.GetLowStockAsync(threshold, ct);
         return ApiResponse.Ok(result, $"Danh sach san pham sap het hang (<={threshold})");
     }
 }

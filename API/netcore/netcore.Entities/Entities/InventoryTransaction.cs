@@ -11,7 +11,7 @@ public partial class InventoryTransaction
 
     public string TransactionType { get; set; } = null!;
 
-    public decimal Quantity { get; set; }
+    public int Quantity { get; set; }
 
     public decimal? UnitCost { get; set; }
 
