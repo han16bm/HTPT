@@ -1,7 +1,7 @@
 ﻿# ⚙️ Kế Hoạch Tái Cấu Trúc Backend — FISH SHOP
 
 > Theo phong cách dự án nguồn `byt_csdl_nkt` (NKT.Internal)
-> .NET 8 · EF Core + Oracle · Multi-service architecture
+> .NET 8 · EF Core + SQL Server · Multi-service architecture
 
 ---
 
@@ -88,7 +88,7 @@ netcore/netcore.Commons/
 
 ## Chi Tiết: `netcore.Entities` — Domain & Data Access
 
-> Entities + EF Core DbContext + Repositories — mapping với Oracle schema có sẵn
+> Entities + EF Core DbContext + Repositories — mapping với SQL Server schema có sẵn
 
 ```
 netcore/netcore.Entities/
@@ -125,7 +125,7 @@ netcore/netcore.Entities/
 │   └── ContactStatus.cs
 │
 ├── Persistence/
-│   ├── AppDbContext.cs                  ← EF Core DbContext (Oracle)
+│   ├── AppDbContext.cs                  ← EF Core DbContext (SQL Server)
 │   └── Configurations/                  ← IEntityTypeConfiguration<T> cho từng entity
 │       ├── RoleConfiguration.cs
 │       ├── UserConfiguration.cs
@@ -665,7 +665,7 @@ Cú pháp: `/api/{service-name}/{controller-name}/{action}`
 ### netcore.Entities
 ```xml
 <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
-<PackageReference Include="Oracle.EntityFrameworkCore" Version="8.21.*" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.*" />
 <PackageReference Include="BCrypt.Net-Next" Version="4.*" />
 ```
 
@@ -694,10 +694,10 @@ Bước 1 — Tạo solution mới và cấu trúc thư mục
   [ ] Tạo thư mục Gateway/, Services/, netcore/
   [ ] Tạo các .csproj cho netcore.Commons và netcore.Entities
 
-Bước 2 — Implement netcore.Entities (từ schema Oracle có sẵn)
+Bước 2 — Implement netcore.Entities (từ schema SQL Server có sẵn)
   [ ] Tất cả Entity classes (mapper từ SQL schema)
-  [ ] EF Core IEntityTypeConfiguration cho từng bảng (Oracle uppercase)
-  [ ] AppDbContext với Oracle connection
+  [ ] EF Core IEntityTypeConfiguration cho từng bảng SQL Server
+  [ ] AppDbContext với SQL Server connection
   [ ] GenericRepository + UnitOfWork
   [ ] EntityServicesExtensions.cs — AddEntityServices()
 

@@ -20,10 +20,10 @@
 ## Phase 1 — Nền Tảng (Tuần 1-2)
 
 ### Backend
-- [ ] Cấu hình Oracle connection string
+- [ ] Cấu hình SQL Server connection string
 - [ ] Implement Domain Entities đầy đủ
 - [ ] EF Core Configurations (IEntityTypeConfiguration)
-- [ ] AppDbContext với Oracle
+- [ ] AppDbContext với SQL Server
 - [ ] Generic Repository + UnitOfWork
 - [ ] JwtService (generate/validate access + refresh token)
 - [ ] PasswordService (BCrypt hash/verify)

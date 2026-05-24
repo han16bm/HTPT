@@ -1,269 +1,166 @@
-# 🚀 Hướng Dẫn Triển Khai — FISH SHOP
+# Hướng Dẫn Triển Khai - FISH SHOP
 
-> Môi trường Development và hướng dẫn bắt đầu dự án
+> Môi trường development hiện tại dùng .NET 8, React/Vite, SQL Server, RabbitMQ, Seq và API Gateway.
 
----
+## Công Cụ Cần Có
 
-## Yêu Cầu Môi Trường
+| Công cụ | Phiên bản khuyến nghị | Mục đích |
+|---|---:|---|
+| .NET SDK | 8.x | Build và chạy backend |
+| Node.js | 18+ hoặc 20 LTS | Chạy frontend |
+| npm | Đi kèm Node.js | Cài package frontend |
+| Docker Desktop | Bản mới | Chạy RabbitMQ, Seq và backend bằng Docker Compose |
+| SQL Server | 2019+ / 2022 Developer hoặc Express | Cơ sở dữ liệu |
+| `sqlcmd` hoặc SSMS/Azure Data Studio | Bản mới | Chạy script database |
 
-| Phần mềm | Phiên bản | Mục đích |
-|----------|-----------|----------|
-| .NET SDK | 8.x | Build & run Backend |
-| Node.js | >= 18.x | Build & run Frontend |
-| npm | >= 9.x | Package manager |
-| Oracle Database | 19c+ | Cơ sở dữ liệu |
-| Oracle Data Access Client (ODAC) | Latest | .NET driver |
-| Visual Studio 2022 / Rider | Latest | IDE Backend |
-| VS Code | Latest | IDE Frontend |
+## Chuẩn Bị Database
 
----
+SQL Server cần chạy sẵn trên máy host. Script setup nằm tại:
 
-## Cài Đặt Oracle (Dev Local)
-
-### Option A: Oracle XE (miễn phí)
-```bash
-# Download Oracle Database 21c XE từ oracle.com
-# Cài đặt và tạo user:
-sqlplus / as sysdba
-
-CREATE USER fishuser IDENTIFIED BY Fish@123456;
-GRANT CONNECT, RESOURCE, DBA TO fishuser;
-GRANT UNLIMITED TABLESPACE TO fishuser;
-
-# Chạy schema:
-sqlplus fishuser/Fish@123456@localhost:1521/XE @"C:\Users\Admin\Desktop\FISH_SHOP\API\database\oracle_full_schema.sql"
+```text
+API/database/sqlserver_full_setup.sql
 ```
 
-### Option B: Oracle Docker
-```bash
-docker run -d \
-  --name fish-oracle \
-  -p 1521:1521 \
-  -e ORACLE_PASSWORD=Fish@123456 \
-  -e APP_USER=fishuser \
-  -e APP_USER_PASSWORD=Fish@123456 \
-  container-registry.oracle.com/database/express:21.3.0-xe
+Chạy từ thư mục gốc dự án:
+
+```powershell
+cd API\database
+sqlcmd -S localhost -U sa -P viet123 -i .\sqlserver_full_setup.sql
 ```
 
----
+Script sẽ tạo lại 4 database và seed dữ liệu mẫu:
 
-## Chạy Backend
-
-### 1. Cấu hình Connection String
-```json
-// API/Src/FishShop.API/appsettings.Development.json
-{
-  "ConnectionStrings": {
-    "Oracle": "User Id=fishuser;Password=Fish@123456;Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE)))"
-  },
-  "Jwt": {
-    "SecretKey": "FishShopSuperSecretKeyForJWT2026!",
-    "Issuer": "FishShop",
-    "Audience": "FishShop",
-    "AccessTokenExpiryMinutes": 15,
-    "RefreshTokenExpiryDays": 7
-  }
-}
+```text
+FishShop_User
+FishShop_Product
+FishShop_Order
+FishShop_Content
 ```
 
-### 2. (Khi có EF Migrations) Tạo migration và update database
-```bash
-cd API
+Tài khoản demo:
 
-# Tạo migration đầu tiên (sau khi implement Infrastructure)
-dotnet ef migrations add InitialCreate \
-  --project Core/FishShop.Infrastructure \
-  --startup-project Src/FishShop.API
+| Vai trò | Username | Password |
+|---|---|---|
+| Admin | `admin` | `123456` |
+| Khách hàng | `customer01` | `123456` |
 
-# Áp migration
-dotnet ef database update \
-  --project Core/FishShop.Infrastructure \
-  --startup-project Src/FishShop.API
+## Chạy Backend Bằng Docker Compose
+
+Từ thư mục gốc dự án:
+
+```powershell
+docker compose up --build
 ```
 
-> **Lưu ý:** Schema Oracle đã có sẵn trong `database/oracle_full_schema.sql`.
-> Trong giai đoạn đầu có thể chạy SQL trực tiếp rồi dùng EF theo dõi (không migrate-down toàn bộ).
+Các URL chính:
 
-### 3. Chạy FishShop.API
-```bash
-cd API/Src/FishShop.API
-dotnet run
-# → Swagger: https://localhost:5001/swagger
+| Dịch vụ | URL |
+|---|---|
+| API Gateway | `http://localhost:5000` |
+| RabbitMQ UI | `http://localhost:15672` |
+| Seq Log UI | `http://localhost:5341` |
+
+RabbitMQ mặc định dùng `guest / guest`.
+
+## Chạy Backend Trực Tiếp
+
+Chạy RabbitMQ và Seq:
+
+```powershell
+docker compose up rabbitmq seq
 ```
 
-### 4. Chạy FishShop.Admin.API
-```bash
-cd API/Src/FishShop.Admin.API
-dotnet run
-# → Swagger: https://localhost:5002/swagger
+Mở các terminal riêng:
+
+```powershell
+dotnet run --project API\Services\API.User\API.User.csproj --launch-profile http
 ```
 
-### 5. Chạy cả solution từ Visual Studio
-- Chuột phải solution → **Set Startup Projects** → Multiple startup
-- Chọn: `FishShop.API` + `FishShop.Admin.API`
-- Press **F5**
+```powershell
+$env:RabbitMQ__Host='localhost'
+dotnet run --project API\Services\API.Product\API.Product.csproj --launch-profile http
+```
 
----
+```powershell
+$env:RabbitMQ__Host='localhost'
+dotnet run --project API\Services\API.Order\API.Order.csproj --launch-profile http
+```
+
+```powershell
+dotnet run --project API\Services\API.Content\API.Content.csproj --launch-profile http
+```
+
+```powershell
+dotnet run --project API\Gateway\FishShop.Gateway\FishShop.Gateway.csproj --urls http://localhost:5000
+```
+
+Port mặc định:
+
+| Service | URL |
+|---|---|
+| API.User | `http://localhost:5001` |
+| API.Product | `http://localhost:5002` |
+| API.Order | `http://localhost:5003` |
+| API.Content | `http://localhost:5005` |
+| Gateway | `http://localhost:5000` |
 
 ## Chạy Frontend
 
-### FE Admin
-```bash
+Admin:
+
+```powershell
 cd FE
-
-# Cài dependencies (lần đầu)
 npm install
-
-# Tạo file .env.development
-echo "VITE_API_URL=http://localhost:8080/api" > .env.development
-echo "VITE_APP_NAME=FishShop Admin" >> .env.development
-echo "VITE_ENABLE_DEBUG=true" >> .env.development
-
-# Chạy dev server
 npm run dev
-# → http://localhost:5174
 ```
 
-### FE Customer
-```bash
+URL admin: `http://localhost:3000`
+
+Khách hàng:
+
+```powershell
 cd FE-Customer
-
-# Cài dependencies (lần đầu)
 npm install
-
-# Copy .env.example thành .env.local
-cp .env.example .env.local
-# Chỉnh sửa VITE_API_URL nếu cần
-
-# Chạy dev server
 npm run dev
-# → http://localhost:5173
 ```
 
----
+URL khách hàng: `http://localhost:3001`
 
-## Cấu Trúc Port (Development)
+## Kiểm Tra Build
 
-```
-┌────────────────────────────────────────┐
-│         Development Ports              │
-│                                        │
-│  FE-Customer     → http://localhost:5173 │
-│  FE-Admin        → http://localhost:5174 │
-│                                        │
-│  FishShop.API    → https://localhost:5001 │
-│  Admin.API       → https://localhost:5002 │
-│  API.Gateway     → http://localhost:8080  │
-│                                        │
-│  Oracle Database → localhost:1521/XE   │
-└────────────────────────────────────────┘
+Backend:
+
+```powershell
+dotnet build API\API.sln
 ```
 
----
+Frontend admin:
+
+```powershell
+cd FE
+npm run build
+```
+
+Frontend khách hàng:
+
+```powershell
+cd FE-Customer
+npm run build
+```
 
 ## Thứ Tự Khởi Động Dev
 
+1. Chạy SQL Server.
+2. Chạy `API/database/sqlserver_full_setup.sql`.
+3. Chạy RabbitMQ và Seq, hoặc chạy toàn bộ bằng `docker compose up --build`.
+4. Chạy Gateway và các service backend nếu debug trực tiếp.
+5. Chạy `FE` và `FE-Customer`.
+
+## Kiểm Tra Nhanh
+
+```text
+GET http://localhost:5000/api/user/auth/health
+GET http://localhost:5000/api/product/products/health
+GET http://localhost:5000/api/order/orders/health
+GET http://localhost:5000/api/content/blogs/health
 ```
-1. 🗄️  Start Oracle Database
-2. ⚙️  Start FishShop.API (port 5001)
-3. ⚙️  Start FishShop.Admin.API (port 5002)
-4. 🌐  Start FE-Customer (port 5173)  -- cho khách
-5. 🌐  Start FE-Admin (port 5174)     -- cho admin
-```
-
----
-
-## Tài Khoản Demo (Seed Data)
-
-Sau khi chạy schema + seed data:
-
-| Username | Password | Role |
-|----------|----------|------|
-| `admin` | `Admin@123456` | ADMIN |
-| `staff1` | `Staff@123456` | STAFF |
-
-> Seed data cho USERS sẽ được tạo trong `database/seed_data.sql` (cần tạo thêm)
-
----
-
-## Build Production
-
-### Backend
-```bash
-# Publish FishShop.API
-cd API/Src/FishShop.API
-dotnet publish -c Release -o ./publish
-
-# Publish Admin.API
-cd API/Src/FishShop.Admin.API
-dotnet publish -c Release -o ./publish
-```
-
-### Frontend
-```bash
-# FE Admin
-cd FE
-npm run build
-# Output: ./dist/
-
-# FE Customer
-cd FE-Customer
-npm run build
-# Output: ./dist/
-```
-
----
-
-## Scripts Tiện Ích
-
-### Kiểm tra TypeScript (FE)
-```bash
-# FE Admin
-cd FE && npm run type-check
-
-# FE Customer
-cd FE-Customer && npm run type-check
-```
-
-### Lint (FE)
-```bash
-npm run lint        # Kiểm tra lỗi
-npm run lint:fix    # Tự sửa lỗi có thể sửa
-```
-
-### dotnet watch (BE — hot reload)
-```bash
-cd API/Src/FishShop.API
-dotnet watch run
-```
-
----
-
-## Kiểm Tra Sức Khỏe (Health Check)
-
-Sau khi implement:
-```
-GET http://localhost:5001/health    → {"status": "Healthy"}
-GET http://localhost:5002/health    → {"status": "Healthy"}
-GET http://localhost:8080/health    → Gateway health
-```
-
----
-
-## Lưu Ý Quan Trọng
-
-> [!IMPORTANT]
-> **Oracle Case Sensitivity**: Oracle mặc định uppercase table/column names.
-> EF Core phải map chính xác: `builder.ToTable("PRODUCTS")`, `HasColumnName("SALE_PRICE")`.
-
-> [!WARNING]
-> **Secret Key JWT**: Không commit secret key vào git.
-> Dùng `appsettings.Development.json` (đã trong `.gitignore`) hoặc User Secrets.
-
-> [!NOTE]
-> **CORS**: FE chạy ở port 5173/5174 phải được whitelist trong BE.
-> Kiểm tra `appsettings.json` mục `Cors.AllowedOrigins`.
-
-> [!TIP]
-> **Swagger UI**: Truy cập `https://localhost:5001/swagger` để test API trực tiếp
-> mà không cần FE trong quá trình phát triển BE.

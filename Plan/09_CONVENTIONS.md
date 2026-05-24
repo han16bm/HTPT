@@ -364,7 +364,7 @@ VITE_ENABLE_DEBUG=false
 ```json
 {
   "ConnectionStrings": {
-    "Oracle": "User Id=fishuser;Password=fish123;Data Source=localhost:1521/FISHDB"
+    "DefaultConnection": "Server=localhost;Database=FishShop_User;User Id=sa;Password=viet123;TrustServerCertificate=True;"
   },
   "Jwt": {
     "SecretKey": "dev-secret-key-min-32-chars-here!",

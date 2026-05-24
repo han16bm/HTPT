@@ -1,7 +1,7 @@
 # 🐟 FISH SHOP — Tổng Quan Dự Án
 
 > **Website thương mại điện tử bán cá cảnh & phụ kiện**
-> Stack: React + Vite + TypeScript (FE) · .NET 8 + EF Core + Oracle (BE)
+> Stack: React + Vite + TypeScript (FE) · .NET 8 + EF Core + SQL Server (BE)
 > Ngày lập kế hoạch: 06/04/2026
 
 ---
@@ -13,7 +13,7 @@
 | `00_OVERVIEW.md` | **[File này]** Tổng quan & chỉ mục |
 | `01_ARCHITECTURE.md` | Kiến trúc hệ thống tổng thể |
 | `02_PROJECT_STRUCTURE.md` | Cấu trúc thư mục chi tiết |
-| `03_DATABASE.md` | Thiết kế CSDL Oracle + EF Core |
+| `03_DATABASE.md` | Thiết kế CSDL SQL Server + EF Core |
 | `04_BACKEND_PLAN.md` | Kế hoạch phát triển Backend .NET 8 |
 | `05_FRONTEND_ADMIN_PLAN.md` | Kế hoạch FE Admin (React + Vite + TS) |
 | `06_FRONTEND_CUSTOMER_PLAN.md` | Kế hoạch FE Khách hàng (React + Vite + TS) |
@@ -60,7 +60,7 @@ Xây dựng nền tảng thương mại điện tử **chuyên biệt cá cảnh
 |----------|-----------|-----------|
 | Framework | ASP.NET Core | .NET 8 |
 | ORM | Entity Framework Core | 8.x |
-| Database driver | Oracle.EntityFrameworkCore | 8.x |
+| Database driver | Microsoft.EntityFrameworkCore.SqlServer | 8.x |
 | Xác thực | JWT Bearer | — |
 | Logging | Serilog | — |
 | API Docs | Swagger / OpenAPI | — |
@@ -69,7 +69,7 @@ Xây dựng nền tảng thương mại điện tử **chuyên biệt cá cảnh
 ### Database
 | Hạng mục | Công nghệ |
 |----------|-----------|
-| DBMS | Oracle 19c+ |
+| DBMS | SQL Server 2019+ / 2022 |
 | Migration | EF Core Migrations |
 
 ---
@@ -77,7 +77,7 @@ Xây dựng nền tảng thương mại điện tử **chuyên biệt cá cảnh
 ## 📊 Hiện Trạng Codebase
 
 ### Đã có sẵn
-- ✅ **Oracle Schema** đầy đủ (`/API/database/oracle_full_schema.sql`)
+- ✅ **SQL Server setup + seed** đầy đủ (`/API/database/sqlserver_full_setup.sql`)
   - 15 bảng: ROLES, USERS, CUSTOMER_PROFILES, CUSTOMER_ADDRESSES, CATEGORIES,
     PRODUCTS, PRODUCT_IMAGES, INVENTORY_TRANSACTIONS, PROMOTIONS,
     SHOPPING_CARTS, CART_ITEMS, ORDERS, ORDER_ITEMS, PAYMENTS,

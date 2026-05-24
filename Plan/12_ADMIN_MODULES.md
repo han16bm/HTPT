@@ -1,6 +1,6 @@
 # 🔐 Module Quản Trị Hệ Thống — FISH SHOP
 
-> Đơn giản hóa từ tài liệu tham khảo cho phù hợp stack: .NET 8 + Oracle + React
+> Đơn giản hóa từ tài liệu tham khảo cho phù hợp stack: .NET 8 + SQL Server + React
 > 3 module: **User Management · System Config · Whitelist**
 
 ---
@@ -35,38 +35,37 @@ Quản lý internal = quản lý tài khoản ADMIN + STAFF
 ### Database Schema (Bổ Sung/Điều Chỉnh)
 
 ```sql
--- Đã có trong oracle_full_schema.sql:
+-- Đã có trong sqlserver_full_setup.sql:
 -- ROLES (ID, ROLE_CODE, ROLE_NAME, DESCRIPTION)
 -- USERS (ID, USERNAME, PASSWORD_HASH, FULL_NAME, EMAIL, PHONE, STATUS, ROLE_ID, ...)
 
 -- Cần thêm:
 CREATE TABLE PERMISSIONS (
-    ID              NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    PERM_CODE       VARCHAR2(100)    NOT NULL UNIQUE,  -- 'USER.VIEW', 'USER.CREATE', ...
-    PERM_NAME       VARCHAR2(200)    NOT NULL,
-    MODULE          VARCHAR2(50)     NOT NULL,          -- 'USER', 'PRODUCT', 'ORDER'...
-    DESCRIPTION     CLOB,
-    CREATED_AT      TIMESTAMP        DEFAULT SYSTIMESTAMP
+    ID              DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
+    PERM_CODE       VARCHAR(100)     NOT NULL UNIQUE,  -- 'USER.VIEW', 'USER.CREATE', ...
+    PERM_NAME       NVARCHAR(200)    NOT NULL,
+    MODULE          VARCHAR(50)      NOT NULL,         -- 'USER', 'PRODUCT', 'ORDER'...
+    DESCRIPTION     NVARCHAR(MAX),
+    CREATED_AT      DATETIME2        DEFAULT SYSUTCDATETIME()
 );
 
 CREATE TABLE ROLE_PERMISSIONS (
-    ID              NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    ROLE_ID         NUMBER           NOT NULL REFERENCES ROLES(ID),
-    PERM_CODE       VARCHAR2(100)    NOT NULL,
-    CREATED_AT      TIMESTAMP        DEFAULT SYSTIMESTAMP,
+    ID              DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
+    ROLE_ID         DECIMAL(18,0)    NOT NULL REFERENCES ROLES(ID),
+    PERM_CODE       VARCHAR(100)     NOT NULL,
+    CREATED_AT      DATETIME2        DEFAULT SYSUTCDATETIME(),
     UNIQUE (ROLE_ID, PERM_CODE)
 );
 
 -- Bổ sung cột vào USERS (nếu chưa có):
-ALTER TABLE USERS ADD (
-    IS_ADMIN        NUMBER(1)        DEFAULT 0,    -- 1 = superadmin, bỏ qua mọi quyền
-    LAST_LOGIN_AT   TIMESTAMP,
-    RESET_TOKEN     VARCHAR2(200),
-    RESET_TOKEN_EXP TIMESTAMP,
-    CREATED_BY      NUMBER,
-    UPDATED_BY      NUMBER,
-    UPDATED_AT      TIMESTAMP
-);
+ALTER TABLE USERS ADD
+    IS_ADMIN        BIT              DEFAULT 0,    -- 1 = superadmin, bỏ qua mọi quyền
+    LAST_LOGIN_AT   DATETIME2,
+    RESET_TOKEN     VARCHAR(200),
+    RESET_TOKEN_EXP DATETIME2,
+    CREATED_BY      DECIMAL(18,0),
+    UPDATED_BY      DECIMAL(18,0),
+    UPDATED_AT      DATETIME2;
 ```
 
 ---
@@ -364,24 +363,30 @@ Pages/Users/
 
 ```sql
 CREATE TABLE SYSTEM_SETTINGS (
-    ID              NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    SETTING_KEY     VARCHAR2(100)    NOT NULL UNIQUE,  -- 'SHIPPING_FEE_DEFAULT'
-    SETTING_GROUP   VARCHAR2(50)     NOT NULL,          -- 'SHIPPING', 'SHOP_INFO', 'ALERT'
-    VALUE           CLOB,                               -- Giá trị (JSON hoặc string)
-    DATA_TYPE       VARCHAR2(20)     DEFAULT 'STRING',  -- STRING/NUMBER/BOOLEAN/JSON
-    DESCRIPTION     VARCHAR2(500),
-    IS_ACTIVE       NUMBER(1)        DEFAULT 1,
-    UPDATED_BY      VARCHAR2(100),
-    UPDATED_AT      TIMESTAMP        DEFAULT SYSTIMESTAMP
+    ID              DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
+    SETTING_KEY     VARCHAR(100)     NOT NULL UNIQUE,  -- 'SHIPPING_FEE_DEFAULT'
+    SETTING_GROUP   VARCHAR(50)      NOT NULL,         -- 'SHIPPING', 'SHOP_INFO', 'ALERT'
+    VALUE           NVARCHAR(MAX),                     -- Giá trị (JSON hoặc string)
+    DATA_TYPE       VARCHAR(20)      DEFAULT 'STRING', -- STRING/NUMBER/BOOLEAN/JSON
+    DESCRIPTION     NVARCHAR(500),
+    IS_ACTIVE       BIT              DEFAULT 1,
+    UPDATED_BY      VARCHAR(100),
+    UPDATED_AT      DATETIME2        DEFAULT SYSUTCDATETIME()
 );
 
 -- Seed data mẫu
-INSERT INTO SYSTEM_SETTINGS VALUES (DEFAULT, 'SHIPPING_FEE_DEFAULT', 'SHIPPING', '30000', 'NUMBER', 'Phí vận chuyển mặc định (VNĐ)', 1, 'system', SYSTIMESTAMP);
-INSERT INTO SYSTEM_SETTINGS VALUES (DEFAULT, 'LOW_STOCK_THRESHOLD',  'ALERT',    '10',    'NUMBER', 'Ngưỡng cảnh báo hàng sắp hết', 1, 'system', SYSTIMESTAMP);
-INSERT INTO SYSTEM_SETTINGS VALUES (DEFAULT, 'AUTO_CANCEL_HOURS',    'ORDER',    '48',    'NUMBER', 'Tự hủy đơn PENDING sau N giờ', 1, 'system', SYSTIMESTAMP);
-INSERT INTO SYSTEM_SETTINGS VALUES (DEFAULT, 'SHOP_NAME',            'SHOP_INFO','Cá Cảnh Shop', 'STRING', 'Tên cửa hàng', 1, 'system', SYSTIMESTAMP);
-INSERT INTO SYSTEM_SETTINGS VALUES (DEFAULT, 'SHOP_PHONE',           'SHOP_INFO','0901234567',   'STRING', 'SĐT cửa hàng', 1, 'system', SYSTIMESTAMP);
-INSERT INTO SYSTEM_SETTINGS VALUES (DEFAULT, 'HOME_BANNER_TEXT',     'CONTENT',  'Chào mừng đến Cá Cảnh Shop!', 'STRING', 'Text banner trang chủ', 1, 'system', SYSTIMESTAMP);
+INSERT INTO SYSTEM_SETTINGS (SETTING_KEY, SETTING_GROUP, VALUE, DATA_TYPE, DESCRIPTION, IS_ACTIVE, UPDATED_BY, UPDATED_AT)
+VALUES ('SHIPPING_FEE_DEFAULT', 'SHIPPING', '30000', 'NUMBER', N'Phí vận chuyển mặc định (VNĐ)', 1, 'system', SYSUTCDATETIME());
+INSERT INTO SYSTEM_SETTINGS (SETTING_KEY, SETTING_GROUP, VALUE, DATA_TYPE, DESCRIPTION, IS_ACTIVE, UPDATED_BY, UPDATED_AT)
+VALUES ('LOW_STOCK_THRESHOLD',  'ALERT',    '10',    'NUMBER', N'Ngưỡng cảnh báo hàng sắp hết', 1, 'system', SYSUTCDATETIME());
+INSERT INTO SYSTEM_SETTINGS (SETTING_KEY, SETTING_GROUP, VALUE, DATA_TYPE, DESCRIPTION, IS_ACTIVE, UPDATED_BY, UPDATED_AT)
+VALUES ('AUTO_CANCEL_HOURS',    'ORDER',    '48',    'NUMBER', N'Tự hủy đơn PENDING sau N giờ', 1, 'system', SYSUTCDATETIME());
+INSERT INTO SYSTEM_SETTINGS (SETTING_KEY, SETTING_GROUP, VALUE, DATA_TYPE, DESCRIPTION, IS_ACTIVE, UPDATED_BY, UPDATED_AT)
+VALUES ('SHOP_NAME',            'SHOP_INFO',N'Cá Cảnh Shop', 'STRING', N'Tên cửa hàng', 1, 'system', SYSUTCDATETIME());
+INSERT INTO SYSTEM_SETTINGS (SETTING_KEY, SETTING_GROUP, VALUE, DATA_TYPE, DESCRIPTION, IS_ACTIVE, UPDATED_BY, UPDATED_AT)
+VALUES ('SHOP_PHONE',           'SHOP_INFO','0901234567',   'STRING', N'SĐT cửa hàng', 1, 'system', SYSUTCDATETIME());
+INSERT INTO SYSTEM_SETTINGS (SETTING_KEY, SETTING_GROUP, VALUE, DATA_TYPE, DESCRIPTION, IS_ACTIVE, UPDATED_BY, UPDATED_AT)
+VALUES ('HOME_BANNER_TEXT',     'CONTENT',  N'Chào mừng đến Cá Cảnh Shop!', 'STRING', N'Text banner trang chủ', 1, 'system', SYSUTCDATETIME());
 ```
 
 ---
@@ -552,21 +557,23 @@ Pages/SystemConfig/
 
 ```sql
 CREATE TABLE WHITELIST_ENTRIES (
-    ID              NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    RECORD_TYPE     VARCHAR2(20)     NOT NULL,  -- 'IP', 'API_KEY', 'DOMAIN'
-    VALUE           VARCHAR2(500)    NOT NULL,  -- IP address, key, domain
-    DESCRIPTION     VARCHAR2(500),
-    IS_ENABLED      NUMBER(1)        DEFAULT 1,
-    CREATED_BY      VARCHAR2(100),
-    CREATED_AT      TIMESTAMP        DEFAULT SYSTIMESTAMP,
-    UPDATED_AT      TIMESTAMP
+    ID              DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
+    RECORD_TYPE     VARCHAR(20)      NOT NULL,  -- 'IP', 'API_KEY', 'DOMAIN'
+    VALUE           VARCHAR(500)     NOT NULL,  -- IP address, key, domain
+    DESCRIPTION     NVARCHAR(500),
+    IS_ENABLED      BIT              DEFAULT 1,
+    CREATED_BY      VARCHAR(100),
+    CREATED_AT      DATETIME2        DEFAULT SYSUTCDATETIME(),
+    UPDATED_AT      DATETIME2
 );
 
 -- API Keys cho service-to-service (thay thế config cứng)
-INSERT INTO WHITELIST_ENTRIES VALUES (DEFAULT, 'API_KEY', 'fish-gateway-key-prod', 'Key của Gateway', 1, 'system', SYSTIMESTAMP, NULL);
+INSERT INTO WHITELIST_ENTRIES (RECORD_TYPE, VALUE, DESCRIPTION, IS_ENABLED, CREATED_BY, CREATED_AT, UPDATED_AT)
+VALUES ('API_KEY', 'fish-gateway-key-prod', N'Key của Gateway', 1, 'system', SYSUTCDATETIME(), NULL);
 
 -- IP Admin (nếu muốn restrict)
--- INSERT INTO WHITELIST_ENTRIES VALUES (DEFAULT, 'IP', '192.168.1.0', 'Mạng nội bộ', 1, 'system', SYSTIMESTAMP, NULL);
+-- INSERT INTO WHITELIST_ENTRIES (RECORD_TYPE, VALUE, DESCRIPTION, IS_ENABLED, CREATED_BY, CREATED_AT, UPDATED_AT)
+-- VALUES ('IP', '192.168.1.0', N'Mạng nội bộ', 1, 'system', SYSUTCDATETIME(), NULL);
 ```
 
 ---
@@ -730,16 +737,16 @@ Ghi nhận mọi thao tác quản trị — lưu vào bảng hoặc file Serilog
 -- Dùng Serilog ghi ra file (đơn giản nhất, không cần bảng riêng)
 -- Hoặc tạo bảng:
 CREATE TABLE AUDIT_LOGS (
-    ID              NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    ACTION          VARCHAR2(100),   -- 'USER.CREATE', 'USER.RESET_PWD', 'CONFIG.UPDATE'
-    TARGET_TYPE     VARCHAR2(50),    -- 'User', 'SystemConfig', 'Whitelist'
-    TARGET_ID       VARCHAR2(100),
-    OLD_VALUE       CLOB,            -- JSON snapshot trước khi thay đổi
-    NEW_VALUE       CLOB,            -- JSON snapshot sau khi thay đổi
-    PERFORMED_BY    VARCHAR2(100),   -- Username
-    PERFORMED_AT    TIMESTAMP        DEFAULT SYSTIMESTAMP,
-    IP_ADDRESS      VARCHAR2(50),
-    USER_AGENT      VARCHAR2(500)
+    ID              DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
+    ACTION          VARCHAR(100),    -- 'USER.CREATE', 'USER.RESET_PWD', 'CONFIG.UPDATE'
+    TARGET_TYPE     VARCHAR(50),     -- 'User', 'SystemConfig', 'Whitelist'
+    TARGET_ID       VARCHAR(100),
+    OLD_VALUE       NVARCHAR(MAX),   -- JSON snapshot trước khi thay đổi
+    NEW_VALUE       NVARCHAR(MAX),   -- JSON snapshot sau khi thay đổi
+    PERFORMED_BY    VARCHAR(100),    -- Username
+    PERFORMED_AT    DATETIME2        DEFAULT SYSUTCDATETIME(),
+    IP_ADDRESS      VARCHAR(50),
+    USER_AGENT      VARCHAR(500)
 );
 ```
 
@@ -780,7 +787,7 @@ public interface IAuditLogService
 
 ```
 Phase 1 — User Management (ưu tiên cao, cần sớm)
-  [ ] Thêm bảng PERMISSIONS + ROLE_PERMISSIONS vào Oracle
+  [ ] Thêm bảng PERMISSIONS + ROLE_PERMISSIONS vào SQL Server
   [ ] Seed data: permission codes + role-permission mapping
   [ ] Bổ sung cột USERS (IS_ADMIN, LAST_LOGIN_AT, ...)
   [ ] UserManagementService (getAll, upsert, delete, toggle, resetPwd)

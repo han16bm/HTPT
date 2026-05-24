@@ -65,7 +65,7 @@
 │  │                          │   │                             ││
 │  │ • [ApiKey] Attribute     │   │ • Domain Entities (18 class)││
 │  │ • [Audit] Attribute      │   │ • Enums                     ││
-│  │ • MessageException       │   │ • AppDbContext (EF+Oracle)  ││
+│  │ • MessageException       │   │ • AppDbContext (EF+SQL)     ││
 │  │ • KebabCase Transformer  │   │ • GenericRepository         ││
 │  │ • ApiPrefixConvention    │   │ • UnitOfWork                ││
 │  │ • TrimStrings Filter     │   │ • IEntityTypeConfiguration  ││
@@ -84,10 +84,10 @@
 │         DATA TIER              │  │      EXTERNAL SERVICES        │
 │                                │  │                              │
 │  ┌──────────────────────────┐  │  │  ┌──────────────────────┐   │
-│  │     Oracle Database       │  │  │  │     Cloudinary        │   │
-│  │         (19c+)            │  │  │  │   (Image Storage)    │   │
-│  │  18 bảng, triggers,      │  │  │  │                      │   │
-│  │  indexes, sequences      │  │  │  │ • 25GB free storage  │   │
+│  │     SQL Server            │  │  │  │     Cloudinary        │   │
+│  │   4 database theo service │  │  │  │   (Image Storage)    │   │
+│  │  tables, indexes, seed    │  │  │  │                      │   │
+│  │  data                     │  │  │  │ • 25GB free storage  │   │
 │  └──────────────────────────┘  │  │  │ • CDN tự động        │   │
 │                                │  │  │ • Transform URL       │   │
 │  ┌──────────────────────────┐  │  │  └──────────────────────┘   │
@@ -130,7 +130,7 @@ I{Resource}Service (Interface)
 UnitOfWork / GenericRepository / AppDbContext
     │
     ▼
-Oracle Database
+SQL Server
 ```
 
 ### Chuỗi DI Registration
@@ -144,7 +144,7 @@ Program.cs
   │     └── AddCorsConfiguration()
   │
   └── AddEntityServices()            ← EntityServicesExtensions.cs
-        ├── services.AddDbContext<AppDbContext>(UseOracle(...))
+        ├── services.AddDbContext<AppDbContext>(UseSqlServer(...))
         └── services.AddScoped<IUnitOfWork, UnitOfWork>()
 ```
 
@@ -240,7 +240,7 @@ FE-Customer
 | API.Content | http://localhost:5005 | http://localhost:5005/swagger |
 | FE-Customer | http://localhost:5173 | — |
 | FE-Admin | http://localhost:5174 | — |
-| Oracle DB | localhost:1521/XE | — |
+| SQL Server | localhost:1433 | 4 database FishShop_* |
 
 ---
 

@@ -26,8 +26,7 @@ FISH_SHOP/
 │   │   └── netcore.Entities/         # Domain & Data Access
 │   │
 │   └── database/                     # SQL scripts
-│       ├── oracle_full_schema.sql    ✅ Đã có
-│       └── seed_data.sql
+│       └── sqlserver_full_setup.sql  ✅ Tạo 4 database + seed dữ liệu mẫu
 │
 ├── FE/                               # Admin Frontend
 ├── FE-Customer/                      # Customer Frontend
@@ -75,7 +74,7 @@ netcore/netcore.Commons/
 
 ```
 netcore/netcore.Entities/
-├── netcore.Entities.csproj              ← Refs: EF Core, Oracle.EF, BCrypt
+├── netcore.Entities.csproj              ← Refs: EF Core, SqlServer, BCrypt
 │
 ├── Entities/
 │   ├── BaseEntity.cs                    ← { Id, CreatedAt, UpdatedAt }
@@ -108,7 +107,7 @@ netcore/netcore.Entities/
 │   └── ContactStatus.cs                 ← New/Read/Resolved/Closed
 │
 ├── Persistence/
-│   ├── AppDbContext.cs                  ← EF Core DbContext (Oracle, uppercase mapping)
+│   ├── AppDbContext.cs                  ← EF Core DbContext (SQL Server mapping)
 │   └── Configurations/
 │       ├── RoleConfiguration.cs
 │       ├── UserConfiguration.cs

@@ -8,7 +8,7 @@ namespace netcore.Entities.Entities;
 /// </summary>
 public partial class User
 {
-    public bool? IsAdmin { get; set; }      // NUMBER(1) → bool? như tất cả STATUS columns
+    public bool? IsAdmin { get; set; }      // BIT -> bool? như tất cả STATUS columns
     public decimal? CreatedBy { get; set; }
     public decimal? UpdatedBy { get; set; }
     public DateTime? UpdatedAt2 { get; set; }

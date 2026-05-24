@@ -249,7 +249,7 @@ fish-shop/
 
 ```
 ❌ Vấn đề: Nhiều khách đặt hàng cùng lúc (Flash Sale, sự kiện)
-   - N request đồng thời → API.Orders → Oracle → race condition tồn kho
+   - N request đồng thời → API.Order → SQL Server → race condition tồn kho
    - Database bị quá tải
    - Timeout → khách bức xúc
 
@@ -284,7 +284,7 @@ FE: POST /api/order/orders
     │    (Background Service / IHostedService) │
     │                                 │
     │  Consume từ queue:              │
-    │  1. Lock tồn kho (Oracle FOR UPDATE NOWAIT) │
+    │  1. Kiểm tra tồn kho trong SQL Server       │
     │  2. Trừ STOCK_QUANTITY          │
     │  3. Tạo ORDER + ORDER_ITEMS     │
     │  4. Ghi INVENTORY_TRANSACTIONS  │
@@ -509,7 +509,7 @@ public async Task ProcessOrderAsync(OrderCreatedMessage msg, CancellationToken c
     using var transaction = await _dbContext.Database.BeginTransactionAsync(ct);
     try
     {
-        // 1. Kiểm tra & khóa tồn kho (Oracle: SELECT FOR UPDATE NOWAIT)
+        // 1. Kiểm tra tồn kho trong SQL Server
         foreach (var item in msg.Items)
         {
             var product = await _dbContext.Products
@@ -793,7 +793,7 @@ VITE_CLOUDINARY_UPLOAD_PRESET=fish-shop-preset  # unsigned preset (optional)
 ## VI. Thứ Tự Khởi Động Dev (Cập Nhật)
 
 ```
-1. 🗄️  Start Oracle Database        (localhost:1521)
+1. 🗄️  Start SQL Server            (localhost:1433)
 2. 🐰  Start RabbitMQ               (localhost:5672, UI: 15672)
 3. ⚙️  Start API.Auth               (port 5001)
 4. ⚙️  Start API.Products           (port 5002)
