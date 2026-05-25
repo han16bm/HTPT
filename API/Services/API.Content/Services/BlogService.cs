@@ -204,21 +204,35 @@ public class BlogService : IBlogService
     }
 
     private static string GenerateSlug(string title)
-        => title.ToLowerInvariant().Replace(" ", "-").Replace("đ", "d").Trim('-');
-
-    private static BlogPostDto MapToDto(BlogPost b) => new()
     {
-        Id = (long)b.Id,
-        CategoryId = b.CategoryId.HasValue ? (long)b.CategoryId.Value : null,
-        CategoryName = b.BlogCategory?.Name,
-        Title = b.Title,
-        Slug = b.Slug,
-        Summary = b.Summary,
-        Content = b.Content,
-        ThumbnailUrl = b.ThumbnailUrl,
-        Status = b.Status,
-        PublishedAt = b.PublishedAt,
-        CreatedAt = b.CreatedAt,
-        UpdatedAt = b.UpdatedAt
-    };
+        var lowered = title.ToLowerInvariant();
+        var hyphenated = lowered.Replace(" ", "-");
+        var normalized = hyphenated.Replace("đ", "d");
+        return normalized.Trim('-');
+    }
+
+    private static BlogPostDto MapToDto(BlogPost b)
+    {
+        long? categoryId = null;
+        if (b.CategoryId.HasValue)
+        {
+            categoryId = (long)b.CategoryId.Value;
+        }
+
+        return new BlogPostDto
+        {
+            Id = (long)b.Id,
+            CategoryId = categoryId,
+            CategoryName = b.BlogCategory?.Name,
+            Title = b.Title,
+            Slug = b.Slug,
+            Summary = b.Summary,
+            Content = b.Content,
+            ThumbnailUrl = b.ThumbnailUrl,
+            Status = b.Status,
+            PublishedAt = b.PublishedAt,
+            CreatedAt = b.CreatedAt,
+            UpdatedAt = b.UpdatedAt,
+        };
+    }
 }

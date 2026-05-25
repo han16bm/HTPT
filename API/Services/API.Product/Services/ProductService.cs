@@ -308,53 +308,69 @@ public class ProductService : IProductService
         return slug;
     }
 
-    private static ProductListDto MapToListDto(ProductEntity p) => new()
+    private static ProductListDto MapToListDto(ProductEntity p)
     {
-        Id = (long)p.Id,
-        ProductCode = p.ProductCode,
-        Name = p.Name,
-        Slug = p.Slug,
-        ShortDescription = p.ShortDescription,
-        Description = p.Description,
-        ImageUrl = p.ImageUrl,
-        SalePrice = p.SalePrice,
-        StockQuantity = (int)p.StockQuantity,
-        SoldQuantity = (int)p.SoldQuantity,
-        Status = p.Status ?? true,
-        IsFeatured = p.IsFeatured ?? false,
-        CategoryId = (long)p.CategoryId,
-        CategoryName = p.Category?.Name,
-        CreatedAt = p.CreatedAt
-    };
-
-    private static ProductDto MapToDto(ProductEntity p) => new()
-    {
-        Id = (long)p.Id,
-        CategoryId = (long)p.CategoryId,
-        CategoryName = p.Category?.Name,
-        ProductCode = p.ProductCode,
-        Sku = p.Sku,
-        Name = p.Name,
-        Slug = p.Slug,
-        ShortDescription = p.ShortDescription,
-        Description = p.Description,
-        ImageUrl = p.ImageUrl,
-        CostPrice = p.CostPrice,
-        SalePrice = p.SalePrice,
-        StockQuantity = (int)p.StockQuantity,
-        SoldQuantity = (int)p.SoldQuantity,
-        WeightGrams = p.WeightGrams,
-        Status = p.Status ?? true,
-        IsFeatured = p.IsFeatured ?? false,
-        CreatedAt = p.CreatedAt,
-        UpdatedAt = p.UpdatedAt,
-        Images = p.ProductImages?.Select(i => new ProductImageDto
+        return new ProductListDto
         {
-            Id = (long)i.Id,
-            ImageUrl = i.ImageUrl,
-            AltText = i.AltText,
-            IsPrimary = i.IsPrimary ?? false,
-            DisplayOrder = (int)i.DisplayOrder
-        }).OrderBy(i => i.DisplayOrder).ToList() ?? []
-    };
+            Id = (long)p.Id,
+            ProductCode = p.ProductCode,
+            Name = p.Name,
+            Slug = p.Slug,
+            ShortDescription = p.ShortDescription,
+            Description = p.Description,
+            ImageUrl = p.ImageUrl,
+            SalePrice = p.SalePrice,
+            StockQuantity = (int)p.StockQuantity,
+            SoldQuantity = (int)p.SoldQuantity,
+            Status = p.Status ?? true,
+            IsFeatured = p.IsFeatured ?? false,
+            CategoryId = (long)p.CategoryId,
+            CategoryName = p.Category?.Name,
+            CreatedAt = p.CreatedAt,
+        };
+    }
+
+    private static ProductDto MapToDto(ProductEntity p)
+    {
+        var images = new List<ProductImageDto>();
+        if (p.ProductImages != null)
+        {
+            foreach (var i in p.ProductImages)
+            {
+                images.Add(new ProductImageDto
+                {
+                    Id = (long)i.Id,
+                    ImageUrl = i.ImageUrl,
+                    AltText = i.AltText,
+                    IsPrimary = i.IsPrimary ?? false,
+                    DisplayOrder = (int)i.DisplayOrder,
+                });
+            }
+            images = images.OrderBy(img => img.DisplayOrder).ToList();
+        }
+
+        return new ProductDto
+        {
+            Id = (long)p.Id,
+            CategoryId = (long)p.CategoryId,
+            CategoryName = p.Category?.Name,
+            ProductCode = p.ProductCode,
+            Sku = p.Sku,
+            Name = p.Name,
+            Slug = p.Slug,
+            ShortDescription = p.ShortDescription,
+            Description = p.Description,
+            ImageUrl = p.ImageUrl,
+            CostPrice = p.CostPrice,
+            SalePrice = p.SalePrice,
+            StockQuantity = (int)p.StockQuantity,
+            SoldQuantity = (int)p.SoldQuantity,
+            WeightGrams = p.WeightGrams,
+            Status = p.Status ?? true,
+            IsFeatured = p.IsFeatured ?? false,
+            CreatedAt = p.CreatedAt,
+            UpdatedAt = p.UpdatedAt,
+            Images = images,
+        };
+    }
 }

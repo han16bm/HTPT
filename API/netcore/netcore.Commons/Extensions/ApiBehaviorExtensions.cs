@@ -4,19 +4,8 @@ using netcore.Commons.Models;
 
 namespace netcore.Commons.Extensions;
 
-/// <summary>
-/// Cấu hình hành vi chung của ASP.NET Core MVC cho toàn bộ services.
-/// </summary>
 public static class ApiBehaviorExtensions
 {
-    /// <summary>
-    /// Thay default <c>ProblemDetails</c> (RFC 9110) của model-binding/validation
-    /// bằng <see cref="ApiResponse{T}"/>.Fail chuẩn — để mọi response lỗi đều
-    /// cùng một shape <c>{ success, message, errors }</c>.
-    ///
-    /// <para>Gọi trong <c>Program.cs</c> SAU <c>AddControllers()</c>:</para>
-    /// <code>services.AddUnifiedApiResponse();</code>
-    /// </summary>
     public static IServiceCollection AddUnifiedApiResponse(this IServiceCollection services)
     {
         services.Configure<ApiBehaviorOptions>(options =>

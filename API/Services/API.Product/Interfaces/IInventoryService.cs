@@ -11,4 +11,5 @@ public interface IInventoryService
     Task ImportStockAsync(StockImportRequest request, CancellationToken ct = default);
     Task<List<LowStockProductDto>> GetLowStockAsync(int threshold = 10, CancellationToken ct = default);
     Task ExportStockAsync(string orderCode, List<netcore.Commons.Messages.Events.OrderItemEventDto> items, CancellationToken ct = default);
+    Task ReleaseStockAsync(string orderCode, List<netcore.Commons.Messages.Events.OrderItemEventDto> items, CancellationToken ct = default);
 }

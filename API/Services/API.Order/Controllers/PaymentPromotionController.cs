@@ -16,7 +16,10 @@ public class PaymentsController : BaseApiController
 {
     private readonly IPaymentService _service;
 
-    public PaymentsController(IPaymentService service) => _service = service;
+    public PaymentsController(IPaymentService service)
+    {
+        _service = service;
+    }
 
     // POST /api/order/payments
     [HttpPost]
@@ -42,7 +45,10 @@ public class PromotionsController : BaseApiController
 {
     private readonly IPromotionService _service;
 
-    public PromotionsController(IPromotionService service) => _service = service;
+    public PromotionsController(IPromotionService service)
+    {
+        _service = service;
+    }
 
     // GET /api/order/promotions
     [HttpGet]

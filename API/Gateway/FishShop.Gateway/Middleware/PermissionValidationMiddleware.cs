@@ -3,11 +3,6 @@ using System.Text.Json;
 
 namespace FishShop.Gateway.Middleware;
 
-/// <summary>
-/// Validates JWT on every request:
-/// - Public paths → pass through directly
-/// - Protected paths → validate token, inject X-User-Id + X-User-Role headers
-/// </summary>
 public class PermissionValidationMiddleware
 {
     private readonly RequestDelegate _next;
@@ -31,14 +26,12 @@ public class PermissionValidationMiddleware
     {
         var path = context.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
 
-        // CORS preflight — always pass
         if (context.Request.Method == HttpMethods.Options)
         {
             await _next(context);
             return;
         }
 
-        // Check if this path is public (no auth required)
         var unauthPaths = _config.GetSection("Gateway:UnauthenticatedPaths").Get<List<string>>() ?? [];
         bool isPublic = unauthPaths.Any(pub => IsPublicPath(pub, context.Request.Method, path));
 
@@ -48,7 +41,6 @@ public class PermissionValidationMiddleware
             return;
         }
 
-        // Extract bearer token
         var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
         if (authHeader is null || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
         {
@@ -65,7 +57,6 @@ public class PermissionValidationMiddleware
             return;
         }
 
-        // Extract claims and inject as headers for downstream services
         var userId = _tokenValidator.GetClaim(principal, "sub")
                   ?? _tokenValidator.GetClaim(principal, "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
         var roleCode = _tokenValidator.GetClaim(principal, "role")
@@ -74,14 +65,12 @@ public class PermissionValidationMiddleware
 
         if (!string.IsNullOrWhiteSpace(userId))
             context.Request.Headers["X-User-Id"] = userId;
-
         if (!string.IsNullOrWhiteSpace(roleCode))
             context.Request.Headers["X-User-Role"] = roleCode;
-
         if (!string.IsNullOrWhiteSpace(customerId))
             context.Request.Headers["X-Customer-Id"] = customerId;
 
-        _logger.LogDebug("Request authorized: userId={UserId} role={Role} → {Path}", userId, roleCode, path);
+        _logger.LogDebug("Authorized: userId={UserId} role={Role} → {Path}", userId, roleCode, path);
 
         await _next(context);
     }
@@ -103,17 +92,13 @@ public class PermissionValidationMiddleware
     private static bool IsPublicPath(string rule, string requestMethod, string requestPath)
     {
         var normalizedRule = rule.Trim();
-        if (string.IsNullOrWhiteSpace(normalizedRule))
-        {
-            return false;
-        }
+        if (string.IsNullOrWhiteSpace(normalizedRule)) return false;
 
         var spaceIndex = normalizedRule.IndexOf(' ');
         if (spaceIndex > 0)
         {
             var method = normalizedRule[..spaceIndex].Trim();
             var path = normalizedRule[(spaceIndex + 1)..].Trim().ToLowerInvariant();
-
             return requestMethod.Equals(method, StringComparison.OrdinalIgnoreCase)
                 && PathMatchesRule(path, requestPath);
         }

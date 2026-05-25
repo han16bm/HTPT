@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace netcore.Commons.Filters;
 
-/// <summary>
-/// Tự động trim whitespace cho tất cả string properties trong request body/query.
-/// </summary>
 public class TrimStringsActionFilter : IActionFilter
 {
     public void OnActionExecuting(ActionExecutingContext context)

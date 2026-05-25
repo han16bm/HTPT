@@ -17,7 +17,10 @@ public class CustomersController : BaseApiController
 {
     private readonly ICustomerAdminService _service;
 
-    public CustomersController(ICustomerAdminService service) => _service = service;
+    public CustomersController(ICustomerAdminService service)
+    {
+        _service = service;
+    }
 
     // GET /api/user/customers
     [HttpGet]

@@ -88,15 +88,18 @@ public class ContactService : IContactService
         return MapToDto(contact);
     }
 
-    private static ContactDto MapToDto(ContactMessage c) => new()
+    private static ContactDto MapToDto(ContactMessage c)
     {
-        Id = (long)c.Id,
-        FullName = c.FullName,
-        Email = c.Email,
-        Phone = c.Phone,
-        Subject = c.Subject,
-        Message = c.Message,
-        Status = c.Status,
-        CreatedAt = c.CreatedAt
-    };
+        return new ContactDto
+        {
+            Id = (long)c.Id,
+            FullName = c.FullName,
+            Email = c.Email,
+            Phone = c.Phone,
+            Subject = c.Subject,
+            Message = c.Message,
+            Status = c.Status,
+            CreatedAt = c.CreatedAt,
+        };
+    }
 }

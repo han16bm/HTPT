@@ -1,6 +1,7 @@
 using API.Product.Consumers;
 using API.Product.Interfaces;
 using API.Product.Services;
+using netcore.Commons.Correlation;
 using netcore.Commons.Extensions;
 using MassTransit;
 
@@ -23,10 +24,11 @@ public static class ServiceRegistrationExtensions
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IInventoryService, InventoryService>();
-        // MassTransit (RabbitMQ Consumer)
+        // MassTransit (RabbitMQ Consumer) - saga inventory steps
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<OrderCreatedEventConsumer>();
+            x.AddConsumer<InventoryReservationConsumer>();
+            x.AddConsumer<InventoryReleaseConsumer>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host(configuration["RabbitMQ:Host"] ?? "rabbitmq", "/", h =>
@@ -34,10 +36,17 @@ public static class ServiceRegistrationExtensions
                     h.Username("guest");
                     h.Password("guest");
                 });
-                cfg.ReceiveEndpoint("order-created-queue", e =>
+                cfg.ReceiveEndpoint("inventory-reservation-queue", e =>
                 {
                     e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
-                    e.ConfigureConsumer<OrderCreatedEventConsumer>(context);
+                    e.UseCorrelationIdConsumeFilter(context);
+                    e.ConfigureConsumer<InventoryReservationConsumer>(context);
+                });
+                cfg.ReceiveEndpoint("inventory-release-queue", e =>
+                {
+                    e.UseMessageRetry(r => r.Interval(3, TimeSpan.FromSeconds(5)));
+                    e.UseCorrelationIdConsumeFilter(context);
+                    e.ConfigureConsumer<InventoryReleaseConsumer>(context);
                 });
             });
         });

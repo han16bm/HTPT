@@ -1,8 +1,5 @@
 namespace API.User.Constants;
 
-/// <summary>
-/// Role codes chuẩn — phải khớp với cột CODE trong bảng ROLES của SQL Server.
-/// </summary>
 public static class AuthConstants
 {
     public const string RoleAdmin = "ADMIN";

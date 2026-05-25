@@ -16,7 +16,10 @@ public class ContactController : BaseApiController
 {
     private readonly IContactService _service;
 
-    public ContactController(IContactService service) => _service = service;
+    public ContactController(IContactService service)
+    {
+        _service = service;
+    }
 
     // GET /api/content/contacts
     [HttpGet]

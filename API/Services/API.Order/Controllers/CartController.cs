@@ -15,7 +15,10 @@ public class CartController : BaseApiController
 {
     private readonly ICartService _service;
 
-    public CartController(ICartService service) => _service = service;
+    public CartController(ICartService service)
+    {
+        _service = service;
+    }
 
     // GET /api/order/cart
     [HttpGet]

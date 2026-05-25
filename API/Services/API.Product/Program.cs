@@ -1,7 +1,10 @@
 using API.Product;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.FileProviders;
+using netcore.Commons.Correlation;
 using netcore.Commons.Extensions;
+using netcore.Commons.Observability;
+using netcore.Commons.Resilience;
 using netcore.Commons.Filters;
 using netcore.Commons.Models;
 using netcore.Commons.Services;
@@ -15,18 +18,28 @@ var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
-// ── Serilog ──────────────────────────────────────
+// Serilog
 builder.Host.UseSerilog((ctx, cfg) =>
     cfg.ReadFrom.Configuration(ctx.Configuration)
-       .WriteTo.Console()
-       .WriteTo.File("logs/api-product-.log", rollingInterval: RollingInterval.Day)
+       .Enrich.FromLogContext()
+       .Enrich.WithProperty("Service", "API.Product")
+       .WriteTo.Console(outputTemplate:
+            "[{Timestamp:HH:mm:ss} {Level:u3}] [cid:{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+       .WriteTo.File("logs/api-product-.log",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate:
+            "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [cid:{CorrelationId}] {Message:lj}{NewLine}{Exception}")
        .WriteTo.Seq(ctx.Configuration["Seq:ServerUrl"] ?? "http://seq:5341"));
 
-// ── Services ─────────────────────────────────────
+services.AddCorrelationId();
+services.AddResilientHttpClient();
+services.AddDistributedTracing(configuration, "API.Product");
+
+// Services
 services.AddApplicationServices(configuration);
 services.AddEntityServices(configuration);
 
-// ── Controllers ──────────────────────────────────
+// Controllers
 services.AddControllers(options =>
 {
     options.Conventions.Add(new RouteTokenTransformerConvention(new KebabCaseRouteTokenTransformer()));
@@ -42,10 +55,10 @@ services.AddControllers(options =>
 
 services.AddUnifiedApiResponse();
 
-// ── ApiKey ───────────────────────────────────────
+// ApiKey
 services.Configure<ApiKeyOptions>(configuration.GetSection("ApiKey"));
 
-// ── Swagger ──────────────────────────────────────
+// Swagger
 services.AddEndpointsApiExplorer();
 services.AddSwaggerGen(c =>
 {
@@ -60,7 +73,7 @@ services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// ── Middleware Pipeline ───────────────────────────
+// Pipeline
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -79,8 +92,17 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(productAssetsPath),
     RequestPath = configuration["LocalAssetStorage:RequestPath"] ?? "/api/product/assets"
 });
-app.UseSerilogRequestLogging();
+app.UseCorrelationId();
+app.UseSerilogRequestLogging(opts =>
+{
+    opts.EnrichDiagnosticContext = (diag, http) =>
+    {
+        if (http.Items[CorrelationIdConstants.ItemKey] is string cid)
+            diag.Set(CorrelationIdConstants.LogPropertyName, cid);
+    };
+});
 app.UseCors("AllowOrigin");
+app.UseObservabilityEndpoints();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

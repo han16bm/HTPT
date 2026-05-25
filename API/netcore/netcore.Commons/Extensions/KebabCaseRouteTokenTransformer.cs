@@ -1,21 +1,24 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Routing;
 
 namespace netcore.Commons.Extensions;
 
-/// <summary>
-/// Chuyển controller/action name sang kebab-case.
-/// ProductsController -> /products | SearchProducts -> /search-products
-/// </summary>
 public class KebabCaseRouteTokenTransformer : IOutboundParameterTransformer
 {
     public string? TransformOutbound(object? value)
     {
-        if (value is null) return null;
+        if (value == null)
+        {
+            return null;
+        }
 
-        var str = value.ToString()!;
-        // Insert a dash before each uppercase transition.
-        return System.Text.RegularExpressions.Regex
-            .Replace(str, "([a-z])([A-Z])", "$1-$2")
-            .ToLowerInvariant();
+        var input = value.ToString();
+        if (string.IsNullOrEmpty(input))
+        {
+            return input;
+        }
+
+        var withDashes = Regex.Replace(input, "([a-z])([A-Z])", "$1-$2");
+        return withDashes.ToLowerInvariant();
     }
 }

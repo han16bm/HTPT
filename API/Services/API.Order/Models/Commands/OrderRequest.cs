@@ -39,7 +39,7 @@ public class CancelOrderRequest
     public string? Reason { get; set; }
 }
 
-/// <summary>Đặt hàng trực tiếp (không qua giỏ) — dùng cho POS hoặc admin</summary>
+// Đặt hàng trực tiếp (không qua giỏ) — POS hoặc admin
 public class DirectOrderRequest
 {
     public long? CustomerId { get; set; }
@@ -66,6 +66,5 @@ public class OrderLineRequest
     [Required, Range(1, 9999)]
     public int Quantity { get; set; }
 
-    /// <summary>Đơn giá (tùy chọn, nếu null lấy giá sản phẩm)</summary>
     public decimal? UnitPrice { get; set; }
 }

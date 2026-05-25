@@ -7,10 +7,6 @@ using System.Threading.Tasks;
 
 namespace netcore.Commons.Attributes;
 
-/// <summary>
-/// Bắt buộc người dùng phải có Role ADMIN mới được thực thi endpoint.
-/// Đọc từ header X-User-Role (do Gateway inject).
-/// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class RequireAdminAttribute : Attribute, IAsyncActionFilter
 {

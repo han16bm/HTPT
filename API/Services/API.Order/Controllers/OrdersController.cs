@@ -16,7 +16,10 @@ public class OrdersController : BaseApiController
 {
     private readonly IOrderService _service;
 
-    public OrdersController(IOrderService service) => _service = service;
+    public OrdersController(IOrderService service)
+    {
+        _service = service;
+    }
 
     // GET /api/order/orders
     [HttpGet]
@@ -91,5 +94,8 @@ public class OrdersController : BaseApiController
     // GET /api/order/orders/health
     [HttpGet("health")]
     public Task<ApiResponse<HealthCheckStatus>> Health()
-        => Task.FromResult(ApiResponse.Ok(new HealthCheckStatus("Healthy", "API.Order", DateTime.UtcNow)));
+    {
+        var status = new HealthCheckStatus("Healthy", "API.Order", DateTime.UtcNow);
+        return Task.FromResult(ApiResponse.Ok(status));
+    }
 }

@@ -16,7 +16,10 @@ public class SalesController : BaseApiController
 {
     private readonly ISalesService _service;
 
-    public SalesController(ISalesService service) => _service = service;
+    public SalesController(ISalesService service)
+    {
+        _service = service;
+    }
 
     // GET /api/order/sales/stats
     [HttpGet("stats")]

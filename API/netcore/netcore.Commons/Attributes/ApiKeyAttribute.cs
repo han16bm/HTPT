@@ -6,10 +6,6 @@ using netcore.Commons.Models;
 
 namespace netcore.Commons.Attributes;
 
-/// <summary>
-/// [ApiKey] — Xác thực gateway key trên header X-Api-Key.
-/// Mỗi service chỉ nhận request đến từ Gateway (đã có header này).
-/// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class ApiKeyAttribute : Attribute, IAsyncActionFilter
 {

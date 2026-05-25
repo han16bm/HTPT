@@ -1,8 +1,5 @@
 namespace netcore.Commons.Exceptions;
 
-/// <summary>
-/// Ném ra khi không tìm thấy resource — tự động map thành HTTP 404.
-/// </summary>
 public class NotFoundException : MessageException
 {
     public NotFoundException(string resourceName, object identifier)

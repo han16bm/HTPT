@@ -146,20 +146,34 @@ public class CategoryService : ICategoryService
         _logger.LogInformation("Category deleted: {Id}", request.Id);
     }
 
-    private static string GenerateSlug(string name) =>
-        name.ToLowerInvariant().Replace(" ", "-").Replace("đ", "d").Trim('-');
-
-    private static CategoryDto MapToDto(Category c) => new()
+    private static string GenerateSlug(string name)
     {
-        Id = (long)c.Id,
-        ParentId = c.ParentId.HasValue ? (long)c.ParentId.Value : null,
-        CategoryCode = c.CategoryCode,
-        Name = c.Name,
-        Slug = c.Slug,
-        Description = c.Description,
-        ImageUrl = c.ImageUrl,
-        DisplayOrder = (int)c.DisplayOrder,
-        Status = c.Status ?? true,
-        CreatedAt = c.CreatedAt
-    };
+        var lowered = name.ToLowerInvariant();
+        var hyphenated = lowered.Replace(" ", "-");
+        var normalized = hyphenated.Replace("đ", "d");
+        return normalized.Trim('-');
+    }
+
+    private static CategoryDto MapToDto(Category c)
+    {
+        long? parentId = null;
+        if (c.ParentId.HasValue)
+        {
+            parentId = (long)c.ParentId.Value;
+        }
+
+        return new CategoryDto
+        {
+            Id = (long)c.Id,
+            ParentId = parentId,
+            CategoryCode = c.CategoryCode,
+            Name = c.Name,
+            Slug = c.Slug,
+            Description = c.Description,
+            ImageUrl = c.ImageUrl,
+            DisplayOrder = (int)c.DisplayOrder,
+            Status = c.Status ?? true,
+            CreatedAt = c.CreatedAt,
+        };
+    }
 }

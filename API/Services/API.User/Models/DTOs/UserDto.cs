@@ -1,8 +1,5 @@
 namespace API.User.Models.DTOs;
 
-/// <summary>
-/// Thông tin người dùng trả về sau khi đăng nhập.
-/// </summary>
 public class UserDto
 {
     public long Id { get; set; }

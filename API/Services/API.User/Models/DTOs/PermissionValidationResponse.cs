@@ -1,8 +1,5 @@
 namespace API.User.Models.DTOs;
 
-/// <summary>
-/// Response của /permissions/check — Gateway gọi để xác thực quyền.
-/// </summary>
 public class PermissionValidationResponse
 {
     public bool IsValid { get; set; }

@@ -1,8 +1,5 @@
 namespace API.User.Models.DTOs;
 
-/// <summary>
-/// Config đọc từ appsettings.json — section "AuthService"
-/// </summary>
 public class AuthConfiguration
 {
     public string JwtSecret { get; set; } = string.Empty;

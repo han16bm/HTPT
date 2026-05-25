@@ -2,9 +2,6 @@ using System.Linq.Expressions;
 
 namespace netcore.Entities.Interfaces;
 
-/// <summary>
-/// Generic repository interface — CRUD cơ bản cho tất cả entity.
-/// </summary>
 public interface IRepository<T> where T : class
 {
     Task<T?> GetByIdAsync(long id, CancellationToken ct = default);

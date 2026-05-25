@@ -20,10 +20,13 @@ public class PaymentService : IPaymentService
 
     public async Task<PaymentDto> CreatePaymentAsync(CreatePaymentRequest request, CancellationToken ct = default)
     {
-        var order = await _uow.Orders.FirstOrDefaultAsync(o => o.Id == (decimal)request.OrderId, ct)
-            ?? throw new NotFoundException("Đơn hàng", request.OrderId);
+        var order = await _uow.Orders.FirstOrDefaultAsync(o => o.Id == (decimal)request.OrderId, ct);
+        if (order == null)
+        {
+            throw new NotFoundException("Đơn hàng", request.OrderId);
+        }
 
-        var paymentCode = $"TT{DateTime.UtcNow:yyyyMMddHHmmss}";
+        var paymentCode = "TT" + DateTime.UtcNow.ToString("yyyyMMddHHmmss");
         var payment = new Payment
         {
             OrderId = order.Id,
@@ -49,21 +52,29 @@ public class PaymentService : IPaymentService
         var order = await _uow.Orders.FirstOrDefaultAsync(o => o.Id == (decimal)orderId, ct);
         var payment = await _uow.Payments.FirstOrDefaultAsync(p => p.OrderId == (decimal)orderId, ct);
 
-        if (payment is null) return null;
-        return MapToDto(payment, order?.OrderCode ?? string.Empty);
+        if (payment == null)
+        {
+            return null;
+        }
+
+        var orderCode = order != null ? order.OrderCode : string.Empty;
+        return MapToDto(payment, orderCode);
     }
 
-    private static PaymentDto MapToDto(Payment p, string orderCode) => new()
+    private static PaymentDto MapToDto(Payment payment, string orderCode)
     {
-        Id = (long)p.Id,
-        OrderId = (long)p.OrderId,
-        OrderCode = orderCode,
-        PaymentMethod = p.Method,
-        Status = p.Status,
-        Amount = p.Amount,
-        TransactionCode = p.TransactionRef,
-        Notes = p.Note,
-        PaidAt = p.PaidAt,
-        CreatedAt = p.CreatedAt,
-    };
+        return new PaymentDto
+        {
+            Id = (long)payment.Id,
+            OrderId = (long)payment.OrderId,
+            OrderCode = orderCode,
+            PaymentMethod = payment.Method,
+            Status = payment.Status,
+            Amount = payment.Amount,
+            TransactionCode = payment.TransactionRef,
+            Notes = payment.Note,
+            PaidAt = payment.PaidAt,
+            CreatedAt = payment.CreatedAt,
+        };
+    }
 }

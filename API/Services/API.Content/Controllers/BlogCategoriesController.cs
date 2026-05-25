@@ -15,7 +15,10 @@ public class BlogCategoriesController : BaseApiController
 {
     private readonly IBlogService _service;
 
-    public BlogCategoriesController(IBlogService service) => _service = service;
+    public BlogCategoriesController(IBlogService service)
+    {
+        _service = service;
+    }
 
     // GET /api/content/blog-categories
     [HttpGet]

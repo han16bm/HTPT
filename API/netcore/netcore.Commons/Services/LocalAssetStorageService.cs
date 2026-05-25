@@ -186,10 +186,25 @@ public sealed class LocalAssetStorageService : IObjectStorageService
     }
 
     private static string CombineUrl(params string[] parts)
-        => "/" + string.Join("/", parts.Select(NormalizeUrlPath).Where(p => p.Length > 0));
+    {
+        var segments = new List<string>();
+        foreach (var part in parts)
+        {
+            var normalized = NormalizeUrlPath(part);
+            if (normalized.Length > 0)
+            {
+                segments.Add(normalized);
+            }
+        }
+        return "/" + string.Join("/", segments);
+    }
 
     private static string NormalizeUrlPath(string value)
-        => (value ?? string.Empty).Replace('\\', '/').Trim('/');
+    {
+        var input = value ?? string.Empty;
+        var withForwardSlash = input.Replace('\\', '/');
+        return withForwardSlash.Trim('/');
+    }
 
     private static string SanitizePathSegment(string value)
     {

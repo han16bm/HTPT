@@ -157,20 +157,35 @@ public class PromotionService : IPromotionService
         await _uow.SaveChangesAsync(ct);
     }
 
-    private static PromotionDto MapToDto(Promotion p) => new()
+    private static PromotionDto MapToDto(Promotion p)
     {
-        Id = (long)p.Id,
-        PromoCode = p.PromoCode,
-        Title = p.Title,
-        Description = p.Description,
-        DiscountType = p.DiscountType,
-        DiscountValue = p.DiscountValue,
-        MinOrderValue = p.MinOrderValue,
-        MaxDiscountValue = p.MaxDiscountValue,
-        UsageLimit = p.UsageLimit.HasValue ? (int?)Convert.ToInt32(p.UsageLimit.Value) : null,
-        UsedCount = Convert.ToInt32(p.UsedCount),
-        Status = (p.Status ?? false) ? 1 : 0,
-        StartAt = p.StartAt,
-        EndAt = p.EndAt,
-    };
+        int? usageLimit = null;
+        if (p.UsageLimit.HasValue)
+        {
+            usageLimit = Convert.ToInt32(p.UsageLimit.Value);
+        }
+
+        int statusValue = 0;
+        if (p.Status == true)
+        {
+            statusValue = 1;
+        }
+
+        return new PromotionDto
+        {
+            Id = (long)p.Id,
+            PromoCode = p.PromoCode,
+            Title = p.Title,
+            Description = p.Description,
+            DiscountType = p.DiscountType,
+            DiscountValue = p.DiscountValue,
+            MinOrderValue = p.MinOrderValue,
+            MaxDiscountValue = p.MaxDiscountValue,
+            UsageLimit = usageLimit,
+            UsedCount = Convert.ToInt32(p.UsedCount),
+            Status = statusValue,
+            StartAt = p.StartAt,
+            EndAt = p.EndAt,
+        };
+    }
 }

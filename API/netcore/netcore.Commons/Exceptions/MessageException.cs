@@ -1,9 +1,5 @@
 namespace netcore.Commons.Exceptions;
 
-/// <summary>
-/// Exception có message an toàn để hiển thị trực tiếp cho client.
-/// Dùng khi cần throw lỗi business logic với message tiếng Việt.
-/// </summary>
 public class MessageException : Exception
 {
     public int StatusCode { get; }

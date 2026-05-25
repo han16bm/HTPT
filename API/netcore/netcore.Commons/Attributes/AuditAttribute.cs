@@ -3,10 +3,6 @@ using Microsoft.Extensions.Logging;
 
 namespace netcore.Commons.Attributes;
 
-/// <summary>
-/// [Audit] — Ghi log thao tác vào service: ai, lúc nào, action nào.
-/// Đặt ở class tầng Controller để log tất cả requests.
-/// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class AuditAttribute : Attribute, IAsyncActionFilter
 {

@@ -2,13 +2,9 @@ using netcore.Entities.Entities;
 
 namespace netcore.Entities.Interfaces;
 
-/// <summary>
-/// Unit of Work — gom tất cả repositories, save changes vào DB một lần.
-/// Inject IUnitOfWork vào Services thay vì inject từng repository riêng lẻ.
-/// </summary>
 public interface IUnitOfWork : IDisposable
 {
-    // === Repositories ===
+    // Repositories
     IRepository<Role> Roles { get; }
     IRepository<User> Users { get; }
     IRepository<CustomerProfile> CustomerProfiles { get; }
@@ -28,7 +24,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<BlogPost> BlogPosts { get; }
     IRepository<ContactMessage> ContactMessages { get; }
 
-    // === Persistence ===
+    // Persistence
     Task<int> SaveChangesAsync(CancellationToken ct = default);
     Task BeginTransactionAsync(CancellationToken ct = default);
     Task CommitTransactionAsync(CancellationToken ct = default);

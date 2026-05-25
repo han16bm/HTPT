@@ -16,7 +16,10 @@ public class ReportsController : BaseApiController
 {
     private readonly IReportService _service;
 
-    public ReportsController(IReportService service) => _service = service;
+    public ReportsController(IReportService service)
+    {
+        _service = service;
+    }
 
     // GET /api/order/reports/revenue
     [HttpGet("revenue")]

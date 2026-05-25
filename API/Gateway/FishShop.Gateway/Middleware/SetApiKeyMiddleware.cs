@@ -1,9 +1,5 @@
 namespace FishShop.Gateway.Middleware;
 
-/// <summary>
-/// Injects the internal API key into every forwarded request
-/// so downstream services can verify the request came through the Gateway.
-/// </summary>
 public class SetApiKeyMiddleware
 {
     private readonly RequestDelegate _next;
@@ -19,10 +15,7 @@ public class SetApiKeyMiddleware
     {
         var apiKey = _config["Gateway:ApiKey"];
         if (!string.IsNullOrWhiteSpace(apiKey))
-        {
-            // Overwrite or add X-Api-Key header so downstream [ApiKey] attribute passes
             context.Request.Headers["X-Api-Key"] = apiKey;
-        }
 
         await _next(context);
     }

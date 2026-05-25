@@ -16,7 +16,10 @@ public class BlogController : BaseApiController
 {
     private readonly IBlogService _service;
 
-    public BlogController(IBlogService service) => _service = service;
+    public BlogController(IBlogService service)
+    {
+        _service = service;
+    }
 
     // GET /api/content/blogs
     [HttpGet]
@@ -80,5 +83,8 @@ public class BlogController : BaseApiController
     // GET /api/content/blogs/health
     [HttpGet("health")]
     public Task<ApiResponse<HealthCheckStatus>> Health()
-        => Task.FromResult(ApiResponse.Ok(new HealthCheckStatus("Healthy", "API.Content", DateTime.UtcNow)));
+    {
+        var status = new HealthCheckStatus("Healthy", "API.Content", DateTime.UtcNow);
+        return Task.FromResult(ApiResponse.Ok(status));
+    }
 }

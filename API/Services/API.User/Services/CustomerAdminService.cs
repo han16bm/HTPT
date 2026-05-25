@@ -358,11 +358,30 @@ public class CustomerAdminService : ICustomerAdminService
     }
 
     private static string? NormalizeOptional(string? value)
-        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+        return value.Trim();
+    }
 
     private static string? BuildAddress(string? fallback, params string?[] parts)
     {
-        var address = string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p!.Trim()));
-        return string.IsNullOrWhiteSpace(address) ? NormalizeOptional(fallback) : address;
+        var nonEmptyParts = new List<string>();
+        foreach (var part in parts)
+        {
+            if (!string.IsNullOrWhiteSpace(part))
+            {
+                nonEmptyParts.Add(part.Trim());
+            }
+        }
+
+        if (nonEmptyParts.Count == 0)
+        {
+            return NormalizeOptional(fallback);
+        }
+
+        return string.Join(", ", nonEmptyParts);
     }
 }

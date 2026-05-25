@@ -22,9 +22,7 @@ public class InventoryService : IInventoryService
         _logger = logger;
     }
 
-    // ─────────────────────────────────────────────
-    // LỊCH SỬ GIAO DỊCH
-    // ─────────────────────────────────────────────
+    // Lịch sử giao dịch
     public async Task<PagedResult<InventoryTransactionDto>> GetTransactionsAsync(
         InventoryQuery query, CancellationToken ct = default)
     {
@@ -78,16 +76,13 @@ public class InventoryService : IInventoryService
         };
     }
 
-    // ─────────────────────────────────────────────
-    // NHẬP HÀNG
-    // ─────────────────────────────────────────────
+    // Nhập hàng
     public async Task ImportStockAsync(StockImportRequest request, CancellationToken ct = default)
     {
         var product = await _uow.Products.FirstOrDefaultAsync(
             p => p.Id == (decimal)request.ProductId, ct)
             ?? throw new NotFoundException("Sản phẩm", request.ProductId);
 
-        // Ghi transaction
         var tx = new InventoryTransaction
         {
             ProductId = (decimal)request.ProductId,
@@ -101,7 +96,6 @@ public class InventoryService : IInventoryService
 
         await _uow.InventoryTransactions.AddAsync(tx, ct);
 
-        // Cập nhật số lượng tồn kho sản phẩm
         product.StockQuantity += (decimal)request.Quantity;
         product.UpdatedAt = DateTime.UtcNow;
         _uow.Products.Update(product);
@@ -113,9 +107,7 @@ public class InventoryService : IInventoryService
             request.ProductId, request.Quantity);
     }
 
-    // ─────────────────────────────────────────────
-    // SẮP HẾT HÀNG
-    // ─────────────────────────────────────────────
+    // Sắp hết hàng
     public async Task<List<LowStockProductDto>> GetLowStockAsync(
         int threshold = 10, CancellationToken ct = default)
     {
@@ -136,20 +128,33 @@ public class InventoryService : IInventoryService
         return items;
     }
 
-    // ─────────────────────────────────────────────
-    // XUẤT HÀNG (Qua Message Queue)
-    // ─────────────────────────────────────────────
+    // Xuất hàng (qua Message Queue) - idempotent theo orderCode
     public async Task ExportStockAsync(string orderCode, List<netcore.Commons.Messages.Events.OrderItemEventDto> items, CancellationToken ct = default)
     {
+        var exportNote = $"Đơn hàng {orderCode} (MQ)";
+
+        var alreadyExported = await _uow.InventoryTransactions.Query()
+            .AnyAsync(tx => tx.TransactionType == "SALE" && tx.Note == exportNote, ct);
+
+        if (alreadyExported)
+        {
+            _logger.LogInformation("Bỏ qua xuất kho {OrderCode}: đã xuất trước đó", orderCode);
+            return;
+        }
+
         foreach (var item in items)
         {
-            var product = await _uow.Products.FirstOrDefaultAsync(p => p.Id == (decimal)item.ProductId, ct)
-                ?? throw new NotFoundException("Sản phẩm", item.ProductId);
+            var product = await _uow.Products.FirstOrDefaultAsync(p => p.Id == (decimal)item.ProductId, ct);
+            if (product == null)
+            {
+                throw new NotFoundException("Sản phẩm", item.ProductId);
+            }
 
             if (product.StockQuantity < item.Quantity)
+            {
                 throw new MessageException($"'{product.Name}' không đủ hàng (còn {product.StockQuantity}).");
+            }
 
-            // Ghi transaction
             var tx = new InventoryTransaction
             {
                 ProductId = (decimal)item.ProductId,
@@ -157,19 +162,68 @@ public class InventoryService : IInventoryService
                 Quantity = -(int)item.Quantity,
                 UnitCost = product.SalePrice,
                 ReferenceType = "ORDER",
-                ReferenceId = null, // Can map to OrderId if needed
-                Note = $"Đơn hàng {orderCode} (MQ)",
+                ReferenceId = null,
+                Note = exportNote,
                 CreatedAt = DateTime.UtcNow,
             };
             await _uow.InventoryTransactions.AddAsync(tx, ct);
 
-            // Cập nhật tồn kho
             product.StockQuantity -= (decimal)item.Quantity;
             product.SoldQuantity += (decimal)item.Quantity;
             product.UpdatedAt = DateTime.UtcNow;
             _uow.Products.Update(product);
         }
+
         await _uow.SaveChangesAsync(ct);
         _logger.LogInformation("Đã xuất kho cho đơn hàng {OrderCode} qua Message Queue", orderCode);
+    }
+
+    // Hoàn kho (Saga compensation) - idempotent theo orderCode
+    public async Task ReleaseStockAsync(string orderCode, List<netcore.Commons.Messages.Events.OrderItemEventDto> items, CancellationToken ct = default)
+    {
+        var releaseNote = $"Hoàn kho {orderCode}";
+
+        var alreadyReleased = await _uow.InventoryTransactions.Query()
+            .AnyAsync(tx => tx.TransactionType == "RELEASE" && tx.Note == releaseNote, ct);
+
+        if (alreadyReleased)
+        {
+            _logger.LogInformation("Bỏ qua hoàn kho {OrderCode}: đã release trước đó", orderCode);
+            return;
+        }
+
+        foreach (var item in items)
+        {
+            var product = await _uow.Products.FirstOrDefaultAsync(p => p.Id == (decimal)item.ProductId, ct);
+            if (product == null)
+            {
+                _logger.LogWarning("Không tìm thấy product {ProductId} khi hoàn kho {OrderCode}",
+                    item.ProductId, orderCode);
+                continue;
+            }
+
+            var tx = new InventoryTransaction
+            {
+                ProductId = (decimal)item.ProductId,
+                TransactionType = "RELEASE",
+                Quantity = (int)item.Quantity,
+                UnitCost = product.SalePrice,
+                ReferenceType = "ORDER",
+                Note = releaseNote,
+                CreatedAt = DateTime.UtcNow,
+            };
+            await _uow.InventoryTransactions.AddAsync(tx, ct);
+
+            product.StockQuantity += (decimal)item.Quantity;
+            if (product.SoldQuantity >= (decimal)item.Quantity)
+            {
+                product.SoldQuantity -= (decimal)item.Quantity;
+            }
+            product.UpdatedAt = DateTime.UtcNow;
+            _uow.Products.Update(product);
+        }
+
+        await _uow.SaveChangesAsync(ct);
+        _logger.LogInformation("Đã hoàn kho cho đơn hàng {OrderCode}", orderCode);
     }
 }

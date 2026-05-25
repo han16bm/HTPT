@@ -2,22 +2,15 @@ using System;
 
 namespace netcore.Entities.Entities;
 
-/// <summary>
-/// Partial extension — thêm navigation properties cho User.
-/// File gốc User.cs được scaffold từ database, file này bổ sung relationships.
-/// </summary>
 public partial class User
 {
-    public bool? IsAdmin { get; set; }      // BIT -> bool? như tất cả STATUS columns
+    public bool? IsAdmin { get; set; }
     public decimal? CreatedBy { get; set; }
     public decimal? UpdatedBy { get; set; }
     public DateTime? UpdatedAt2 { get; set; }
     public string? ResetToken { get; set; }
     public DateTime? ResetTokenExp { get; set; }
 
-    // Navigation
     public virtual Role? Role { get; set; }
     public virtual CustomerProfile? CustomerProfile { get; set; }
 }
-
-

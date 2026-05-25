@@ -18,27 +18,25 @@ public class OrderService : IOrderService
 {
     private readonly IUnitOfWork _uow;
     private readonly ILogger<OrderService> _logger;
-    private readonly MassTransit.IPublishEndpoint _publishEndpoint;
-    private readonly HttpClient _httpClient;
+    private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _config;
 
     public OrderService(
         IUnitOfWork uow,
         ILogger<OrderService> logger,
-        MassTransit.IPublishEndpoint publishEndpoint,
+        IPublishEndpoint publishEndpoint,
         IHttpClientFactory httpClientFactory,
         IConfiguration config)
     {
         _uow = uow;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
-        _httpClient = httpClientFactory.CreateClient();
+        _httpClientFactory = httpClientFactory;
         _config = config;
     }
 
-    // ─────────────────────────────────────────────
-    // TẠO ĐƠN TỪ GIỎ HÀNG
-    // ─────────────────────────────────────────────
+    // Tạo đơn từ giỏ hàng
     public async Task<OrderDto> CreateOrderFromCartAsync(long userId, CreateOrderRequest request, CancellationToken ct = default)
     {
         var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == (decimal)userId, ct)
@@ -63,7 +61,6 @@ public class OrderService : IOrderService
             productInfos[item.ProductId] = product;
         }
 
-        // Validate và áp promotion
         decimal discountAmount = 0;
         Promotion? promotion = null;
 
@@ -170,6 +167,8 @@ public class OrderService : IOrderService
                 OrderCode = order.OrderCode,
                 CustomerId = (long?)order.CustomerId,
                 CreatedAt = order.CreatedAt,
+                TotalAmount = order.TotalAmount,
+                PaymentMethod = order.PaymentMethod,
                 Items = cartItems.Select(ci => new netcore.Commons.Messages.Events.OrderItemEventDto
                 {
                     ProductId = (long)ci.ProductId,
@@ -187,9 +186,7 @@ public class OrderService : IOrderService
         }
     }
 
-    // ─────────────────────────────────────────────
-    // TẠO ĐƠN TRỰC TIẾP (POS / Admin)
-    // ─────────────────────────────────────────────
+    // Tạo đơn trực tiếp (POS / Admin)
     public async Task<OrderDto> CreateDirectOrderAsync(DirectOrderRequest request, CancellationToken ct = default)
     {
         decimal discountAmount = 0;
@@ -280,6 +277,8 @@ public class OrderService : IOrderService
                 OrderCode = order.OrderCode,
                 CustomerId = (long?)order.CustomerId,
                 CreatedAt = order.CreatedAt,
+                TotalAmount = order.TotalAmount,
+                PaymentMethod = order.PaymentMethod,
                 Items = lines.Select(l => new netcore.Commons.Messages.Events.OrderItemEventDto
                 {
                     ProductId = (long)l.Line.ProductId,
@@ -297,18 +296,14 @@ public class OrderService : IOrderService
         }
     }
 
-    // ─────────────────────────────────────────────
-    // ĐƠN HÀNG CỦA TÔI
-    // ─────────────────────────────────────────────
+    // Đơn hàng của tôi
     public async Task<PagedResult<OrderListDto>> GetMyOrdersAsync(long userId, OrderQuery query, CancellationToken ct = default)
     {
         query.CustomerId = userId;
         return await GetAllOrdersAsync(query, ct);
     }
 
-    // ─────────────────────────────────────────────
-    // TẤT CẢ ĐƠN (Admin)
-    // ─────────────────────────────────────────────
+    // Tất cả đơn (Admin)
     public async Task<PagedResult<OrderListDto>> GetAllOrdersAsync(OrderQuery query, CancellationToken ct = default)
     {
         var q = _uow.Orders.Query()
@@ -378,9 +373,7 @@ public class OrderService : IOrderService
         };
     }
 
-    // ─────────────────────────────────────────────
-    // CHI TIẾT THEO ORDER CODE
-    // ─────────────────────────────────────────────
+    // Chi tiết theo OrderCode
     public async Task<OrderDto> GetByOrderCodeAsync(string orderCode, CancellationToken ct = default)
     {
         var order = await _uow.Orders.Query()
@@ -391,9 +384,7 @@ public class OrderService : IOrderService
         return MapToDto(order);
     }
 
-    // ─────────────────────────────────────────────
-    // CHI TIẾT THEO ID
-    // ─────────────────────────────────────────────
+    // Chi tiết theo Id
     public async Task<OrderDto> GetByIdAsync(long orderId, CancellationToken ct = default)
     {
         var order = await _uow.Orders.Query()
@@ -404,9 +395,7 @@ public class OrderService : IOrderService
         return MapToDto(order);
     }
 
-    // ─────────────────────────────────────────────
-    // CẬP NHẬT TRẠNG THÁI (Admin)
-    // ─────────────────────────────────────────────
+    // Cập nhật trạng thái (Admin)
     public async Task<OrderDto> UpdateStatusAsync(UpdateOrderStatusRequest request, CancellationToken ct = default)
     {
         var order = await _uow.Orders.FirstOrDefaultAsync(o => o.OrderCode == request.OrderCode, ct)
@@ -435,9 +424,7 @@ public class OrderService : IOrderService
         return await GetByOrderCodeAsync(request.OrderCode, ct);
     }
 
-    // ─────────────────────────────────────────────
-    // HỦY ĐƠN (Customer)
-    // ─────────────────────────────────────────────
+    // Hủy đơn (Customer)
     public async Task<OrderDto> CancelOrderAsync(long userId, CancelOrderRequest request, CancellationToken ct = default)
     {
         var order = await _uow.Orders.FirstOrDefaultAsync(
@@ -460,25 +447,28 @@ public class OrderService : IOrderService
         return await GetByOrderCodeAsync(request.OrderCode, ct);
     }
 
-    // ─────────────────────────────────────────────
-    // HELPERS
-    // ─────────────────────────────────────────────
+    // Helpers
     private async Task<ProductDtoInfo> GetProductInfoAsync(long productId, CancellationToken ct)
     {
         var productApiUrl = _config["ProductServiceUrl"] ?? "http://localhost:5002";
         var apiKey = _config["ApiKey:Key"] ?? "fish-gateway-key-2026";
         var headerName = _config["ApiKey:HeaderName"] ?? "X-Api-Key";
 
+        var client = _httpClientFactory.CreateClient();
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{productApiUrl}/api/product/products/{productId}");
         requestMessage.Headers.Add(headerName, apiKey);
 
-        var response = await _httpClient.SendAsync(requestMessage, ct);
+        var response = await client.SendAsync(requestMessage, ct);
         if (!response.IsSuccessStatusCode)
+        {
             throw new MessageException($"Không thể kết nối đến Product Service (HTTP {response.StatusCode}).");
+        }
 
         var productResult = await response.Content.ReadFromJsonAsync<ApiResponse<ProductDtoInfo>>(cancellationToken: ct);
-        if (productResult is null || !productResult.Success || productResult.Data is null)
+        if (productResult == null || !productResult.Success || productResult.Data == null)
+        {
             throw new NotFoundException("Sản phẩm", productId);
+        }
 
         return productResult.Data;
     }
@@ -489,21 +479,27 @@ public class OrderService : IOrderService
         var apiKey = _config["ApiKey:Key"] ?? "fish-gateway-key-2026";
         var headerName = _config["ApiKey:HeaderName"] ?? "X-Api-Key";
 
+        var client = _httpClientFactory.CreateClient();
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{userApiUrl}/api/user/auth/me");
         requestMessage.Headers.Add(headerName, apiKey);
         requestMessage.Headers.Add("X-User-Id", userId.ToString());
 
         try
         {
-            var response = await _httpClient.SendAsync(requestMessage, ct);
+            var response = await client.SendAsync(requestMessage, ct);
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Cannot get user profile from UserService. UserId={UserId}, Status={StatusCode}", userId, response.StatusCode);
+                _logger.LogWarning("Cannot get user profile from UserService. UserId={UserId}, Status={StatusCode}",
+                    userId, response.StatusCode);
                 return null;
             }
 
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<UserDtoInfo>>(cancellationToken: ct);
-            return result is { Success: true, Data: not null } ? result.Data : null;
+            if (result == null || !result.Success || result.Data == null)
+            {
+                return null;
+            }
+            return result.Data;
         }
         catch (HttpRequestException ex)
         {
@@ -518,7 +514,16 @@ public class OrderService : IOrderService
     }
 
     private static string? FirstNonEmpty(params string?[] values)
-        => values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v))?.Trim();
+    {
+        foreach (var value in values)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                return value.Trim();
+            }
+        }
+        return null;
+    }
 
     private static string? TryGetShippingAddressPart(string? shippingAddress, int index)
     {
@@ -528,63 +533,101 @@ public class OrderService : IOrderService
         }
 
         var parts = shippingAddress.Split('|', 3, StringSplitOptions.TrimEntries);
-        return parts.Length > index ? parts[index] : null;
+        if (parts.Length > index)
+        {
+            return parts[index];
+        }
+        return null;
     }
 
     private static string? BuildAddress(params string?[] parts)
     {
-        var address = string.Join(", ", parts
-            .Where(p => !string.IsNullOrWhiteSpace(p))
-            .Select(p => p!.Trim()));
+        var nonEmptyParts = new List<string>();
+        foreach (var part in parts)
+        {
+            if (!string.IsNullOrWhiteSpace(part))
+            {
+                nonEmptyParts.Add(part.Trim());
+            }
+        }
 
-        return string.IsNullOrWhiteSpace(address) ? null : address;
+        if (nonEmptyParts.Count == 0)
+        {
+            return null;
+        }
+
+        return string.Join(", ", nonEmptyParts);
     }
 
     private static decimal CalculateDiscount(Promotion promo, decimal subtotal)
     {
         if (subtotal < promo.MinOrderValue)
+        {
             return 0;
+        }
 
-        decimal discount = promo.DiscountType == "PERCENT"
-            ? subtotal * promo.DiscountValue / 100
-            : promo.DiscountValue;
+        decimal discount;
+        if (promo.DiscountType == "PERCENT")
+        {
+            discount = subtotal * promo.DiscountValue / 100;
+        }
+        else
+        {
+            discount = promo.DiscountValue;
+        }
 
-        if (promo.MaxDiscountValue.HasValue)
-            discount = Math.Min(discount, promo.MaxDiscountValue.Value);
+        if (promo.MaxDiscountValue.HasValue && discount > promo.MaxDiscountValue.Value)
+        {
+            discount = promo.MaxDiscountValue.Value;
+        }
 
-        return Math.Min(discount, subtotal);
+        if (discount > subtotal)
+        {
+            discount = subtotal;
+        }
+
+        return discount;
     }
 
-    private static OrderDto MapToDto(OrderEntity o) => new()
+    private static OrderDto MapToDto(OrderEntity o)
     {
-        Id = (long)o.Id,
-        OrderCode = o.OrderCode,
-        CustomerId = (long)(o.CustomerId ?? 0),
-        CustomerName = o.CustomerName,
-        CustomerPhone = o.CustomerPhone,
-        OrderStatus = o.OrderStatus,
-        PaymentMethod = o.PaymentMethod,
-        PaymentStatus = o.PaymentStatus,
-        Subtotal = o.SubtotalAmount,
-        DiscountAmount = o.DiscountAmount,
-        ShippingFee = o.ShippingFee,
-        TotalAmount = o.TotalAmount,
-        ShippingAddress = o.CustomerAddress,
-        Notes = o.Note,
-        Source = o.OrderSource,
-        CreatedAt = o.CreatedAt,
-        UpdatedAt = o.UpdatedAt,
-        Items = o.OrderItems.Select(oi => new OrderItemDto
+        var itemDtos = new List<OrderItemDto>();
+        foreach (var oi in o.OrderItems)
         {
-            Id = (long)oi.Id,
-            ProductId = (long)oi.ProductId,
-            ProductName = oi.ProductName,
-            ImageUrl = oi.ImageUrl,
-            Quantity = (int)oi.Quantity,
-            UnitPrice = oi.UnitPrice,
-            SubTotal = oi.LineTotal,
-        }).ToList(),
-    };
+            itemDtos.Add(new OrderItemDto
+            {
+                Id = (long)oi.Id,
+                ProductId = (long)oi.ProductId,
+                ProductName = oi.ProductName,
+                ImageUrl = oi.ImageUrl,
+                Quantity = (int)oi.Quantity,
+                UnitPrice = oi.UnitPrice,
+                SubTotal = oi.LineTotal,
+            });
+        }
+
+        return new OrderDto
+        {
+            Id = (long)o.Id,
+            OrderCode = o.OrderCode,
+            CustomerId = (long)(o.CustomerId ?? 0),
+            CustomerName = o.CustomerName,
+            CustomerPhone = o.CustomerPhone,
+            OrderStatus = o.OrderStatus,
+            PaymentMethod = o.PaymentMethod,
+            PaymentStatus = o.PaymentStatus,
+            Subtotal = o.SubtotalAmount,
+            DiscountAmount = o.DiscountAmount,
+            ShippingFee = o.ShippingFee,
+            TotalAmount = o.TotalAmount,
+            ShippingAddress = o.CustomerAddress,
+            Notes = o.Note,
+            Source = o.OrderSource,
+            CreatedAt = o.CreatedAt,
+            UpdatedAt = o.UpdatedAt,
+            Items = itemDtos,
+        };
+    }
 
     private sealed class UserDtoInfo
     {

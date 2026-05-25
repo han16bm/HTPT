@@ -283,34 +283,72 @@ public class AuthService : IAuthService
         return await _uow.CustomerProfiles.FirstOrDefaultAsync(p => p.UserId == user.Id, ct);
     }
 
-    private static UserDto MapToDto(UserEntity user, CustomerProfile? profile, decimal? customerId) => new()
+    private static UserDto MapToDto(UserEntity user, CustomerProfile? profile, decimal? customerId)
     {
-        Id = (long)user.Id,
-        Username = user.Username,
-        CustomerCode = profile?.CustomerCode,
-        FullName = profile?.FullName ?? user.FullName,
-        Email = profile?.Email ?? user.Email,
-        Phone = profile?.Phone ?? user.Phone,
-        Address = BuildAddress(profile?.Address, profile?.AddressLine, profile?.Ward, profile?.District, profile?.Province),
-        AddressLine = profile?.AddressLine,
-        Ward = profile?.Ward,
-        District = profile?.District,
-        Province = profile?.Province,
-        DateOfBirth = profile?.DateOfBirth,
-        Gender = profile?.Gender,
-        AvatarUrl = user.AvatarUrl,
-        RoleCode = user.Role?.Code ?? string.Empty,
-        RoleName = user.Role?.Name ?? string.Empty,
-        IsAdmin = user.IsAdmin == true || user.Role?.Code == AuthConstants.RoleAdmin,
-        CustomerId = customerId.HasValue ? (long)customerId.Value : null,
-    };
+        var isAdmin = false;
+        if (user.IsAdmin == true)
+        {
+            isAdmin = true;
+        }
+        else if (user.Role != null && user.Role.Code == AuthConstants.RoleAdmin)
+        {
+            isAdmin = true;
+        }
+
+        long? mappedCustomerId = null;
+        if (customerId.HasValue)
+        {
+            mappedCustomerId = (long)customerId.Value;
+        }
+
+        return new UserDto
+        {
+            Id = (long)user.Id,
+            Username = user.Username,
+            CustomerCode = profile?.CustomerCode,
+            FullName = profile?.FullName ?? user.FullName,
+            Email = profile?.Email ?? user.Email,
+            Phone = profile?.Phone ?? user.Phone,
+            Address = BuildAddress(profile?.Address, profile?.AddressLine, profile?.Ward, profile?.District, profile?.Province),
+            AddressLine = profile?.AddressLine,
+            Ward = profile?.Ward,
+            District = profile?.District,
+            Province = profile?.Province,
+            DateOfBirth = profile?.DateOfBirth,
+            Gender = profile?.Gender,
+            AvatarUrl = user.AvatarUrl,
+            RoleCode = user.Role?.Code ?? string.Empty,
+            RoleName = user.Role?.Name ?? string.Empty,
+            IsAdmin = isAdmin,
+            CustomerId = mappedCustomerId,
+        };
+    }
 
     private static string? NormalizeOptional(string? value)
-        => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+        return value.Trim();
+    }
 
     private static string? BuildAddress(string? fallback, params string?[] parts)
     {
-        var address = string.Join(", ", parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p!.Trim()));
-        return string.IsNullOrWhiteSpace(address) ? NormalizeOptional(fallback) : address;
+        var nonEmptyParts = new List<string>();
+        foreach (var part in parts)
+        {
+            if (!string.IsNullOrWhiteSpace(part))
+            {
+                nonEmptyParts.Add(part.Trim());
+            }
+        }
+
+        if (nonEmptyParts.Count == 0)
+        {
+            return NormalizeOptional(fallback);
+        }
+
+        return string.Join(", ", nonEmptyParts);
     }
 }

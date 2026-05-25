@@ -85,5 +85,8 @@ public class AuthController : BaseApiController
     // GET /api/user/auth/health
     [HttpGet("health")]
     public Task<ApiResponse<HealthCheckStatus>> Health()
-        => Task.FromResult(ApiResponse.Ok(new HealthCheckStatus("Healthy", "API.User", DateTime.UtcNow)));
+    {
+        var status = new HealthCheckStatus("Healthy", "API.User", DateTime.UtcNow);
+        return Task.FromResult(ApiResponse.Ok(status));
+    }
 }

@@ -1,14 +1,10 @@
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace FishShop.Gateway.Services;
 
-/// <summary>
-/// Validates JWT tokens locally without calling API.User — fast path for Gateway.
-/// Only basic validation (signature + expiry). Full permission check via API.User.
-/// </summary>
 public class TokenValidator
 {
     private readonly IConfiguration _config;
@@ -24,12 +20,26 @@ public class TokenValidator
     {
         try
         {
-            var secret = _config["Gateway:JwtSecret"]
-                ?? throw new InvalidOperationException("Gateway:JwtSecret not configured");
-            var issuer = _config["Gateway:JwtIssuer"] ?? "FishShop";
-            var audience = _config["Gateway:JwtAudience"] ?? "FishShop";
+            var secret = _config["Gateway:JwtSecret"];
+            if (string.IsNullOrEmpty(secret))
+            {
+                throw new InvalidOperationException("Gateway:JwtSecret not configured");
+            }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+            var issuer = _config["Gateway:JwtIssuer"];
+            if (string.IsNullOrEmpty(issuer))
+            {
+                issuer = "FishShop";
+            }
+
+            var audience = _config["Gateway:JwtAudience"];
+            if (string.IsNullOrEmpty(audience))
+            {
+                audience = "FishShop";
+            }
+
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+
             var parameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -37,26 +47,44 @@ public class TokenValidator
                 ValidateAudience = true,
                 ValidAudience = audience,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = key,
+                IssuerSigningKey = signingKey,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.FromMinutes(1),
             };
 
-            var handler = new JwtSecurityTokenHandler();
-            return handler.ValidateToken(token, parameters, out _);
+            var handler = new JsonWebTokenHandler();
+            handler.MapInboundClaims = false;
+
+            var result = handler.ValidateTokenAsync(token, parameters).GetAwaiter().GetResult();
+            if (!result.IsValid)
+            {
+                var exceptionType = result.Exception != null ? result.Exception.GetType().Name : "Unknown";
+                var exceptionMessage = result.Exception != null ? result.Exception.Message : "Unknown error";
+                _logger.LogWarning("Token validation failed: {Type} {Msg}", exceptionType, exceptionMessage);
+                return null;
+            }
+
+            return new ClaimsPrincipal(result.ClaimsIdentity);
         }
-        catch (SecurityTokenExpiredException)
+        catch (SecurityTokenException ex)
         {
-            _logger.LogDebug("Token expired");
+            _logger.LogWarning("Token validation failed: {Type} {Msg}", ex.GetType().Name, ex.Message);
             return null;
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
-            _logger.LogDebug("Token validation failed: {Msg}", ex.Message);
+            _logger.LogWarning("Token argument error: {Msg}", ex.Message);
             return null;
         }
     }
 
     public string? GetClaim(ClaimsPrincipal principal, string claimType)
-        => principal.FindFirst(claimType)?.Value;
+    {
+        var claim = principal.FindFirst(claimType);
+        if (claim == null)
+        {
+            return null;
+        }
+        return claim.Value;
+    }
 }

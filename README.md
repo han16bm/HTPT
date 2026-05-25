@@ -163,6 +163,9 @@ Các dịch vụ chính:
 | API Gateway | `http://localhost:5000` |
 | RabbitMQ UI | `http://localhost:15672` |
 | Seq Log UI | `http://localhost:5341` |
+| Jaeger UI (distributed tracing) | `http://localhost:16686` |
+| Prometheus UI | `http://localhost:9090` |
+| Grafana dashboard | `http://localhost:3002` (admin/admin) |
 
 RabbitMQ mặc định:
 

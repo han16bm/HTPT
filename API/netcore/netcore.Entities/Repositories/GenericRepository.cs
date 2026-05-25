@@ -5,9 +5,6 @@ using netcore.Entities.Persistence;
 
 namespace netcore.Entities.Repositories;
 
-/// <summary>
-/// Generic repository implementation — dùng EF Core + AppDbContext.
-/// </summary>
 public class GenericRepository<T> : IRepository<T> where T : class
 {
     protected readonly AppDbContext _context;
@@ -20,43 +17,71 @@ public class GenericRepository<T> : IRepository<T> where T : class
     }
 
     public async Task<T?> GetByIdAsync(long id, CancellationToken ct = default)
-        => await _dbSet.FindAsync([id], ct);
+    {
+        return await _dbSet.FindAsync(new object[] { id }, ct);
+    }
 
     public async Task<List<T>> GetAllAsync(CancellationToken ct = default)
-        => await _dbSet.ToListAsync(ct);
+    {
+        return await _dbSet.ToListAsync(ct);
+    }
 
     public async Task<List<T>> FindAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
-        => await _dbSet.Where(predicate).ToListAsync(ct);
+    {
+        return await _dbSet.Where(predicate).ToListAsync(ct);
+    }
 
     public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
-        => await _dbSet.FirstOrDefaultAsync(predicate, ct);
+    {
+        return await _dbSet.FirstOrDefaultAsync(predicate, ct);
+    }
 
     public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken ct = default)
-        => await _dbSet.AnyAsync(predicate, ct);
+    {
+        return await _dbSet.AnyAsync(predicate, ct);
+    }
 
     public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, CancellationToken ct = default)
-        => predicate is null
-            ? await _dbSet.CountAsync(ct)
-            : await _dbSet.CountAsync(predicate, ct);
+    {
+        if (predicate == null)
+        {
+            return await _dbSet.CountAsync(ct);
+        }
+        return await _dbSet.CountAsync(predicate, ct);
+    }
 
     public async Task AddAsync(T entity, CancellationToken ct = default)
-        => await _dbSet.AddAsync(entity, ct);
+    {
+        await _dbSet.AddAsync(entity, ct);
+    }
 
     public async Task AddRangeAsync(IEnumerable<T> entities, CancellationToken ct = default)
-        => await _dbSet.AddRangeAsync(entities, ct);
+    {
+        await _dbSet.AddRangeAsync(entities, ct);
+    }
 
     public void Update(T entity)
-        => _dbSet.Update(entity);
+    {
+        _dbSet.Update(entity);
+    }
 
     public void UpdateRange(IEnumerable<T> entities)
-        => _dbSet.UpdateRange(entities);
+    {
+        _dbSet.UpdateRange(entities);
+    }
 
     public void Remove(T entity)
-        => _dbSet.Remove(entity);
+    {
+        _dbSet.Remove(entity);
+    }
 
     public void RemoveRange(IEnumerable<T> entities)
-        => _dbSet.RemoveRange(entities);
+    {
+        _dbSet.RemoveRange(entities);
+    }
 
     public IQueryable<T> Query()
-        => _dbSet.AsQueryable();
+    {
+        return _dbSet.AsQueryable();
+    }
 }

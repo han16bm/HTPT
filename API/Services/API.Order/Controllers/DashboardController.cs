@@ -15,7 +15,10 @@ public class DashboardController : BaseApiController
 {
     private readonly IDashboardService _service;
 
-    public DashboardController(IDashboardService service) => _service = service;
+    public DashboardController(IDashboardService service)
+    {
+        _service = service;
+    }
 
     // GET /api/order/dashboard/stats
     [HttpGet("stats")]
@@ -28,5 +31,8 @@ public class DashboardController : BaseApiController
     // GET /api/order/dashboard/health
     [HttpGet("health")]
     public Task<ApiResponse<HealthCheckStatus>> Health()
-        => Task.FromResult(ApiResponse.Ok(new HealthCheckStatus("Healthy", "API.Order", DateTime.UtcNow)));
+    {
+        var status = new HealthCheckStatus("Healthy", "API.Order", DateTime.UtcNow);
+        return Task.FromResult(ApiResponse.Ok(status));
+    }
 }

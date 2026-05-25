@@ -12,24 +12,22 @@ public class CartService : ICartService
 {
     private readonly IUnitOfWork _uow;
     private readonly ILogger<CartService> _logger;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _config;
 
     public CartService(
-        IUnitOfWork uow, 
-        ILogger<CartService> logger, 
+        IUnitOfWork uow,
+        ILogger<CartService> logger,
         IHttpClientFactory httpClientFactory,
         IConfiguration config)
     {
         _uow = uow;
         _logger = logger;
-        _httpClient = httpClientFactory.CreateClient();
+        _httpClientFactory = httpClientFactory;
         _config = config;
     }
 
-    // ─────────────────────────────────────────────
-    // LẤY GIỎ HÀNG
-    // ─────────────────────────────────────────────
+    // Lấy giỏ hàng
     public async Task<CartDto> GetCartAsync(long userId, CancellationToken ct = default)
     {
         var cart = await GetOrCreateCartAsync(userId, ct);
@@ -41,37 +39,41 @@ public class CartService : ICartService
         return MapToDto(cart, items);
     }
 
-    // ─────────────────────────────────────────────
-    // THÊM SẢN PHẨM
-    // ─────────────────────────────────────────────
+    // Thêm sản phẩm
     public async Task<CartDto> AddToCartAsync(long userId, AddToCartRequest request, CancellationToken ct = default)
     {
         if (request.Quantity <= 0)
+        {
             throw new MessageException("Số lượng không hợp lệ.");
+        }
 
-        // Gọi RESTful API sang Product Service để lấy và xác thực thông tin sản phẩm
         var productApiUrl = _config["ProductServiceUrl"] ?? "http://localhost:5002";
         var apiKey = _config["ApiKey:Key"] ?? "fish-gateway-key-2026";
         var headerName = _config["ApiKey:HeaderName"] ?? "X-Api-Key";
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{productApiUrl}/api/product/products/{request.ProductId}");
+        var client = _httpClientFactory.CreateClient();
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"{productApiUrl}/api/product/products/{request.ProductId}");
         requestMessage.Headers.Add(headerName, apiKey);
 
-        var response = await _httpClient.SendAsync(requestMessage, ct);
+        var response = await client.SendAsync(requestMessage, ct);
         if (!response.IsSuccessStatusCode)
+        {
             throw new MessageException($"Không thể kết nối đến Product Service (HTTP {response.StatusCode}).");
+        }
 
         var productResult = await response.Content.ReadFromJsonAsync<netcore.Commons.Models.ApiResponse<ProductDtoInfo>>(cancellationToken: ct);
-        
-        if (productResult is null || !productResult.Success || productResult.Data is null)
+        if (productResult == null || !productResult.Success || productResult.Data == null)
+        {
             throw new NotFoundException("Sản phẩm không tồn tại trên hệ thống", request.ProductId);
+        }
 
         var productData = productResult.Data;
 
         if (productData.StockQuantity < request.Quantity)
+        {
             throw new MessageException($"'{productData.Name}' không đủ hàng (còn {productData.StockQuantity}).");
+        }
         
-        // Cập nhật lại request với dữ liệu chính xác từ Product Service
         request.UnitPrice = productData.SalePrice;
         request.ProductName = productData.Name ?? "Sản phẩm";
         request.ImageUrl = productData.ImageUrl;
@@ -109,9 +111,7 @@ public class CartService : ICartService
         return await GetCartAsync(userId, ct);
     }
 
-    // ─────────────────────────────────────────────
-    // CẬP NHẬT SỐ LƯỢNG
-    // ─────────────────────────────────────────────
+    // Cập nhật số lượng
     public async Task<CartDto> UpdateQuantityAsync(long userId, UpdateCartItemRequest request, CancellationToken ct = default)
     {
         var cart = await GetOrCreateCartAsync(userId, ct);
@@ -126,9 +126,7 @@ public class CartService : ICartService
         return await GetCartAsync(userId, ct);
     }
 
-    // ─────────────────────────────────────────────
-    // XÓA MỤC
-    // ─────────────────────────────────────────────
+    // Xóa mục
     public async Task<CartDto> RemoveItemAsync(long userId, RemoveCartItemRequest request, CancellationToken ct = default)
     {
         var cart = await GetOrCreateCartAsync(userId, ct);
@@ -142,9 +140,7 @@ public class CartService : ICartService
         return await GetCartAsync(userId, ct);
     }
 
-    // ─────────────────────────────────────────────
-    // XÓA TOÀN BỘ GIỎ
-    // ─────────────────────────────────────────────
+    // Xóa toàn bộ giỏ
     public async Task ClearCartAsync(long userId, CancellationToken ct = default)
     {
         var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == (decimal)userId, ct);
@@ -161,9 +157,7 @@ public class CartService : ICartService
         _logger.LogInformation("User {UserId} cleared cart", userId);
     }
 
-    // ─────────────────────────────────────────────
-    // HELPERS
-    // ─────────────────────────────────────────────
+    // Helpers
     private async Task<ShoppingCart> GetOrCreateCartAsync(long userId, CancellationToken ct)
     {
         var cart = await _uow.ShoppingCarts.FirstOrDefaultAsync(c => c.CustomerId == (decimal)userId, ct);
@@ -177,24 +171,36 @@ public class CartService : ICartService
 
     private static CartDto MapToDto(ShoppingCart cart, List<CartItem> items)
     {
-        var itemDtos = items.Select(ci => new CartItemDto
+        var itemDtos = new List<CartItemDto>();
+        decimal totalPrice = 0;
+        int totalItems = 0;
+
+        foreach (var ci in items)
         {
-            Id = (long)ci.Id,
-            ProductId = (long)ci.ProductId,
-            ProductName = ci.ProductName ?? string.Empty,
-            ImageUrl = ci.ImageUrl,
-            Quantity = (int)ci.Quantity,
-            UnitPrice = ci.UnitPrice,
-            SubTotal = ci.UnitPrice * ci.Quantity,
-        }).ToList();
+            var subTotal = ci.UnitPrice * ci.Quantity;
+            var itemDto = new CartItemDto
+            {
+                Id = (long)ci.Id,
+                ProductId = (long)ci.ProductId,
+                ProductName = ci.ProductName ?? string.Empty,
+                ImageUrl = ci.ImageUrl,
+                Quantity = (int)ci.Quantity,
+                UnitPrice = ci.UnitPrice,
+                SubTotal = subTotal,
+            };
+            itemDtos.Add(itemDto);
+
+            totalPrice += subTotal;
+            totalItems += (int)ci.Quantity;
+        }
 
         return new CartDto
         {
             Id = (long)cart.Id,
             UserId = (long)cart.CustomerId,
             Items = itemDtos,
-            TotalPrice = itemDtos.Sum(i => i.SubTotal),
-            TotalItems = itemDtos.Sum(i => i.Quantity),
+            TotalPrice = totalPrice,
+            TotalItems = totalItems,
         };
     }
 }

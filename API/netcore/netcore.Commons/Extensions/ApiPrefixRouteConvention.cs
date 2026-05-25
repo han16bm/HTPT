@@ -2,10 +2,6 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace netcore.Commons.Extensions;
 
-/// <summary>
-/// Thêm prefix /api/{service-name} vào tất cả controller routes.
-/// Dùng trong Program.cs: options.Conventions.Add(new ApiPrefixRouteConvention("product"))
-/// </summary>
 public class ApiPrefixRouteConvention : IApplicationModelConvention
 {
     private readonly string _servicePrefix;

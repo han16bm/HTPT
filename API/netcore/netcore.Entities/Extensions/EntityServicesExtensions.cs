@@ -10,10 +10,6 @@ namespace netcore.Entities.Extensions;
 
 public static class EntityServicesExtensions
 {
-    /// <summary>
-    /// Đăng ký DbContext (SQL Server) + IUnitOfWork vào DI container.
-    /// Gọi trong Program.cs của mỗi API service.
-    /// </summary>
     public static IServiceCollection AddEntityServices(
         this IServiceCollection services,
         IConfiguration configuration)
