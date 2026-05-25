@@ -136,9 +136,9 @@ GO
 CREATE TABLE dbo.CATEGORIES (
     ID            DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
     CATEGORY_CODE VARCHAR(30)   NULL,
-    NAME          VARCHAR(150)  NOT NULL,
+    NAME          NVARCHAR(150) NOT NULL,
     SLUG          VARCHAR(200)  NOT NULL UNIQUE,
-    DESCRIPTION   VARCHAR(1000) NULL,
+    DESCRIPTION   NVARCHAR(1000) NULL,
     IMAGE_URL     VARCHAR(500)  NULL,
     PARENT_ID     DECIMAL(18,0) NULL,
     DISPLAY_ORDER DECIMAL(18,0) DEFAULT 0,
@@ -152,10 +152,10 @@ CREATE TABLE dbo.PRODUCTS (
     CATEGORY_ID       DECIMAL(18,0) NOT NULL,
     PRODUCT_CODE      VARCHAR(30)   NULL,
     SKU               VARCHAR(50)   NULL,
-    NAME              VARCHAR(200)  NOT NULL,
+    NAME              NVARCHAR(200) NOT NULL,
     SLUG              VARCHAR(250)  NOT NULL UNIQUE,
-    DESCRIPTION       VARCHAR(MAX)  NULL,
-    SHORT_DESCRIPTION VARCHAR(500)  NULL,
+    DESCRIPTION       NVARCHAR(MAX) NULL,
+    SHORT_DESCRIPTION NVARCHAR(500) NULL,
     IMAGE_URL         VARCHAR(500)  NULL,
     COST_PRICE        DECIMAL(18,2) DEFAULT 0,
     SALE_PRICE        DECIMAL(18,2) NULL,
@@ -176,7 +176,7 @@ CREATE TABLE dbo.PRODUCT_IMAGES (
     ID            DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
     PRODUCT_ID    DECIMAL(18,0) NOT NULL,
     IMAGE_URL     VARCHAR(1000) NOT NULL,
-    ALT_TEXT      VARCHAR(255)  NULL,
+    ALT_TEXT      NVARCHAR(255) NULL,
     IS_PRIMARY    BIT           DEFAULT 0,
     DISPLAY_ORDER INT           DEFAULT 0,
     CREATED_AT    DATETIME2     DEFAULT SYSUTCDATETIME(),
@@ -201,7 +201,7 @@ CREATE TABLE dbo.INVENTORY_TRANSACTIONS (
     UNIT_COST        DECIMAL(18,2) NULL,
     REFERENCE_TYPE   VARCHAR(50)   NULL,
     REFERENCE_ID     DECIMAL(18,0) NULL,
-    NOTE             VARCHAR(500)  NULL,
+    NOTE             NVARCHAR(500) NULL,
     CREATED_BY       DECIMAL(18,0) NULL,
     CREATED_AT       DATETIME2     DEFAULT SYSUTCDATETIME(),
     CONSTRAINT FK_INVENTORY_TRANSACTIONS_PRODUCTS FOREIGN KEY (PRODUCT_ID) REFERENCES dbo.PRODUCTS(ID)
@@ -211,17 +211,17 @@ CREATE TABLE dbo.INVENTORY_TRANSACTIONS (
 
 SET IDENTITY_INSERT dbo.CATEGORIES ON;
 INSERT INTO dbo.CATEGORIES (ID, CATEGORY_CODE, NAME, SLUG, DESCRIPTION, STATUS) VALUES
-(1, 'C1', 'Ca Canh',           'ca-canh',  'Cac loai ca canh dep',         1),
-(2, 'C2', 'Phu Kien',          'phu-kien', 'Phu kien ho ca',               1),
-(3, 'C3', 'Thuc An',           'thuc-an',  'Thuc an dinh duong cho ca',    1);
+(1, 'C1', N'Cá cảnh',           'ca-canh',  N'Các loại cá cảnh đẹp',         1),
+(2, 'C2', N'Phụ kiện',          'phu-kien', N'Phụ kiện hồ cá',               1),
+(3, 'C3', N'Thức ăn',           'thuc-an',  N'Thức ăn dinh dưỡng cho cá',    1);
 SET IDENTITY_INSERT dbo.CATEGORIES OFF;
 
 SET IDENTITY_INSERT dbo.PRODUCTS ON;
 INSERT INTO dbo.PRODUCTS (ID, CATEGORY_ID, PRODUCT_CODE, NAME, SLUG, SALE_PRICE, DESCRIPTION, IMAGE_URL, STATUS) VALUES
-(1, 1, 'P1', 'Ca Betta Rong Do',       'ca-betta-rong-do',       50000.00, 'Ca Betta Rong Do cuc dep',       'betta-red.jpg',   1),
-(2, 1, 'P2', 'Ca Bay Mau Thai',        'ca-bay-mau-thai',        25000.00, 'Ca Bay Mau Thai thuan chung',    'guppy-thai.jpg',  1),
-(3, 2, 'P3', 'May bom chim 5W',        'may-bom-chim-5w',        65000.00, 'Bom nuoc ho ca loai nho',        'bom-5w.jpg',      1),
-(4, 3, 'P4', 'Cam ca Tetra Color 50g', 'cam-ca-tetra-color-50g', 85000.00, 'Thuc an len mau cho ca',         'tetra-color.jpg', 1);
+(1, 1, 'P1', N'Cá Betta Rồng Đỏ',       'ca-betta-rong-do',       50000.00, N'Cá Betta Rồng Đỏ cực đẹp',       'betta-red.jpg',   1),
+(2, 1, 'P2', N'Cá Bảy Màu Thái',        'ca-bay-mau-thai',        25000.00, N'Cá Bảy Màu Thái thuần chủng',    'guppy-thai.jpg',  1),
+(3, 2, 'P3', N'Máy bơm chìm 5W',        'may-bom-chim-5w',        65000.00, N'Bơm nước hồ cá loại nhỏ',        'bom-5w.jpg',      1),
+(4, 3, 'P4', N'Cám cá Tetra Color 50g', 'cam-ca-tetra-color-50g', 85000.00, N'Thức ăn lên màu cho cá',         'tetra-color.jpg', 1);
 SET IDENTITY_INSERT dbo.PRODUCTS OFF;
 
 INSERT INTO dbo.INVENTORY (PRODUCT_ID, STOCK_QUANTITY, RESERVED_QUANTITY, WAREHOUSE_LOCATION) VALUES
@@ -273,9 +273,9 @@ CREATE TABLE dbo.CART_ITEMS (
 
 CREATE TABLE dbo.PROMOTIONS (
     ID                DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
-    PROMO_CODE        VARCHAR(30)   NOT NULL UNIQUE,
-    TITLE             VARCHAR(150)  NOT NULL,
-    DESCRIPTION       VARCHAR(1000) NULL,
+    PROMO_CODE        VARCHAR(50)   NOT NULL UNIQUE,
+    TITLE             NVARCHAR(200) NOT NULL,
+    DESCRIPTION       NVARCHAR(1000) NULL,
     DISCOUNT_TYPE     VARCHAR(20)   NOT NULL,
     DISCOUNT_VALUE    DECIMAL(18,2) NOT NULL,
     MIN_ORDER_VALUE   DECIMAL(18,2) DEFAULT 0,
@@ -343,7 +343,7 @@ CREATE TABLE dbo.PAYMENTS (
     AMOUNT          DECIMAL(18,2) NOT NULL,
     TRANSACTION_REF VARCHAR(100)  NULL,
     PAID_AT         DATETIME2     NULL,
-    NOTE            VARCHAR(500)  NULL,
+    NOTE            NVARCHAR(500) NULL,
     CREATED_AT      DATETIME2     DEFAULT SYSUTCDATETIME(),
     UPDATED_AT      DATETIME2     DEFAULT SYSUTCDATETIME(),
     CONSTRAINT FK_PAYMENTS_ORDERS FOREIGN KEY (ORDER_ID) REFERENCES dbo.ORDERS(ID)
@@ -370,8 +370,8 @@ CREATE TABLE dbo.PROMOTION_USAGES (
 
 SET IDENTITY_INSERT dbo.PROMOTIONS ON;
 INSERT INTO dbo.PROMOTIONS (ID, PROMO_CODE, TITLE, DISCOUNT_TYPE, DISCOUNT_VALUE, START_AT, END_AT, STATUS) VALUES
-(1, 'WELCOME',  'Chao ban moi',  'PERCENT', 10.00,    DATEADD(day, -1, GETDATE()), DATEADD(year, 1, GETDATE()), 1),
-(2, 'FREESHIP', 'Freeship don',  'AMOUNT',  30000.00, DATEADD(day, -1, GETDATE()), DATEADD(year, 1, GETDATE()), 1);
+(1, 'WELCOME',  N'Chào bạn mới',   'PERCENT', 10.00,    DATEADD(day, -1, GETDATE()), DATEADD(year, 1, GETDATE()), 1),
+(2, 'FREESHIP', N'Freeship đơn',   'AMOUNT',  30000.00, DATEADD(day, -1, GETDATE()), DATEADD(year, 1, GETDATE()), 1);
 SET IDENTITY_INSERT dbo.PROMOTIONS OFF;
 
 
@@ -396,9 +396,9 @@ GO
 
 CREATE TABLE dbo.BLOG_CATEGORIES (
     ID          DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
-    NAME        VARCHAR(150) NOT NULL,
+    NAME        NVARCHAR(150) NOT NULL,
     SLUG        VARCHAR(200) NOT NULL UNIQUE,
-    DESCRIPTION VARCHAR(500) NULL,
+    DESCRIPTION NVARCHAR(500) NULL,
     STATUS      BIT          DEFAULT 1,
     CREATED_AT  DATETIME2    DEFAULT SYSUTCDATETIME(),
     UPDATED_AT  DATETIME2    DEFAULT SYSUTCDATETIME()
@@ -407,10 +407,10 @@ CREATE TABLE dbo.BLOG_CATEGORIES (
 CREATE TABLE dbo.BLOG_POSTS (
     ID            DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
     CATEGORY_ID   DECIMAL(18,0) NOT NULL,
-    TITLE         VARCHAR(200)  NOT NULL,
-    SLUG          VARCHAR(250)  NOT NULL UNIQUE,
-    SUMMARY       VARCHAR(500)  NULL,
-    CONTENT       VARCHAR(MAX)  NULL,
+    TITLE         NVARCHAR(300) NOT NULL,
+    SLUG          VARCHAR(300)  NOT NULL UNIQUE,
+    SUMMARY       NVARCHAR(1000) NULL,
+    CONTENT       NVARCHAR(MAX) NULL,
     THUMBNAIL_URL VARCHAR(500)  NULL,
     AUTHOR_ID     DECIMAL(18,0) NULL,
     PUBLISHED_AT  DATETIME2     NULL,
@@ -423,11 +423,11 @@ CREATE INDEX IDX_BLOG_POSTS_CATEGORY_ID ON dbo.BLOG_POSTS(CATEGORY_ID);
 
 CREATE TABLE dbo.CONTACT_MESSAGES (
     ID         DECIMAL(18,0) IDENTITY(1,1) PRIMARY KEY,
-    FULL_NAME  VARCHAR(150) NOT NULL,
+    FULL_NAME  NVARCHAR(150) NOT NULL,
     EMAIL      VARCHAR(150) NULL,
     PHONE      VARCHAR(20)  NULL,
-    SUBJECT    VARCHAR(200) NULL,
-    MESSAGE    VARCHAR(MAX) NOT NULL,
+    SUBJECT    NVARCHAR(200) NULL,
+    MESSAGE    NVARCHAR(MAX) NOT NULL,
     STATUS     VARCHAR(20)  DEFAULT 'NEW',
     CREATED_AT DATETIME2    DEFAULT SYSUTCDATETIME(),
     UPDATED_AT DATETIME2    DEFAULT SYSUTCDATETIME()
@@ -437,15 +437,15 @@ CREATE TABLE dbo.CONTACT_MESSAGES (
 
 SET IDENTITY_INSERT dbo.BLOG_CATEGORIES ON;
 INSERT INTO dbo.BLOG_CATEGORIES (ID, NAME, SLUG) VALUES
-(1, 'Kien Thuc Nuoi Ca', 'kien-thuc-nuoi-ca'),
-(2, 'Tin Tuc Khuyen Mai', 'tin-tuc-khuyen-mai');
+(1, N'Kiến thức nuôi cá', 'kien-thuc-nuoi-ca'),
+(2, N'Tin tức khuyến mãi', 'tin-tuc-khuyen-mai');
 SET IDENTITY_INSERT dbo.BLOG_CATEGORIES OFF;
 
 SET IDENTITY_INSERT dbo.BLOG_POSTS ON;
 INSERT INTO dbo.BLOG_POSTS (ID, CATEGORY_ID, AUTHOR_ID, TITLE, SLUG, SUMMARY, CONTENT, STATUS) VALUES
-(1, 1, 1, 'Cach cham soc ca Betta', 'cach-cham-soc-ca-betta', 'Huong dan chi tiet',  '<p>Ca Betta rat de nuoi...</p>', 'PUBLISHED'),
-(2, 2, 1, 'Khuyen mai thang 5',     'khuyen-mai-thang-5',     'Co hoi mua sam',      '<p>Nhap ma WELCOME...</p>',     'PUBLISHED');
+(1, 1, 1, N'Cách chăm sóc cá Betta', 'cach-cham-soc-ca-betta', N'Hướng dẫn chi tiết cách chuẩn bị hồ, cho ăn và giữ nước ổn định cho cá Betta.',  N'<p>Cá Betta dễ nuôi, nhưng cần nước sạch, nhiệt độ ổn định và lượng thức ăn vừa đủ để luôn khỏe mạnh.</p>', 'PUBLISHED'),
+(2, 2, 1, N'Khuyến mãi tháng 5',     'khuyen-mai-thang-5',     N'Cập nhật các ưu đãi mới nhất cho cá cảnh, phụ kiện và thức ăn.',      N'<p>Nhập mã WELCOME khi mua hàng để nhận ưu đãi cho đơn đầu tiên.</p>',     'PUBLISHED');
 SET IDENTITY_INSERT dbo.BLOG_POSTS OFF;
 
-PRINT 'FishShop — Full setup hoan tat: 4 database + seed data da san sang.';
+PRINT N'FishShop - Full setup hoàn tất: 4 database + seed data đã sẵn sàng.';
 GO

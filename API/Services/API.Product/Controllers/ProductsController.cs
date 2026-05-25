@@ -26,7 +26,7 @@ public class ProductsController : BaseApiController
     public async Task<ApiResponse<PagedResult<ProductListDto>>> GetAll([FromQuery] ProductQuery query, CancellationToken ct)
     {
         var result = await _service.GetAllAsync(query, ct);
-        return ApiResponse.Ok(result, "Lay danh sach san pham thanh cong");
+        return ApiResponse.Ok(result, "Lấy danh sách sản phẩm thành công");
     }
 
     // GET /api/product/products/featured?top=8
@@ -34,7 +34,7 @@ public class ProductsController : BaseApiController
     public async Task<ApiResponse<List<ProductListDto>>> GetFeatured([FromQuery] int top = 8, CancellationToken ct = default)
     {
         var result = await _service.GetNoiBatAsync(top, ct);
-        return ApiResponse.Ok(result, "Lay san pham noi bat thanh cong");
+        return ApiResponse.Ok(result, "Lấy sản phẩm nổi bật thành công");
     }
 
     // GET /api/product/products/slug/ca-betta
@@ -42,7 +42,7 @@ public class ProductsController : BaseApiController
     public async Task<ApiResponse<ProductDto>> GetBySlug([FromRoute] string slug, CancellationToken ct)
     {
         var result = await _service.GetBySlugAsync(slug, ct);
-        return ApiResponse.Ok(result, "Lay san pham thanh cong");
+        return ApiResponse.Ok(result, "Lấy sản phẩm thành công");
     }
 
     // GET /api/product/products/1
@@ -50,7 +50,7 @@ public class ProductsController : BaseApiController
     public async Task<ApiResponse<ProductDto>> GetById([FromRoute] long id, CancellationToken ct)
     {
         var result = await _service.GetByIdAsync(id, ct);
-        return ApiResponse.Ok(result, "Lay chi tiet san pham thanh cong");
+        return ApiResponse.Ok(result, "Lấy chi tiết sản phẩm thành công");
     }
 
     // POST /api/product/products
@@ -61,7 +61,7 @@ public class ProductsController : BaseApiController
     {
         request.Id = null;
         var result = await _service.UpsertAsync(request, ct);
-        return ApiResponse.Ok(result, "Them san pham thanh cong");
+        return ApiResponse.Ok(result, "Thêm sản phẩm thành công");
     }
 
     // PUT /api/product/products/1
@@ -75,7 +75,7 @@ public class ProductsController : BaseApiController
     {
         request.Id = id;
         var result = await _service.UpsertAsync(request, ct);
-        return ApiResponse.Ok(result, "Cap nhat san pham thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật sản phẩm thành công");
     }
 
     // DELETE /api/product/products/1
@@ -84,7 +84,7 @@ public class ProductsController : BaseApiController
     public async Task<ApiResponse> Delete([FromRoute] long id, CancellationToken ct)
     {
         await _service.DeleteAsync(new DeleteProductRequest { Id = id }, ct);
-        return ApiResponse.OkEmpty("Xoa san pham thanh cong");
+        return ApiResponse.OkEmpty("Xóa sản phẩm thành công");
     }
 
     // GET /api/product/products/health

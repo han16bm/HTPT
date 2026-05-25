@@ -13,9 +13,9 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
         entity.Property(e => e.CategoryCode).HasMaxLength(30).IsUnicode(false).HasColumnName("CATEGORY_CODE");
-        entity.Property(e => e.Name).HasMaxLength(150).IsUnicode(false).HasColumnName("NAME");
+        entity.Property(e => e.Name).HasMaxLength(150).HasColumnName("NAME");
         entity.Property(e => e.Slug).HasMaxLength(200).IsUnicode(false).HasColumnName("SLUG");
-        entity.Property(e => e.Description).HasMaxLength(1000).IsUnicode(false).HasColumnName("DESCRIPTION");
+        entity.Property(e => e.Description).HasMaxLength(1000).HasColumnName("DESCRIPTION");
         entity.Property(e => e.ImageUrl).HasMaxLength(500).IsUnicode(false).HasColumnName("IMAGE_URL");
         entity.Property(e => e.ParentId).HasColumnName("PARENT_ID");
         entity.Property(e => e.DisplayOrder).HasDefaultValueSql("0").HasColumnName("DISPLAY_ORDER");

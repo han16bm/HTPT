@@ -51,6 +51,18 @@ public class OrderService : IOrderService
         if (!cartItems.Any())
             throw new MessageException("Giỏ hàng trống.");
 
+        var productInfos = new Dictionary<decimal, ProductDtoInfo>();
+        foreach (var item in cartItems)
+        {
+            var product = await GetProductInfoAsync((long)item.ProductId, ct);
+            if (product.StockQuantity < item.Quantity)
+            {
+                throw new MessageException($"'{product.Name}' không đủ hàng (còn {product.StockQuantity}).");
+            }
+
+            productInfos[item.ProductId] = product;
+        }
+
         // Validate và áp promotion
         decimal discountAmount = 0;
         Promotion? promotion = null;
@@ -124,12 +136,13 @@ public class OrderService : IOrderService
 
             foreach (var ci in cartItems)
             {
+                var product = productInfos[ci.ProductId];
                 await _uow.OrderItems.AddAsync(new OrderItem
                 {
                     OrderId = order.Id,
                     ProductId = ci.ProductId,
-                    ProductName = ci.ProductName ?? string.Empty,
-                    ImageUrl = ci.ImageUrl,
+                    ProductName = product.Name,
+                    ImageUrl = product.ImageUrl ?? ci.ImageUrl,
                     Quantity = ci.Quantity,
                     UnitPrice = ci.UnitPrice,
                     DiscountAmount = 0,

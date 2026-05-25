@@ -14,8 +14,8 @@ public class ProductImageConfiguration : IEntityTypeConfiguration<ProductImage>
 
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
         entity.Property(e => e.ProductId).HasColumnName("PRODUCT_ID");
-        entity.Property(e => e.ImageUrl).HasMaxLength(500).IsUnicode(false).HasColumnName("IMAGE_URL");
-        entity.Property(e => e.AltText).HasMaxLength(255).IsUnicode(false).HasColumnName("ALT_TEXT");
+        entity.Property(e => e.ImageUrl).HasMaxLength(1000).IsUnicode(false).HasColumnName("IMAGE_URL");
+        entity.Property(e => e.AltText).HasMaxLength(255).HasColumnName("ALT_TEXT");
         entity.Property(e => e.IsPrimary).HasDefaultValueSql("0").HasColumnName("IS_PRIMARY");
         entity.Property(e => e.DisplayOrder).HasDefaultValueSql("0").HasColumnName("DISPLAY_ORDER");
         entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("CREATED_AT");

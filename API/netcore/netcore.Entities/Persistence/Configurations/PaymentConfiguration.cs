@@ -20,7 +20,7 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValueSql("'PENDING' ").HasColumnName("STATUS");
         entity.Property(e => e.TransactionRef).HasMaxLength(100).IsUnicode(false).HasColumnName("TRANSACTION_REF");
         entity.Property(e => e.PaidAt).HasColumnName("PAID_AT");
-        entity.Property(e => e.Note).HasMaxLength(500).IsUnicode(false).HasColumnName("NOTE");
+        entity.Property(e => e.Note).HasMaxLength(500).HasColumnName("NOTE");
         entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("CREATED_AT");
         entity.Property(e => e.UpdatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("UPDATED_AT");
     }

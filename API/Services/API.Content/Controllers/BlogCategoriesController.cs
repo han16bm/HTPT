@@ -32,7 +32,7 @@ public class BlogCategoriesController : BaseApiController
     {
         request.Id = null;
         var result = await _service.UpsertCategoryAsync(request, ct);
-        return ApiResponse.Ok(result, "Them danh muc thanh cong");
+        return ApiResponse.Ok(result, "Thêm danh mục thành công");
     }
 
     // PUT /api/content/blog-categories/1
@@ -45,6 +45,6 @@ public class BlogCategoriesController : BaseApiController
     {
         request.Id = id;
         var result = await _service.UpsertCategoryAsync(request, ct);
-        return ApiResponse.Ok(result, "Cap nhat danh muc thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật danh mục thành công");
     }
 }

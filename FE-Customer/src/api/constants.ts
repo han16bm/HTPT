@@ -40,5 +40,6 @@ export const API_ENDPOINTS = {
   // Blog and Content
   BLOG: '/content/blogs',
   BLOG_DETAIL: (slug: string) => `/content/blogs/slug/${encodeURIComponent(slug)}`,
+  BLOG_CATEGORIES: '/content/blog-categories',
   CONTACT_SEND: '/content/contacts',
 };

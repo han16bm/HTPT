@@ -16,10 +16,10 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         entity.Property(e => e.CategoryId).HasColumnName("CATEGORY_ID");
         entity.Property(e => e.ProductCode).HasMaxLength(30).IsUnicode(false).HasColumnName("PRODUCT_CODE");
         entity.Property(e => e.Sku).HasMaxLength(50).IsUnicode(false).HasColumnName("SKU");
-        entity.Property(e => e.Name).HasMaxLength(200).IsUnicode(false).HasColumnName("NAME");
+        entity.Property(e => e.Name).HasMaxLength(200).HasColumnName("NAME");
         entity.Property(e => e.Slug).HasMaxLength(250).IsUnicode(false).HasColumnName("SLUG");
         entity.Property(e => e.Description).HasColumnName("DESCRIPTION");
-        entity.Property(e => e.ShortDescription).HasMaxLength(500).IsUnicode(false).HasColumnName("SHORT_DESCRIPTION");
+        entity.Property(e => e.ShortDescription).HasMaxLength(500).HasColumnName("SHORT_DESCRIPTION");
         entity.Property(e => e.ImageUrl).HasMaxLength(500).IsUnicode(false).HasColumnName("IMAGE_URL");
         entity.Property(e => e.CostPrice).HasDefaultValueSql("0").HasColumnName("COST_PRICE");
         entity.Property(e => e.SalePrice).HasColumnName("SALE_PRICE");

@@ -1,0 +1,76 @@
+@baseUrl = http://localhost:5000
+@customerUsername = customer01
+@customerPassword = 123456
+@productId = 1
+@productName = Cá Betta Rồng Đỏ
+@unitPrice = 50000
+
+### Health - User
+GET {{baseUrl}}/api/user/auth/health
+
+### Health - Product
+GET {{baseUrl}}/api/product/products/health
+
+### Health - Order
+GET {{baseUrl}}/api/order/orders/health
+
+### Health - Content
+GET {{baseUrl}}/api/content/blogs/health
+
+### Login customer
+# @name login
+POST {{baseUrl}}/api/user/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{customerUsername}}",
+  "password": "{{customerPassword}}"
+}
+
+### Product detail before ordering
+GET {{baseUrl}}/api/product/products/{{productId}}
+
+### Clear current cart
+DELETE {{baseUrl}}/api/order/cart
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+
+### Add item to cart
+POST {{baseUrl}}/api/order/cart/items
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+Content-Type: application/json
+
+{
+  "productId": {{productId}},
+  "quantity": 1,
+  "productName": "{{productName}}",
+  "unitPrice": {{unitPrice}},
+  "imageUrl": "betta-red.jpg"
+}
+
+### Current cart
+GET {{baseUrl}}/api/order/cart
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+
+### Create order from cart
+# @name createOrder
+POST {{baseUrl}}/api/order/orders
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+Content-Type: application/json
+
+{
+  "paymentMethod": "COD",
+  "shippingFee": 0,
+  "note": "Test luồng liên service"
+}
+
+### My orders
+GET {{baseUrl}}/api/order/orders/me?page=1&pageSize=5
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+
+### Created order detail
+GET {{baseUrl}}/api/order/orders/{{createOrder.response.body.$.data.orderCode}}
+Authorization: Bearer {{login.response.body.$.data.accessToken}}
+
+### Product detail after RabbitMQ consumer runs
+# Stock should decrease by 1 after API.Product consumes OrderCreatedEvent.
+GET {{baseUrl}}/api/product/products/{{productId}}

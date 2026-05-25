@@ -10,7 +10,7 @@ import {
   CarOutlined, BankOutlined,
 } from '@ant-design/icons';
 import { CustomerLayout } from '@/components/Layout';
-import { cartService, orderService, type CartItem, type CreateOrderRequest, type PromotionDiscountType } from '@/api';
+import { authService, cartService, orderService, type CartItem, type CreateOrderRequest, type PromotionDiscountType } from '@/api';
 import { formatVND } from '@/utils/format';
 import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import { calcShipping } from '@/constants/shipping';
@@ -26,6 +26,19 @@ interface AppliedPromo {
   discountValue: number;
 }
 
+interface CheckoutFormValues {
+  customerName: string;
+  customerPhone: string;
+  email?: string;
+  province: string;
+  district: string;
+  addressDetail: string;
+  note?: string;
+}
+
+const joinAddress = (...parts: Array<string | undefined>) =>
+  parts.map(part => part?.trim()).filter(Boolean).join(', ');
+
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +53,10 @@ const Checkout: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [orderId, setOrderId] = useState<number | null>(null);
 
-  useEffect(() => { fetchCart(); }, []);
+  useEffect(() => {
+    fetchCart();
+    prefillProfile();
+  }, []);
 
   const fetchCart = async () => {
     setLoading(true);
@@ -63,6 +79,37 @@ const Checkout: React.FC = () => {
     }
   };
 
+  const prefillProfile = async () => {
+    try {
+      const resp = await authService.getProfile();
+      const profile = resp.success && resp.data ? resp.data : authService.getCurrentUser();
+      if (!profile) {
+        return;
+      }
+
+      form.setFieldsValue({
+        customerName: profile.fullName || profile.username || '',
+        customerPhone: profile.phone || '',
+        email: profile.email || '',
+        province: profile.province || '',
+        district: profile.district || '',
+        addressDetail: joinAddress(profile.addressLine, profile.ward) || profile.address || '',
+      });
+    } catch {
+      const profile = authService.getCurrentUser();
+      if (profile) {
+        form.setFieldsValue({
+          customerName: profile.fullName || profile.username || '',
+          customerPhone: profile.phone || '',
+          email: profile.email || '',
+          province: profile.province || '',
+          district: profile.district || '',
+          addressDetail: joinAddress(profile.addressLine, profile.ward) || profile.address || '',
+        });
+      }
+    }
+  };
+
   const shipping = calcShipping(total);
   const discountAmt = appliedPromo
     ? appliedPromo.discountType === 'PERCENT'
@@ -80,20 +127,14 @@ const Checkout: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values: {
-    customerName: string;
-    customerPhone: string;
-    province: string;
-    district: string;
-    addressDetail: string;
-    note?: string;
-  }) => {
+  const handleSubmit = async (values: CheckoutFormValues) => {
     setSubmitting(true);
     try {
       const orderData: CreateOrderRequest = {
         customerName: values.customerName,
         customerPhone: values.customerPhone,
-        shippingAddress: `${values.customerName} | ${values.customerPhone} | ${values.addressDetail}, ${values.district}, ${values.province}`,
+        customerEmail: values.email,
+        shippingAddress: joinAddress(values.addressDetail, values.district, values.province),
         paymentMethod: paymentMethod === 'cod' ? 'COD' : 'BANK_TRANSFER',
         note: values.note,
         shippingFee: shipping,

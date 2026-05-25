@@ -115,9 +115,23 @@ public class PermissionValidationMiddleware
             var path = normalizedRule[(spaceIndex + 1)..].Trim().ToLowerInvariant();
 
             return requestMethod.Equals(method, StringComparison.OrdinalIgnoreCase)
-                && requestPath.StartsWith(path, StringComparison.OrdinalIgnoreCase);
+                && PathMatchesRule(path, requestPath);
         }
 
-        return requestPath.StartsWith(normalizedRule.ToLowerInvariant(), StringComparison.OrdinalIgnoreCase);
+        return PathMatchesRule(normalizedRule.ToLowerInvariant(), requestPath);
+    }
+
+    private static bool PathMatchesRule(string rulePath, string requestPath)
+    {
+        const string wildcardSuffix = "/**";
+
+        if (rulePath.EndsWith(wildcardSuffix, StringComparison.Ordinal))
+        {
+            var prefix = rulePath[..^wildcardSuffix.Length].TrimEnd('/');
+            return requestPath.Equals(prefix, StringComparison.OrdinalIgnoreCase)
+                || requestPath.StartsWith(prefix + "/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return requestPath.Equals(rulePath.TrimEnd('/'), StringComparison.OrdinalIgnoreCase);
     }
 }

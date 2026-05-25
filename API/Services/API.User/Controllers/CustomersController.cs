@@ -42,7 +42,7 @@ public class CustomersController : BaseApiController
         CancellationToken ct)
     {
         var result = await _service.CreateAsync(request, ct);
-        return ApiResponse.Ok(result, "Tao khach hang thanh cong");
+        return ApiResponse.Ok(result, "Tạo khách hàng thành công");
     }
 
     // PUT /api/user/customers/1
@@ -54,7 +54,7 @@ public class CustomersController : BaseApiController
     {
         request.Id = id;
         var result = await _service.UpsertAsync(request, ct);
-        return ApiResponse.Ok(result, "Cap nhat khach hang thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật khách hàng thành công");
     }
 
     // POST /api/user/customers/walk-ins
@@ -62,7 +62,7 @@ public class CustomersController : BaseApiController
     public async Task<ApiResponse<CustomerDetailDto>> CreateWalkIn([FromBody] CustomerWalkInRequest request, CancellationToken ct)
     {
         var result = await _service.CreateWalkInAsync(request, ct);
-        return ApiResponse.Ok(result, "Tao khach hang vang lai thanh cong");
+        return ApiResponse.Ok(result, "Tạo khách hàng vãng lai thành công");
     }
 
     // DELETE /api/user/customers/1
@@ -70,6 +70,6 @@ public class CustomersController : BaseApiController
     public async Task<ApiResponse> Delete([FromRoute] long id, CancellationToken ct)
     {
         await _service.DeleteAsync(id, ct);
-        return ApiResponse.OkEmpty("Xoa khach hang thanh cong");
+        return ApiResponse.OkEmpty("Xóa khách hàng thành công");
     }
 }

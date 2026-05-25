@@ -12,9 +12,9 @@ public class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
         entity.HasKey(e => e.Id).HasName("SYS_C008425");
 
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
-        entity.Property(e => e.PromoCode).HasMaxLength(30).IsUnicode(false).HasColumnName("PROMO_CODE");
-        entity.Property(e => e.Title).HasMaxLength(200).IsUnicode(false).HasColumnName("TITLE");
-        entity.Property(e => e.Description).HasMaxLength(1000).IsUnicode(false).HasColumnName("DESCRIPTION");
+        entity.Property(e => e.PromoCode).HasMaxLength(50).IsUnicode(false).HasColumnName("PROMO_CODE");
+        entity.Property(e => e.Title).HasMaxLength(200).HasColumnName("TITLE");
+        entity.Property(e => e.Description).HasMaxLength(1000).HasColumnName("DESCRIPTION");
         entity.Property(e => e.DiscountType).HasMaxLength(20).IsUnicode(false).HasColumnName("DISCOUNT_TYPE");
         entity.Property(e => e.DiscountValue).HasColumnName("DISCOUNT_VALUE");
         entity.Property(e => e.MaxDiscountValue).HasColumnName("MAX_DISCOUNT_VALUE");

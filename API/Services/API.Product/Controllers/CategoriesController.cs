@@ -26,7 +26,7 @@ public class CategoriesController : BaseApiController
     public async Task<ApiResponse<List<CategoryDto>>> GetAll([FromQuery] CategoryQuery query, CancellationToken ct)
     {
         var result = await _service.GetAllAsync(query, ct);
-        return ApiResponse.Ok(result, "Lay danh sach danh muc thanh cong");
+        return ApiResponse.Ok(result, "Lấy danh sách danh mục thành công");
     }
 
     // GET /api/product/categories/tree
@@ -34,7 +34,7 @@ public class CategoriesController : BaseApiController
     public async Task<ApiResponse<List<CategoryDto>>> GetTree(CancellationToken ct)
     {
         var result = await _service.GetTreeAsync(ct);
-        return ApiResponse.Ok(result, "Lay cay danh muc thanh cong");
+        return ApiResponse.Ok(result, "Lấy cây danh mục thành công");
     }
 
     // GET /api/product/categories/1
@@ -42,7 +42,7 @@ public class CategoriesController : BaseApiController
     public async Task<ApiResponse<CategoryDto>> GetById([FromRoute] long id, CancellationToken ct)
     {
         var result = await _service.GetByIdAsync(id, ct);
-        return ApiResponse.Ok(result, "Lay chi tiet danh muc thanh cong");
+        return ApiResponse.Ok(result, "Lấy chi tiết danh mục thành công");
     }
 
     // POST /api/product/categories
@@ -53,7 +53,7 @@ public class CategoriesController : BaseApiController
     {
         request.Id = null;
         var result = await _service.UpsertAsync(request, ct);
-        return ApiResponse.Ok(result, "Them danh muc thanh cong");
+        return ApiResponse.Ok(result, "Thêm danh mục thành công");
     }
 
     // PUT /api/product/categories/1
@@ -67,7 +67,7 @@ public class CategoriesController : BaseApiController
     {
         request.Id = id;
         var result = await _service.UpsertAsync(request, ct);
-        return ApiResponse.Ok(result, "Cap nhat danh muc thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật danh mục thành công");
     }
 
     // DELETE /api/product/categories/1
@@ -76,6 +76,6 @@ public class CategoriesController : BaseApiController
     public async Task<ApiResponse> Delete([FromRoute] long id, CancellationToken ct)
     {
         await _service.DeleteAsync(new DeleteCategoryRequest { Id = id }, ct);
-        return ApiResponse.OkEmpty("Xoa danh muc thanh cong");
+        return ApiResponse.OkEmpty("Xóa danh mục thành công");
     }
 }

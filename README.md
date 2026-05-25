@@ -40,8 +40,12 @@ FE Admin      FE Customer
 HTPT/
 |-- API/
 |   |-- API.sln
+|   |-- assets/
+|   |   +-- user/ product/ order/ content/  # Lưu ảnh upload, chỉ commit folder/.gitkeep
 |   |-- database/
 |   |   +-- sqlserver_full_setup.sql  # Tạo 4 database và seed dữ liệu mẫu
+|   |-- tests/
+|   |   +-- interservice-order-flow.http  # Test luồng liên service qua Gateway
 |   |-- Gateway/FishShop.Gateway/
 |   |-- netcore/netcore.Commons/
 |   |-- netcore/netcore.Entities/
@@ -136,12 +140,20 @@ Kiểm tra nhanh dữ liệu seed sau khi chạy script:
 sqlcmd -S localhost -U sa -P viet123 -d FishShop_Product -Q "SELECT TOP 5 ID, NAME, SALE_PRICE FROM dbo.PRODUCTS"
 ```
 
+Khi sửa dữ liệu seed trong `API/database/sqlserver_full_setup.sql`, cần chạy lại lệnh `sqlcmd` ở trên để xóa và tạo lại dữ liệu mẫu. Docker build không tự chạy lại seed database.
+
 ## Cách Chạy Backend Bằng Docker Compose
 
 Từ thư mục gốc dự án:
 
 ```powershell
 docker compose up --build
+```
+
+Khi sửa code backend và muốn chạy lại container, có thể dùng:
+
+```powershell
+docker compose up --build -d
 ```
 
 Các dịch vụ chính:
@@ -268,6 +280,16 @@ cd FE-Customer
 npm run build
 ```
 
+## Kiểm Thử Luồng Liên Service
+
+Sau khi đã chạy database seed và backend, có thể dùng REST Client trong VS Code hoặc import thủ công vào Postman theo file:
+
+```text
+API/tests/interservice-order-flow.http
+```
+
+File này kiểm tra luồng chính: health check các service, đăng nhập khách hàng, đọc sản phẩm qua `API.Product`, thêm giỏ hàng và đặt hàng qua `API.Order`, sau đó kiểm tra lại sản phẩm để xác nhận `API.Product` đã consume `OrderCreatedEvent` từ RabbitMQ và trừ tồn kho.
+
 ## Một Số RESTful API Chính
 
 Base URL qua Gateway:
@@ -315,7 +337,12 @@ Content:
 
 ```text
 GET   /api/content/blogs
+GET   /api/content/blog-categories
+GET   /api/content/blogs/{id}       # Admin
 GET   /api/content/blogs/slug/{slug}
+POST  /api/content/blogs
+PUT   /api/content/blogs/{id}
+DELETE /api/content/blogs/{id}
 POST  /api/content/contacts
 PATCH /api/content/contacts/{id}/status
 ```
@@ -344,6 +371,7 @@ docker compose up --build
 - `API.Order` tạo đơn và publish event.
 - `API.Product` chịu trách nhiệm tồn kho, consume event qua RabbitMQ để trừ kho và ghi lịch sử kho.
 - Gateway inject `X-Api-Key` vào request nội bộ để các service xác nhận request đi qua Gateway.
+- Public blog chỉ đọc danh sách và chi tiết theo slug; lấy blog theo id dùng cho admin.
 - Các endpoint cần đăng nhập dùng JWT Bearer token.
 
 ## Xử Lý Lỗi Thường Gặp

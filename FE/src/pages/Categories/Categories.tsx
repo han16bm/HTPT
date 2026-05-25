@@ -366,11 +366,11 @@ const Categories: React.FC = () => {
                 )}
                 <Space direction="vertical">
                   <Button icon={<UploadOutlined />} onClick={() => imageInputRef.current?.click()}>
-                    Chon file
+                    Chọn file
                   </Button>
                   {imagePreview && (
                     <Button danger onClick={handleImageRemove}>
-                      Xoa anh
+                      Xóa ảnh
                     </Button>
                   )}
                 </Space>

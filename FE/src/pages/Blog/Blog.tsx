@@ -70,7 +70,24 @@ const Blog: React.FC = () => {
   }, [thumbnailPreview]);
 
   const handleAdd = () => { setEditing(null); setIsModalOpen(true); };
-  const handleEdit = (r: BlogPost) => { setEditing(r); setIsModalOpen(true); };
+  const handleEdit = async (r: BlogPost) => {
+    try {
+      const detail = await blogService.getById(r.id);
+      setEditing(detail);
+      setIsModalOpen(true);
+    } catch (err) {
+      message.error((err as { message?: string }).message || 'Lỗi khi tải chi tiết bài viết');
+    }
+  };
+
+  const handlePreview = async (r: BlogPost) => {
+    try {
+      const detail = await blogService.getById(r.id);
+      setPreviewPost(detail);
+    } catch (err) {
+      message.error((err as { message?: string }).message || 'Lỗi khi tải chi tiết bài viết');
+    }
+  };
 
   const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -181,7 +198,7 @@ const Blog: React.FC = () => {
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
-          <Button size="small" onClick={() => setPreviewPost(record)}>Xem</Button>
+          <Button size="small" onClick={() => handlePreview(record)}>Xem</Button>
           <Button type="primary" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)} />
           <Popconfirm
             title="Xóa bài viết này?"
@@ -285,11 +302,11 @@ const Blog: React.FC = () => {
                 )}
                 <Space direction="vertical">
                   <Button icon={<UploadOutlined />} onClick={() => thumbnailInputRef.current?.click()}>
-                    Chon file
+                    Chọn file
                   </Button>
                   {thumbnailPreview && (
                     <Button danger onClick={handleThumbnailRemove}>
-                      Xoa anh
+                      Xóa ảnh
                     </Button>
                   )}
                 </Space>

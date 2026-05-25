@@ -1,6 +1,6 @@
 // ============================================
 // API constants — khớp Plan/07_API_CONTRACTS.md
-// URL pattern: /api/{service}/{controller}/{action}
+// URL pattern: /api/{service}/{resource}
 // ============================================
 
 export const HTTP_STATUS = {
@@ -74,7 +74,6 @@ export const API_ENDPOINTS = {
 
   // ===== Dashboard =====
   DASHBOARD_STATS: '/order/dashboard/stats',
-  DASHBOARD_CHARTS: '/order/dashboard/charts',
 
   // ===== Reports =====
   REPORT_REVENUE: '/order/reports/revenue',

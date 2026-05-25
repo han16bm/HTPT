@@ -31,7 +31,7 @@ public class ContactController : BaseApiController
     public async Task<ApiResponse<ContactDto>> Create([FromBody] SubmitContactRequest request, CancellationToken ct)
     {
         var result = await _service.SubmitAsync(request, ct);
-        return ApiResponse.Ok(result, "Gui lien he thanh cong");
+        return ApiResponse.Ok(result, "Gửi liên hệ thành công");
     }
 
     // PATCH /api/content/contacts/1/status
@@ -43,6 +43,6 @@ public class ContactController : BaseApiController
     {
         request.Id = id;
         var result = await _service.UpdateStatusAsync(request, ct);
-        return ApiResponse.Ok(result, "Cap nhat trang thai thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật trạng thái thành công");
     }
 }

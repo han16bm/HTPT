@@ -14,12 +14,12 @@ public class InventoryTransactionConfiguration : IEntityTypeConfiguration<Invent
 
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
         entity.Property(e => e.ProductId).HasColumnName("PRODUCT_ID");
-        entity.Property(e => e.TransactionType).HasMaxLength(20).IsUnicode(false).HasColumnName("TRANSACTION_TYPE");
+        entity.Property(e => e.TransactionType).HasMaxLength(50).IsUnicode(false).HasColumnName("TRANSACTION_TYPE");
         entity.Property(e => e.Quantity).HasColumnName("QUANTITY");
         entity.Property(e => e.UnitCost).HasColumnName("UNIT_COST");
-        entity.Property(e => e.ReferenceType).HasMaxLength(30).IsUnicode(false).HasColumnName("REFERENCE_TYPE");
+        entity.Property(e => e.ReferenceType).HasMaxLength(50).IsUnicode(false).HasColumnName("REFERENCE_TYPE");
         entity.Property(e => e.ReferenceId).HasColumnName("REFERENCE_ID");
-        entity.Property(e => e.Note).HasMaxLength(500).IsUnicode(false).HasColumnName("NOTE");
+        entity.Property(e => e.Note).HasMaxLength(500).HasColumnName("NOTE");
         entity.Property(e => e.CreatedBy).HasColumnName("CREATED_BY");
         entity.Property(e => e.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()").HasColumnName("CREATED_AT");
 

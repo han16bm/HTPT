@@ -20,6 +20,19 @@ import {
 import { CustomerLayout } from '@/components/Layout';
 import styles from './Profile.module.scss';
 
+const toProfileFormValues = (profile: User): Partial<UpdateProfileRequest> => ({
+  fullName: profile.fullName || '',
+  email: profile.email || '',
+  phone: profile.phone || '',
+  address: profile.address || '',
+  addressLine: profile.addressLine || '',
+  ward: profile.ward || '',
+  district: profile.district || '',
+  province: profile.province || '',
+  dateOfBirth: profile.dateOfBirth ? String(profile.dateOfBirth).slice(0, 10) : undefined,
+  gender: profile.gender || undefined,
+});
+
 const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,13 +48,7 @@ const Profile: React.FC = () => {
         const res = await authService.getProfile();
         if (res.success && res.data) {
           setUser(res.data);
-          form.setFieldsValue({
-            fullName: res.data.fullName || '',
-            email: res.data.email || '',
-            phone: res.data.phone || '',
-            dateOfBirth: res.data.dateOfBirth ? String(res.data.dateOfBirth).slice(0, 10) : undefined,
-            gender: res.data.gender || undefined,
-          });
+          form.setFieldsValue(toProfileFormValues(res.data));
           localStorage.setItem('customer_user', JSON.stringify(res.data));
           window.dispatchEvent(new Event('customer-user-updated'));
           return;
@@ -50,13 +57,7 @@ const Profile: React.FC = () => {
         const local = authService.getCurrentUser();
         if (local) {
           setUser(local);
-          form.setFieldsValue({
-            fullName: local.fullName || '',
-            email: local.email || '',
-            phone: local.phone || '',
-            dateOfBirth: local.dateOfBirth ? String(local.dateOfBirth).slice(0, 10) : undefined,
-            gender: local.gender || undefined,
-          });
+          form.setFieldsValue(toProfileFormValues(local));
         }
       } finally {
         setLoading(false);
@@ -76,13 +77,7 @@ const Profile: React.FC = () => {
       }
 
       setUser(res.data);
-      form.setFieldsValue({
-        fullName: res.data.fullName || '',
-        email: res.data.email || '',
-        phone: res.data.phone || '',
-        dateOfBirth: res.data.dateOfBirth ? String(res.data.dateOfBirth).slice(0, 10) : undefined,
-        gender: res.data.gender || undefined,
-      });
+      form.setFieldsValue(toProfileFormValues(res.data));
       localStorage.setItem('customer_user', JSON.stringify(res.data));
       window.dispatchEvent(new Event('customer-user-updated'));
       message.success('Cập nhật thông tin thành công');
@@ -171,6 +166,26 @@ const Profile: React.FC = () => {
 
                       <Form.Item label="Số điện thoại" name="phone">
                         <Input />
+                      </Form.Item>
+
+                      <Form.Item label="Tỉnh / Thành phố" name="province">
+                        <Input placeholder="TP. Hồ Chí Minh" />
+                      </Form.Item>
+
+                      <Form.Item label="Quận / Huyện" name="district">
+                        <Input placeholder="Quận 1" />
+                      </Form.Item>
+
+                      <Form.Item label="Phường / Xã" name="ward">
+                        <Input placeholder="Phường Bến Thành" />
+                      </Form.Item>
+
+                      <Form.Item label="Số nhà, tên đường" name="addressLine">
+                        <Input placeholder="12 Nguyễn Trãi" />
+                      </Form.Item>
+
+                      <Form.Item className={styles.wide} label="Địa chỉ đầy đủ" name="address">
+                        <Input disabled placeholder="Tự tổng hợp từ các ô địa chỉ" />
                       </Form.Item>
 
                       <Form.Item label="Ngày sinh" name="dateOfBirth">

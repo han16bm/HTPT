@@ -138,7 +138,7 @@ export const productService = {
       });
 
       if (!response.success || !response.data) {
-        throw new Error(response.error || 'Khong the tai danh sach san pham');
+        throw new Error(response.error || 'Không thể tải danh sách sản phẩm');
       }
 
       items.push(...response.data.items);

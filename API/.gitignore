@@ -251,11 +251,17 @@ log.txt
 src/DVC.DanhMuc/Properties/PublishProfiles/FolderProfile.pubxml
 src/DVC.DanhMuc/Properties/PublishProfiles/FolderProfile.pubxml
 
-# Keep source code for the API.User service. The Visual Studio pattern *.user
-# also matches folders named API.User, so explicitly unignore this service.
+# Keep source code for API service folders. The Visual Studio pattern *.user
+# can also match folders named API.User, so explicitly unignore service code.
 !Services/API.User/
 !Services/API.User/**
-Services/API.User/**/bin/
-Services/API.User/**/obj/
-Services/API.User/**/appsettings.Development.json
-Services/API.User/**/appsettings.Local.json
+!Services/API.Product/
+!Services/API.Product/**
+!Services/API.Order/
+!Services/API.Order/**
+!Services/API.Content/
+!Services/API.Content/**
+Services/API.*/**/bin/
+Services/API.*/**/obj/
+Services/API.*/**/appsettings.Development.json
+Services/API.*/**/appsettings.Local.json

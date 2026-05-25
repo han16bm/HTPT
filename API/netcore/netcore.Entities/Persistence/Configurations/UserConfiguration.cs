@@ -17,7 +17,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         entity.Property(e => e.Username).HasMaxLength(50).IsUnicode(false).HasColumnName("USERNAME");
         entity.Property(e => e.Email).HasMaxLength(150).IsUnicode(false).HasColumnName("EMAIL");
         entity.Property(e => e.PasswordHash).HasMaxLength(255).IsUnicode(false).HasColumnName("PASSWORD_HASH");
-        entity.Property(e => e.FullName).HasMaxLength(150).IsUnicode(false).HasColumnName("FULL_NAME");
+        entity.Property(e => e.FullName).HasMaxLength(150).HasColumnName("FULL_NAME");
         entity.Property(e => e.Phone).HasMaxLength(20).IsUnicode(false).HasColumnName("PHONE");
         entity.Property(e => e.AvatarUrl).HasMaxLength(500).IsUnicode(false).HasColumnName("AVATAR_URL");
         entity.Property(e => e.Status).HasDefaultValueSql("1").HasColumnName("STATUS");

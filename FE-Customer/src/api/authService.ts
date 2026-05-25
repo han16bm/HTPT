@@ -13,6 +13,11 @@ export interface User {
   fullName?: string;
   email?: string;
   phone?: string;
+  address?: string;
+  addressLine?: string;
+  ward?: string;
+  district?: string;
+  province?: string;
   dateOfBirth?: string;
   gender?: string;
   avatarUrl?: string;
@@ -26,6 +31,11 @@ export interface UpdateProfileRequest {
   fullName: string;
   email?: string;
   phone?: string;
+  address?: string;
+  addressLine?: string;
+  ward?: string;
+  district?: string;
+  province?: string;
   dateOfBirth?: string;
   gender?: string;
 }
@@ -61,7 +71,7 @@ const REFRESH_TOKEN_KEY = 'customer_refresh_token';
 const USER_KEY = 'customer_user';
 
 export const authService = {
-  /** Dang nhap - POST /api/user/auth/login */
+  /** Đăng nhập - POST /api/user/auth/login */
   login: async (data: LoginRequest): Promise<ApiResponse<LoginResponse>> => {
     const resp = await axiosClient.post<LoginResponse>(API_ENDPOINTS.LOGIN, data);
     if (resp.success && resp.data) {
@@ -75,9 +85,9 @@ export const authService = {
     return resp;
   },
 
-  /** Dang ky - POST /api/user/auth/register */
-  register: async (data: RegisterRequest): Promise<ApiResponse<User>> => {
-    return axiosClient.post<User>(API_ENDPOINTS.REGISTER, data);
+  /** Đăng ký - POST /api/user/auth/register */
+  register: async (data: RegisterRequest): Promise<ApiResponse<LoginResponse>> => {
+    return axiosClient.post<LoginResponse>(API_ENDPOINTS.REGISTER, data);
   },
 
   /** Đăng xuất — gọi POST /api/user/auth/logout */

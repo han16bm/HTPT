@@ -184,6 +184,8 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
+dist/
+*.tsbuildinfo
 orleans.codegen.cs
 
 # RIA/Silverlight projects
@@ -251,11 +253,17 @@ log.txt
 src/DVC.DanhMuc/Properties/PublishProfiles/FolderProfile.pubxml
 src/DVC.DanhMuc/Properties/PublishProfiles/FolderProfile.pubxml
 
-# Keep source code for the API.User service. The Visual Studio pattern *.user
-# also matches folders named API.User, so explicitly unignore this service.
+# Keep source code for API service folders. The Visual Studio pattern *.user
+# can also match folders named API.User, so explicitly unignore service code.
 !API/Services/API.User/
 !API/Services/API.User/**
-API/Services/API.User/**/bin/
-API/Services/API.User/**/obj/
-API/Services/API.User/**/appsettings.Development.json
-API/Services/API.User/**/appsettings.Local.json
+!API/Services/API.Product/
+!API/Services/API.Product/**
+!API/Services/API.Order/
+!API/Services/API.Order/**
+!API/Services/API.Content/
+!API/Services/API.Content/**
+API/Services/API.*/**/bin/
+API/Services/API.*/**/obj/
+API/Services/API.*/**/appsettings.Development.json
+API/Services/API.*/**/appsettings.Local.json

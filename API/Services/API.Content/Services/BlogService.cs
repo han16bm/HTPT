@@ -78,7 +78,7 @@ public class BlogService : IBlogService
     {
         var post = await _uow.BlogPosts.Query()
             .Include(b => b.BlogCategory)
-            .FirstOrDefaultAsync(b => b.Slug == slug, ct)
+            .FirstOrDefaultAsync(b => b.Slug == slug && b.Status == "PUBLISHED", ct)
             ?? throw new NotFoundException($"Không tìm thấy bài viết với slug: {slug}");
 
         return MapToDto(post);

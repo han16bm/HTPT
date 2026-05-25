@@ -23,7 +23,7 @@ public class PaymentsController : BaseApiController
     public async Task<ApiResponse<PaymentDto>> Create([FromBody] CreatePaymentRequest request, CancellationToken ct)
     {
         var result = await _service.CreatePaymentAsync(request, ct);
-        return ApiResponse.Ok(result, "Tao giao dich thanh cong");
+        return ApiResponse.Ok(result, "Tạo giao dịch thành công");
     }
 
     // GET /api/order/payments/order/1
@@ -59,7 +59,7 @@ public class PromotionsController : BaseApiController
     {
         request.Id = null;
         var result = await _service.UpsertAsync(request, ct);
-        return ApiResponse.Ok(result, "Them khuyen mai thanh cong");
+        return ApiResponse.Ok(result, "Thêm khuyến mãi thành công");
     }
 
     // PUT /api/order/promotions/1
@@ -72,7 +72,7 @@ public class PromotionsController : BaseApiController
     {
         request.Id = id;
         var result = await _service.UpsertAsync(request, ct);
-        return ApiResponse.Ok(result, "Cap nhat khuyen mai thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật khuyến mãi thành công");
     }
 
     // DELETE /api/order/promotions/1
@@ -81,7 +81,7 @@ public class PromotionsController : BaseApiController
     public async Task<ApiResponse> Delete([FromRoute] long id, CancellationToken ct)
     {
         await _service.DeleteAsync(id, ct);
-        return ApiResponse.OkEmpty("Xoa khuyen mai thanh cong");
+        return ApiResponse.OkEmpty("Xóa khuyến mãi thành công");
     }
 
     // POST /api/order/promotions/validate

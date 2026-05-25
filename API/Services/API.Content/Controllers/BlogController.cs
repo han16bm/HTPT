@@ -28,6 +28,7 @@ public class BlogController : BaseApiController
 
     // GET /api/content/blogs/1
     [HttpGet("{id:long}")]
+    [RequireAdmin]
     public async Task<ApiResponse<BlogPostDto>> GetById([FromRoute] long id, CancellationToken ct)
     {
         var result = await _service.GetByIdAsync(id, ct);
@@ -50,7 +51,7 @@ public class BlogController : BaseApiController
     {
         request.Id = null;
         var result = await _service.UpsertAsync(request, GetUserId(), ct);
-        return ApiResponse.Ok(result, "Them bai viet thanh cong");
+        return ApiResponse.Ok(result, "Thêm bài viết thành công");
     }
 
     // PUT /api/content/blogs/1
@@ -64,7 +65,7 @@ public class BlogController : BaseApiController
     {
         request.Id = id;
         var result = await _service.UpsertAsync(request, GetUserId(), ct);
-        return ApiResponse.Ok(result, "Cap nhat bai viet thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật bài viết thành công");
     }
 
     // DELETE /api/content/blogs/1
@@ -73,7 +74,7 @@ public class BlogController : BaseApiController
     public async Task<ApiResponse> Delete([FromRoute] long id, CancellationToken ct)
     {
         await _service.DeleteAsync(id, ct);
-        return ApiResponse.OkEmpty("Xoa bai viet thanh cong");
+        return ApiResponse.OkEmpty("Xóa bài viết thành công");
     }
 
     // GET /api/content/blogs/health

@@ -41,6 +41,9 @@ export const blogService = {
   getBySlug: (slug: string) =>
     axiosClient.get<BlogPost>(`${API_ENDPOINTS.BLOG_DETAIL}/${encodeURIComponent(slug)}`),
 
+  getById: (id: number) =>
+    axiosClient.get<BlogPost>(`${API_ENDPOINTS.BLOG_UPSERT}/${id}`),
+
   upsert: (data: BlogPostUpsertRequest) => {
     const body = buildFormData(data);
     const config = {

@@ -16,9 +16,9 @@ public class BlogPostConfiguration : IEntityTypeConfiguration<BlogPost>
         entity.Property(e => e.Id).ValueGeneratedOnAdd().HasColumnName("ID");
         entity.Property(e => e.CategoryId).HasColumnName("CATEGORY_ID");
         entity.Property(e => e.AuthorId).HasColumnName("AUTHOR_ID");
-        entity.Property(e => e.Title).HasMaxLength(250).IsUnicode(false).HasColumnName("TITLE");
+        entity.Property(e => e.Title).HasMaxLength(300).HasColumnName("TITLE");
         entity.Property(e => e.Slug).HasMaxLength(300).IsUnicode(false).HasColumnName("SLUG");
-        entity.Property(e => e.Summary).HasMaxLength(1000).IsUnicode(false).HasColumnName("SUMMARY");
+        entity.Property(e => e.Summary).HasMaxLength(1000).HasColumnName("SUMMARY");
         entity.Property(e => e.Content).HasColumnName("CONTENT");
         entity.Property(e => e.ThumbnailUrl).HasMaxLength(500).IsUnicode(false).HasColumnName("THUMBNAIL_URL");
         entity.Property(e => e.Status).HasMaxLength(20).IsUnicode(false).HasDefaultValueSql("'DRAFT' ").HasColumnName("STATUS");

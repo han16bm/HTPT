@@ -4,7 +4,7 @@ namespace netcore.Commons.Extensions;
 
 /// <summary>
 /// Chuyển controller/action name sang kebab-case.
-/// ProductsController → /products | TimKiem → /tim-kiem
+/// ProductsController -> /products | SearchProducts -> /search-products
 /// </summary>
 public class KebabCaseRouteTokenTransformer : IOutboundParameterTransformer
 {
@@ -13,7 +13,7 @@ public class KebabCaseRouteTokenTransformer : IOutboundParameterTransformer
         if (value is null) return null;
 
         var str = value.ToString()!;
-        // Chèn dấu gạch ngang trước mỗi chữ hoa (trừ ký tự đầu)
+        // Insert a dash before each uppercase transition.
         return System.Text.RegularExpressions.Regex
             .Replace(str, "([a-z])([A-Z])", "$1-$2")
             .ToLowerInvariant();

@@ -27,7 +27,7 @@ export const cartService = {
     return axiosClient.get(API_ENDPOINTS.CART);
   },
 
-  /** POST /api/order/cart/them-san-pham */
+  /** POST /api/order/cart/items */
   addToCart: (
     productId: number,
     quantity: number,
@@ -44,7 +44,7 @@ export const cartService = {
     });
   },
 
-  /** POST /api/order/cart/cap-nhat-so-luong  (BE dùng POST, không phải PUT) */
+  /** PUT /api/order/cart/items/{cartItemId} */
   updateQuantity: (cartItemId: number, quantity: number): Promise<ApiResponse<Cart>> => {
     return axiosClient.put(API_ENDPOINTS.CART_UPDATE(cartItemId), { quantity });
   },

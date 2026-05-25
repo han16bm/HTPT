@@ -26,7 +26,7 @@ public class InventoryController : BaseApiController
     public async Task<ApiResponse<PagedResult<InventoryTransactionDto>>> GetTransactions([FromQuery] InventoryQuery query, CancellationToken ct)
     {
         var result = await _service.GetTransactionsAsync(query, ct);
-        return ApiResponse.Ok(result, "Lay lich su giao dich thanh cong");
+        return ApiResponse.Ok(result, "Lấy lịch sử giao dịch thành công");
     }
 
     // POST /api/product/inventory/imports
@@ -35,7 +35,7 @@ public class InventoryController : BaseApiController
     public async Task<ApiResponse> Import([FromBody] StockImportRequest request, CancellationToken ct)
     {
         await _service.ImportStockAsync(request, ct);
-        return ApiResponse.OkEmpty("Nhap hang thanh cong");
+        return ApiResponse.OkEmpty("Nhập hàng thành công");
     }
 
     // GET /api/product/inventory/low-stock?threshold=10
@@ -43,6 +43,6 @@ public class InventoryController : BaseApiController
     public async Task<ApiResponse<List<LowStockProductDto>>> GetLowStock([FromQuery] int threshold = 10, CancellationToken ct = default)
     {
         var result = await _service.GetLowStockAsync(threshold, ct);
-        return ApiResponse.Ok(result, $"Danh sach san pham sap het hang (<={threshold})");
+        return ApiResponse.Ok(result, $"Danh sách sản phẩm sắp hết hàng (<={threshold})");
     }
 }

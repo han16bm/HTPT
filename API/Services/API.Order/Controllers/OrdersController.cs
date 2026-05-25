@@ -48,7 +48,7 @@ public class OrdersController : BaseApiController
     public async Task<ApiResponse<OrderDto>> CreateFromCart([FromBody] CreateOrderRequest request, CancellationToken ct)
     {
         var result = await _service.CreateOrderFromCartAsync(GetUserId(), request, ct);
-        return ApiResponse.Ok(result, "Dat hang thanh cong");
+        return ApiResponse.Ok(result, "Đặt hàng thành công");
     }
 
     // POST /api/order/orders/direct
@@ -56,7 +56,7 @@ public class OrdersController : BaseApiController
     public async Task<ApiResponse<OrderDto>> CreateDirect([FromBody] DirectOrderRequest request, CancellationToken ct)
     {
         var result = await _service.CreateDirectOrderAsync(request, ct);
-        return ApiResponse.Ok(result, "Tao don hang thanh cong");
+        return ApiResponse.Ok(result, "Tạo đơn hàng thành công");
     }
 
     // PATCH /api/order/orders/DH2024.../status
@@ -69,7 +69,7 @@ public class OrdersController : BaseApiController
     {
         request.OrderCode = orderCode;
         var result = await _service.UpdateStatusAsync(request, ct);
-        return ApiResponse.Ok(result, "Cap nhat trang thai thanh cong");
+        return ApiResponse.Ok(result, "Cập nhật trạng thái thành công");
     }
 
     // DELETE /api/order/orders/DH2024...?reason=...
@@ -85,7 +85,7 @@ public class OrdersController : BaseApiController
             Reason = reason
         }, ct);
 
-        return ApiResponse.Ok(result, "Huy don hang thanh cong");
+        return ApiResponse.Ok(result, "Hủy đơn hàng thành công");
     }
 
     // GET /api/order/orders/health
