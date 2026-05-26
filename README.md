@@ -30,8 +30,9 @@ FE Admin      FE Customer
  FishShop_User  FishShop_Product FishShop_Order FishShop_Content
                       ^
                       |
-          RabbitMQ: OrderCreatedEvent
-          API.Order publish, API.Product consume để trừ kho
+          RabbitMQ + MassTransit Saga
+          API.Order tạo đơn, API.Product reserve/hoàn kho,
+          API.Order xử lý payment và cập nhật kết quả
 ```
 
 ## Cấu Trúc Thư Mục
@@ -69,7 +70,7 @@ HTPT/
 | .NET SDK | 8.x | Build/chạy backend |
 | Node.js | 18+ hoặc 20 LTS | Chạy frontend React/Vite |
 | npm | Đi kèm Node.js | Cài package frontend |
-| Docker Desktop | Bản mới | Chạy RabbitMQ, Seq và backend bằng Docker Compose |
+| Docker Desktop | Bản mới | Chạy RabbitMQ, Seq, Jaeger, Prometheus, Grafana và backend bằng Docker Compose |
 | SQL Server | 2019+ / 2022 Developer hoặc Express | Cơ sở dữ liệu |
 | SQL Server command-line tools (`sqlcmd`) | Bản mới | Chạy script tạo DB/seed từ terminal |
 | SQL Server Management Studio hoặc Azure Data Studio | Bản mới | Chạy script tạo DB |
@@ -185,35 +186,40 @@ GET http://localhost:5000/api/content/blogs/health
 
 ## Cách Chạy Backend Trực Tiếp Bằng .NET
 
-Cách này phù hợp khi muốn debug từng service. Cần RabbitMQ và SQL Server đang chạy.
+Cách này phù hợp khi muốn debug từng service. Cần RabbitMQ, Seq, Jaeger và SQL Server đang chạy.
 
-Chạy RabbitMQ và Seq:
+Chạy RabbitMQ, Seq và Jaeger:
 
 ```powershell
-docker compose up rabbitmq seq
+docker compose up rabbitmq seq jaeger
 ```
 
 Mở các terminal riêng:
 
 ```powershell
+$env:Otlp__Endpoint='http://localhost:4317'
 dotnet run --project API\Services\API.User\API.User.csproj --launch-profile http
 ```
 
 ```powershell
 $env:RabbitMQ__Host='localhost'
+$env:Otlp__Endpoint='http://localhost:4317'
 dotnet run --project API\Services\API.Product\API.Product.csproj --launch-profile http
 ```
 
 ```powershell
 $env:RabbitMQ__Host='localhost'
+$env:Otlp__Endpoint='http://localhost:4317'
 dotnet run --project API\Services\API.Order\API.Order.csproj --launch-profile http
 ```
 
 ```powershell
+$env:Otlp__Endpoint='http://localhost:4317'
 dotnet run --project API\Services\API.Content\API.Content.csproj --launch-profile http
 ```
 
 ```powershell
+$env:Otlp__Endpoint='http://localhost:4317'
 dotnet run --project API\Gateway\FishShop.Gateway\FishShop.Gateway.csproj --urls http://localhost:5000
 ```
 
@@ -291,7 +297,7 @@ Sau khi đã chạy database seed và backend, có thể dùng REST Client trong
 API/tests/interservice-order-flow.http
 ```
 
-File này kiểm tra luồng chính: health check các service, đăng nhập khách hàng, đọc sản phẩm qua `API.Product`, thêm giỏ hàng và đặt hàng qua `API.Order`, sau đó kiểm tra lại sản phẩm để xác nhận `API.Product` đã consume `OrderCreatedEvent` từ RabbitMQ và trừ tồn kho.
+File này kiểm tra luồng chính: health check các service, đăng nhập khách hàng, đọc sản phẩm qua `API.Product`, thêm giỏ hàng và đặt hàng qua `API.Order`, sau đó kiểm tra lại sản phẩm để xác nhận Saga đã gửi message sang `API.Product` reserve tồn kho qua RabbitMQ.
 
 ## Một Số RESTful API Chính
 
@@ -365,14 +371,16 @@ docker compose up --build
 6. Xem danh sách sản phẩm.
 7. Thêm sản phẩm vào giỏ hàng.
 8. Đặt hàng.
-9. Mở RabbitMQ UI kiểm tra queue `order-created-queue`.
-10. Kiểm tra tồn kho sản phẩm giảm và có giao dịch xuất kho.
+9. Mở RabbitMQ UI kiểm tra các queue Saga.
+10. Kiểm tra tồn kho sản phẩm giảm, có giao dịch xuất kho và trạng thái đơn được cập nhật.
 
 ## Ghi Chú Kỹ Thuật
 
 - API đang dùng RESTful resource URL, không dùng action tiếng Việt trong URL như `tim-kiem`, `dat-hang`, `dang-nhap`.
-- `API.Order` tạo đơn và publish event.
-- `API.Product` chịu trách nhiệm tồn kho, consume event qua RabbitMQ để trừ kho và ghi lịch sử kho.
+- `API.Order` tạo đơn và publish `OrderCreatedEvent`.
+- `API.Order` có Saga điều phối luồng đặt hàng: reserve tồn kho, xử lý payment, hoàn kho khi payment lỗi và cập nhật trạng thái đơn.
+- `API.Product` chịu trách nhiệm tồn kho, consume `InventoryReservationRequested`/`InventoryReleaseRequested` qua RabbitMQ để trừ hoặc hoàn kho.
+- Các queue RabbitMQ chính: `order-saga`, `inventory-reservation-queue`, `inventory-release-queue`, `payment-process-queue`, `order-completed-queue`, `order-failed-queue`.
 - Gateway inject `X-Api-Key` vào request nội bộ để các service xác nhận request đi qua Gateway.
 - Public blog chỉ đọc danh sách và chi tiết theo slug; lấy blog theo id dùng cho admin.
 - Các endpoint cần đăng nhập dùng JWT Bearer token.
@@ -393,5 +401,6 @@ Nếu API báo lỗi kết nối DB:
 Nếu đặt hàng không trừ kho:
 
 - Kiểm tra RabbitMQ đang chạy.
-- Kiểm tra `API.Order` publish event.
-- Kiểm tra `API.Product` đang chạy và consume queue `order-created-queue`.
+- Kiểm tra `API.Order` publish `OrderCreatedEvent`.
+- Kiểm tra Saga queue `order-saga`.
+- Kiểm tra `API.Product` đang chạy và consume queue `inventory-reservation-queue`.

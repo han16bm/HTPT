@@ -60,7 +60,6 @@ public static class OpenTelemetryExtensions
 
         tracing.AddSqlClientInstrumentation(options =>
         {
-            options.SetDbStatementForText = true;
             options.RecordException = true;
         });
 

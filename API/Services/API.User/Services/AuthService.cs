@@ -245,36 +245,6 @@ public class AuthService : IAuthService
         await _uow.SaveChangesAsync(ct);
     }
 
-    public async Task<PermissionValidationResponse> ValidatePermissionAsync(
-        PermissionValidationRequest request, CancellationToken ct = default)
-    {
-        var principal = _jwt.ValidateToken(request.Token);
-        if (principal is null)
-            return new PermissionValidationResponse { IsValid = false, Message = "Token không hợp lệ" };
-
-        var userIdStr = principal.FindFirst(AuthConstants.ClaimUserId)?.Value;
-        if (!long.TryParse(userIdStr, out var userIdLong))
-            return new PermissionValidationResponse { IsValid = false, Message = "Token không hợp lệ" };
-
-        var user = await _uow.Users.Query()
-            .Include(u => u.Role)
-            .FirstOrDefaultAsync(u => u.Id == (decimal)userIdLong, ct);
-
-        if (user is null || user.Status == false)
-            return new PermissionValidationResponse { IsValid = false, Message = "Tài khoản không hợp lệ" };
-
-        return new PermissionValidationResponse
-        {
-            IsValid = true,
-            UserId = (long)user.Id,
-            Username = user.Username,
-            RoleCode = user.Role?.Code ?? string.Empty,
-            Permissions = user.IsAdmin == true || user.Role?.Code == AuthConstants.RoleAdmin
-                ? ["*"]
-                : [],
-        };
-    }
-
     private async Task<CustomerProfile?> GetCustomerProfileAsync(UserEntity user, CancellationToken ct)
     {
         if (user.Role?.Code != AuthConstants.RoleCustomer)

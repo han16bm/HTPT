@@ -84,7 +84,7 @@ public class OrderService : IOrderService
 
         if (string.IsNullOrWhiteSpace(shippingAddress))
         {
-            throw new MessageException("Vui long cap nhat dia chi giao hang.");
+            throw new MessageException("Vui lòng cập nhật địa chỉ giao hàng.");
         }
 
         var customerName = FirstNonEmpty(
@@ -92,7 +92,7 @@ public class OrderService : IOrderService
             userInfo?.FullName,
             TryGetShippingAddressPart(shippingAddress, 0),
             userInfo?.Username,
-            "Khach hang")!;
+            "Khách hàng")!;
         var customerPhone = FirstNonEmpty(
             request.CustomerPhone,
             userInfo?.Phone,

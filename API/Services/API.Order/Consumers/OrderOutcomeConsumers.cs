@@ -28,14 +28,34 @@ public class OrderCompletedConsumer : IConsumer<OrderCompletedEvent>
             return;
         }
 
-        order.OrderStatus = "CONFIRMED";
-        order.ConfirmedAt = message.CompletedAt;
+        var latestPayment = await _uow.Payments.Query()
+            .Where(p => p.OrderId == order.Id)
+            .OrderByDescending(p => p.CreatedAt)
+            .FirstOrDefaultAsync(context.CancellationToken);
+
+        if (string.Equals(order.OrderSource, "POS", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(order.OrderStatus, "COMPLETED", StringComparison.OrdinalIgnoreCase))
+        {
+            order.OrderStatus = "COMPLETED";
+            order.PaymentStatus = "PAID";
+            order.DeliveredAt ??= message.CompletedAt;
+        }
+        else
+        {
+            order.OrderStatus = "CONFIRMED";
+            if (latestPayment is not null)
+            {
+                order.PaymentStatus = latestPayment.Status;
+            }
+        }
+
+        order.ConfirmedAt ??= message.CompletedAt;
         order.UpdatedAt = DateTime.UtcNow;
 
         _uow.Orders.Update(order);
         await _uow.SaveChangesAsync(context.CancellationToken);
 
-        _logger.LogInformation("Saga completed: {OrderCode} -> CONFIRMED", message.OrderCode);
+        _logger.LogInformation("Saga completed: {OrderCode} -> {Status}", message.OrderCode, order.OrderStatus);
     }
 }
 

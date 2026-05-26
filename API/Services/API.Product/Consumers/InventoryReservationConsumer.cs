@@ -1,6 +1,7 @@
 using API.Product.Interfaces;
 using MassTransit;
 using netcore.Commons.Messages.Events;
+using MessageException = netcore.Commons.Exceptions.MessageException;
 
 namespace API.Product.Consumers;
 
@@ -36,7 +37,7 @@ public class InventoryReservationConsumer : IConsumer<InventoryReservationReques
             };
             await context.Publish(reservedEvent);
         }
-        catch (Exception ex)
+        catch (MessageException ex)
         {
             _logger.LogWarning("Reserve failed {OrderCode}: {Reason}",
                 message.OrderCode, ex.Message);
@@ -47,6 +48,12 @@ public class InventoryReservationConsumer : IConsumer<InventoryReservationReques
                 Reason = ex.Message,
             };
             await context.Publish(failedEvent);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi hệ thống khi reserve inventory cho đơn {OrderCode}. Message sẽ được retry.",
+                message.OrderCode);
+            throw;
         }
     }
 }

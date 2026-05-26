@@ -12,5 +12,4 @@ public interface IAuthService
     Task<UserDto> GetCurrentUserAsync(long userId, CancellationToken ct = default);
     Task<UserDto> UpdateProfileAsync(long userId, UpdateProfileRequest request, CancellationToken ct = default);
     Task ChangePasswordAsync(long userId, ChangePasswordRequest request, CancellationToken ct = default);
-    Task<PermissionValidationResponse> ValidatePermissionAsync(PermissionValidationRequest request, CancellationToken ct = default);
 }

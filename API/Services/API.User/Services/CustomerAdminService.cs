@@ -341,7 +341,7 @@ public class CustomerAdminService : ICustomerAdminService
         var profile = await _uow.CustomerProfiles.Query()
             .Include(p => p.User)
             .FirstOrDefaultAsync(p => p.Id == (decimal)customerId, ct)
-            ?? throw new NotFoundException("Khach hang", customerId);
+            ?? throw new NotFoundException("Khách hàng", customerId);
 
         profile.Status = false;
         profile.UpdatedAt = DateTime.UtcNow;

@@ -71,6 +71,7 @@ Authorization: Bearer {{login.response.body.$.data.accessToken}}
 GET {{baseUrl}}/api/order/orders/{{createOrder.response.body.$.data.orderCode}}
 Authorization: Bearer {{login.response.body.$.data.accessToken}}
 
-### Product detail after RabbitMQ consumer runs
-# Stock should decrease by 1 after API.Product consumes OrderCreatedEvent.
+### Product detail after RabbitMQ saga runs
+# Stock should decrease by 1 after Saga sends InventoryReservationRequested
+# and API.Product consumes inventory-reservation-queue.
 GET {{baseUrl}}/api/product/products/{{productId}}
