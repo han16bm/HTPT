@@ -192,7 +192,7 @@ const Checkout: React.FC = () => {
 
         if (finalOrder && isOrderFailed(finalOrder)) {
           setVerificationStatus('failed');
-          setVerificationMessage('Xác minh thanh toán không thành công. Đơn hàng đã bị hủy và tồn kho được hoàn lại.');
+          setVerificationMessage('Xác minh thanh toán không thành công. Đơn hàng đã bị hủy, hệ thống đang xử lý hoàn kho.');
           message.error('Xác minh thanh toán thất bại');
         } else if (finalOrder && isOrderSuccess(finalOrder)) {
           setVerificationStatus('success');

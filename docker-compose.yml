@@ -129,9 +129,6 @@ services:
       - ProductServiceUrl=http://api-product:8080
       - UserServiceUrl=http://api-user:8080
       - Otlp__Endpoint=http://jaeger:4317
-      - PaymentMock__ProcessingDelaySeconds=${PAYMENT_MOCK_DELAY_SECONDS:-5}
-      - PaymentMock__CodSuccessRatePercent=${PAYMENT_MOCK_COD_SUCCESS_RATE:-95}
-      - PaymentMock__BankTransferSuccessRatePercent=${PAYMENT_MOCK_BANK_SUCCESS_RATE:-90}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:

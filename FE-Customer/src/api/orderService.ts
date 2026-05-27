@@ -11,7 +11,7 @@ export interface Order {
   customerPhone?: string;
   orderStatus: string;       // PENDING | CONFIRMED | SHIPPING | COMPLETED | CANCELLED
   paymentMethod: string;     // COD | BANK_TRANSFER | CASH
-  paymentStatus: string;     // PENDING | UNPAID | PARTIAL | PAID | REFUNDED
+  paymentStatus: string;     // UNPAID | PENDING | AWAITING | PAID | FAILED
   totalAmount: number;
   itemCount?: number;
   source?: string;

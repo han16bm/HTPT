@@ -147,6 +147,25 @@ public class PaymentProcessConsumer : IConsumer<PaymentProcessRequested>
             _uow.Payments.Update(existingPayment);
         }
 
+        if (!result.Success)
+        {
+            order.OrderStatus = "CANCELLED";
+            order.PaymentStatus = "FAILED";
+            order.CancelledAt = DateTime.UtcNow;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            if (string.IsNullOrWhiteSpace(order.Note))
+            {
+                order.Note = result.Reason;
+            }
+            else if (!order.Note.Contains(result.Reason, StringComparison.OrdinalIgnoreCase))
+            {
+                order.Note = order.Note + " | Payment: " + result.Reason;
+            }
+
+            _uow.Orders.Update(order);
+        }
+
         await _uow.SaveChangesAsync(context.CancellationToken);
 
         if (result.Success)

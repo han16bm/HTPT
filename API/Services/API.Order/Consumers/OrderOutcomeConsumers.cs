@@ -99,7 +99,7 @@ public class OrderFailedConsumer : IConsumer<OrderFailedEvent>
         {
             order.Note = message.Reason;
         }
-        else
+        else if (!order.Note.Contains(message.Reason, StringComparison.OrdinalIgnoreCase))
         {
             order.Note = order.Note + " | Saga: " + message.Reason;
         }
