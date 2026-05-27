@@ -35,6 +35,32 @@ const STATUS_TEXT: Record<string, string> = {
   CANCELLED: 'Đã hủy',
 };
 
+const PAYMENT_STATUS_COLOR: Record<string, string> = {
+  PENDING: 'gold',
+  UNPAID: 'red',
+  PARTIAL: 'orange',
+  PAID: 'green',
+  REFUNDED: 'default',
+  FAILED: 'red',
+  AWAITING: 'blue',
+};
+
+const PAYMENT_STATUS_TEXT: Record<string, string> = {
+  PENDING: 'Chờ thanh toán',
+  UNPAID: 'Chưa thanh toán',
+  PARTIAL: 'Thanh toán một phần',
+  PAID: 'Đã thanh toán',
+  REFUNDED: 'Đã hoàn tiền',
+  FAILED: 'Thanh toán lỗi',
+  AWAITING: 'Chờ xác nhận',
+};
+
+const PAYMENT_METHOD_TEXT: Record<string, string> = {
+  COD: 'Tiền mặt (COD)',
+  BANK_TRANSFER: 'Chuyển khoản',
+  CASH: 'Tiền mặt',
+};
+
 const OrderDetail: React.FC = () => {
   const { code } = useParams<{ code: string }>();
   const navigate = useNavigate();
@@ -46,20 +72,25 @@ const OrderDetail: React.FC = () => {
 
   const fmt = formatVND;
 
-  const fetchOrder = async () => {
+  const fetchOrder = async (showLoading = true) => {
     if (!code) return;
-    setLoading(true);
+    if (showLoading) setLoading(true);
     try {
       const res = await orderService.getOrderByCode(code);
       if (res.success && res.data) setOrder(res.data);
       else setOrder(null);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchOrder();
+    const intervalId = window.setInterval(() => {
+      void fetchOrder(false);
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
 
@@ -165,7 +196,12 @@ const OrderDetail: React.FC = () => {
                 : '—'}
             </Descriptions.Item>
             <Descriptions.Item label="Thanh toán">
-              {order.paymentMethod || '—'}
+              {PAYMENT_METHOD_TEXT[order.paymentMethod?.toUpperCase()] || order.paymentMethod || '—'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Trạng thái thanh toán">
+              <Tag color={PAYMENT_STATUS_COLOR[order.paymentStatus?.toUpperCase()] || 'default'}>
+                {PAYMENT_STATUS_TEXT[order.paymentStatus?.toUpperCase()] || order.paymentStatus || '—'}
+              </Tag>
             </Descriptions.Item>
             <Descriptions.Item label="Tổng tiền">
               <strong style={{ color: '#ef233c' }}>{fmt(order.totalAmount ?? 0)}</strong>

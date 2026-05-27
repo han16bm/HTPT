@@ -79,7 +79,7 @@ const POLICIES: PolicySection[] = [
     intro: 'H&H Fish Shop hỗ trợ nhiều hình thức thanh toán linh hoạt, an toàn và tiện lợi.',
     color: '#722ed1',
     items: [
-      { q: 'Có những hình thức thanh toán nào?', a: 'Thanh toán khi nhận hàng (COD). Chuyển khoản ngân hàng. Ví điện tử: MoMo, ZaloPay, VNPay. Thẻ tín dụng/ghi nợ (Visa, Mastercard).' },
+      { q: 'Có những hình thức thanh toán nào?', a: 'Thanh toán khi nhận hàng (COD). Chuyển khoản ngân hàng.' },
       { q: 'Thanh toán COD có giới hạn không?', a: 'COD áp dụng cho đơn hàng dưới 5.000.000đ. Với đơn lớn hơn, vui lòng chuyển khoản hoặc thanh toán trước 30% đặt cọc.' },
       { q: 'Có được hoàn tiền không?', a: 'Hoàn tiền trong 3-5 ngày làm việc qua ngân hàng hoặc ví điện tử trong trường hợp đơn hàng bị hủy hoặc lỗi từ phía chúng tôi.' },
       { q: 'Thông tin thanh toán có an toàn không?', a: 'Chúng tôi sử dụng mã hóa SSL 256-bit. Không lưu trữ thông tin thẻ ngân hàng. Tuân thủ tiêu chuẩn bảo mật PCI DSS.' },

@@ -113,7 +113,7 @@ public class OrderService : IOrderService
                 PromotionId = promotion?.Id,
                 OrderSource = "ONLINE",
                 OrderStatus = "PENDING",
-                PaymentStatus = "PENDING",
+                PaymentStatus = "UNPAID",
                 PaymentMethod = request.PaymentMethod,
                 CustomerName = customerName,
                 CustomerPhone = customerPhone,
@@ -412,13 +412,35 @@ public class OrderService : IOrderService
             order.DeliveredAt = DateTime.UtcNow;
             order.PaymentStatus = "PAID";
         }
-        if (request.Status == "CANCELLED") order.CancelledAt = DateTime.UtcNow;
+        if (request.Status == "CANCELLED")
+        {
+            order.CancelledAt = DateTime.UtcNow;
+            order.PaymentStatus = "FAILED";
+        }
 
         if (!string.IsNullOrWhiteSpace(request.Note))
             order.Note = request.Note;
 
         _uow.Orders.Update(order);
         await _uow.SaveChangesAsync(ct);
+
+        if (request.Status == "CANCELLED" && prevStatus != "CANCELLED")
+        {
+            var items = await _uow.OrderItems.Query()
+                .Where(oi => oi.OrderId == order.Id)
+                .Select(oi => new netcore.Commons.Messages.Events.OrderItemEventDto
+                {
+                    ProductId = (long)oi.ProductId,
+                    Quantity = (int)oi.Quantity,
+                })
+                .ToListAsync(ct);
+
+            await _publishEndpoint.Publish(new netcore.Commons.Messages.Events.InventoryReleaseRequested
+            {
+                OrderCode = order.OrderCode,
+                Items = items,
+            }, ct);
+        }
 
         _logger.LogInformation("Order {OrderCode} status: {Old} → {New}", request.OrderCode, prevStatus, request.Status);
         return await GetByOrderCodeAsync(request.OrderCode, ct);
@@ -435,6 +457,7 @@ public class OrderService : IOrderService
             throw new MessageException($"Không thể hủy đơn hàng ở trạng thái '{order.OrderStatus}'.");
 
         order.OrderStatus = "CANCELLED";
+        order.PaymentStatus = "FAILED";
         order.CancelledAt = DateTime.UtcNow;
         order.UpdatedAt = DateTime.UtcNow;
         if (!string.IsNullOrWhiteSpace(request.Reason))
@@ -443,7 +466,23 @@ public class OrderService : IOrderService
         _uow.Orders.Update(order);
         await _uow.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Order {OrderCode} cancelled by user {UserId}", request.OrderCode, userId);
+        var items = await _uow.OrderItems.Query()
+            .Where(oi => oi.OrderId == order.Id)
+            .Select(oi => new netcore.Commons.Messages.Events.OrderItemEventDto
+            {
+                ProductId = (long)oi.ProductId,
+                Quantity = (int)oi.Quantity,
+            })
+            .ToListAsync(ct);
+
+        await _publishEndpoint.Publish(new netcore.Commons.Messages.Events.InventoryReleaseRequested
+        {
+            OrderCode = order.OrderCode,
+            Items = items,
+        }, ct);
+
+        _logger.LogInformation("Order {OrderCode} cancelled by user {UserId}; published inventory release",
+            request.OrderCode, userId);
         return await GetByOrderCodeAsync(request.OrderCode, ct);
     }
 

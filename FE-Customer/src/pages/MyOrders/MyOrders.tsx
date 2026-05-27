@@ -16,14 +16,18 @@ const MyOrders: React.FC = () => {
   useEffect(() => {
     document.title = 'Đơn hàng của tôi | H&H Fish Shop';
     fetchOrders();
+    const intervalId = window.setInterval(() => {
+      void fetchOrders(false);
+    }, 5000);
 
     return () => {
+      window.clearInterval(intervalId);
       document.title = 'H&H Fish Shop';
     };
   }, []);
 
-  const fetchOrders = async () => {
-    setLoading(true);
+  const fetchOrders = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const response = await orderService.getOrders();
       if (response.success && response.data) {
@@ -34,7 +38,7 @@ const MyOrders: React.FC = () => {
     } catch {
       message.error('Không thể tải danh sách đơn hàng');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -84,6 +88,32 @@ const MyOrders: React.FC = () => {
     return map[method.toUpperCase()] ?? method;
   };
 
+  const getPaymentStatusColor = (status?: string) => {
+    const map: Record<string, string> = {
+      PENDING: 'gold',
+      UNPAID: 'red',
+      PARTIAL: 'orange',
+      PAID: 'green',
+      REFUNDED: 'default',
+      FAILED: 'red',
+      AWAITING: 'blue',
+    };
+    return map[status?.toUpperCase() || ''] || 'default';
+  };
+
+  const getPaymentStatusText = (status?: string) => {
+    const map: Record<string, string> = {
+      PENDING: 'Chờ thanh toán',
+      UNPAID: 'Chưa thanh toán',
+      PARTIAL: 'Thanh toán một phần',
+      PAID: 'Đã thanh toán',
+      REFUNDED: 'Đã hoàn tiền',
+      FAILED: 'Thanh toán lỗi',
+      AWAITING: 'Chờ xác nhận',
+    };
+    return map[status?.toUpperCase() || ''] || status || '—';
+  };
+
   const columns: ColumnsType<Order> = [
     {
       title: 'Mã đơn hàng',
@@ -104,6 +134,16 @@ const MyOrders: React.FC = () => {
       dataIndex: 'paymentMethod',
       key: 'paymentMethod',
       render: (method) => getPaymentText(method),
+    },
+    {
+      title: 'TT thanh toán',
+      dataIndex: 'paymentStatus',
+      key: 'paymentStatus',
+      render: (status) => (
+        <Tag color={getPaymentStatusColor(status)}>
+          {getPaymentStatusText(status)}
+        </Tag>
+      ),
     },
     {
       title: 'Tổng tiền',

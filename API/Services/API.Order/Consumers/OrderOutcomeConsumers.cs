@@ -28,6 +28,12 @@ public class OrderCompletedConsumer : IConsumer<OrderCompletedEvent>
             return;
         }
 
+        if (string.Equals(order.OrderStatus, "CANCELLED", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogInformation("Skip saga completed event for cancelled order {OrderCode}", message.OrderCode);
+            return;
+        }
+
         var latestPayment = await _uow.Payments.Query()
             .Where(p => p.OrderId == order.Id)
             .OrderByDescending(p => p.CreatedAt)
@@ -42,14 +48,17 @@ public class OrderCompletedConsumer : IConsumer<OrderCompletedEvent>
         }
         else
         {
-            order.OrderStatus = "CONFIRMED";
+            order.OrderStatus = "PENDING";
             if (latestPayment is not null)
             {
                 order.PaymentStatus = latestPayment.Status;
             }
         }
 
-        order.ConfirmedAt ??= message.CompletedAt;
+        if (order.OrderStatus == "CONFIRMED" || order.OrderStatus == "COMPLETED")
+        {
+            order.ConfirmedAt ??= message.CompletedAt;
+        }
         order.UpdatedAt = DateTime.UtcNow;
 
         _uow.Orders.Update(order);
@@ -83,6 +92,7 @@ public class OrderFailedConsumer : IConsumer<OrderFailedEvent>
         }
 
         order.OrderStatus = "CANCELLED";
+        order.PaymentStatus = "FAILED";
         order.CancelledAt = message.FailedAt;
 
         if (string.IsNullOrEmpty(order.Note))

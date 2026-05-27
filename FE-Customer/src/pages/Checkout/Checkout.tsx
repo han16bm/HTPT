@@ -3,14 +3,15 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   Row, Col, Form, Input, Button, Radio, Steps,
   message, Divider, Breadcrumb, Result, Spin,
+  Alert, Modal,
 } from 'antd';
 import {
   UserOutlined, PhoneOutlined, EnvironmentOutlined,
   CreditCardOutlined, CheckCircleOutlined, ShoppingOutlined,
-  CarOutlined, BankOutlined,
+  CarOutlined, BankOutlined, ClockCircleOutlined,
 } from '@ant-design/icons';
 import { CustomerLayout } from '@/components/Layout';
-import { authService, cartService, orderService, type CartItem, type CreateOrderRequest, type PromotionDiscountType } from '@/api';
+import { authService, cartService, orderService, type CartItem, type CreateOrderRequest, type Order, type PromotionDiscountType } from '@/api';
 import { formatVND } from '@/utils/format';
 import { resolveImageUrl, useImageFallback } from '@/utils/image';
 import { calcShipping } from '@/constants/shipping';
@@ -19,6 +20,7 @@ import styles from './Checkout.module.scss';
 const fmt = formatVND;
 
 type PaymentMethod = 'cod' | 'bank';
+type VerificationStatus = 'idle' | 'processing' | 'success' | 'failed' | 'timeout';
 
 interface AppliedPromo {
   code: string;
@@ -39,6 +41,8 @@ interface CheckoutFormValues {
 const joinAddress = (...parts: Array<string | undefined>) =>
   parts.map(part => part?.trim()).filter(Boolean).join(', ');
 
+const sleep = (ms: number) => new Promise(resolve => window.setTimeout(resolve, ms));
+
 const Checkout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,6 +56,10 @@ const Checkout: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [orderCode, setOrderCode] = useState<string>('');
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>('idle');
+  const [verificationMessage, setVerificationMessage] = useState('');
 
   useEffect(() => {
     fetchCart();
@@ -127,8 +135,39 @@ const Checkout: React.FC = () => {
     }
   };
 
+  const isOrderSuccess = (order: Order) => {
+    const orderStatus = order.orderStatus?.toUpperCase();
+    const paymentStatus = order.paymentStatus?.toUpperCase();
+    return ['PENDING', 'CONFIRMED', 'SHIPPING', 'COMPLETED'].includes(orderStatus)
+      && ['PENDING', 'AWAITING', 'PAID'].includes(paymentStatus);
+  };
+
+  const isOrderFailed = (order: Order) => {
+    return order.orderStatus?.toUpperCase() === 'CANCELLED'
+      || order.paymentStatus?.toUpperCase() === 'FAILED';
+  };
+
+  const waitForPaymentResult = async (code: string) => {
+    const maxAttempts = 20;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      await sleep(1000);
+      const response = await orderService.getOrderByCode(code);
+      if (response.success && response.data) {
+        if (isOrderSuccess(response.data) || isOrderFailed(response.data)) {
+          return response.data;
+        }
+      }
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (values: CheckoutFormValues) => {
     setSubmitting(true);
+    setVerifyingPayment(true);
+    setVerificationStatus('processing');
+    setVerificationMessage('Đang gửi đơn hàng và bắt đầu xác minh thanh toán...');
+
     try {
       const orderData: CreateOrderRequest = {
         customerName: values.customerName,
@@ -143,14 +182,42 @@ const Checkout: React.FC = () => {
       const resp = await orderService.createOrder(orderData);
       if (resp.success && resp.data) {
         setOrderId(resp.data.id);
+        setOrderCode(resp.data.orderCode || '');
         setCurrentStep(2);
-        message.success('Đặt hàng thành công!');
+        setVerificationMessage('Đơn hàng đã được tạo. Hệ thống đang xác minh thanh toán...');
+
+        const finalOrder = resp.data.orderCode
+          ? await waitForPaymentResult(resp.data.orderCode)
+          : null;
+
+        if (finalOrder && isOrderFailed(finalOrder)) {
+          setVerificationStatus('failed');
+          setVerificationMessage('Xác minh thanh toán không thành công. Đơn hàng đã bị hủy và tồn kho được hoàn lại.');
+          message.error('Xác minh thanh toán thất bại');
+        } else if (finalOrder && isOrderSuccess(finalOrder)) {
+          setVerificationStatus('success');
+          setVerificationMessage(
+            paymentMethod === 'bank'
+              ? 'Đơn hàng đã được xác nhận, đang chờ đối soát chuyển khoản.'
+              : 'Đơn hàng đã được xác nhận và sẽ được xử lý giao hàng.'
+          );
+          message.success('Xác minh thanh toán thành công');
+        } else {
+          setVerificationStatus('timeout');
+          setVerificationMessage('Hệ thống vẫn đang xử lý đơn hàng. Bạn có thể xem trạng thái mới nhất trong danh sách đơn hàng.');
+          message.info('Đơn hàng vẫn đang được xử lý');
+        }
       } else {
+        setVerifyingPayment(false);
+        setVerificationStatus('idle');
         message.error(resp.error || 'Không thể đặt hàng');
       }
     } catch {
+      setVerifyingPayment(false);
+      setVerificationStatus('idle');
       message.error('Đã xảy ra lỗi');
     } finally {
+      setVerifyingPayment(false);
       setSubmitting(false);
     }
   };
@@ -168,6 +235,27 @@ const Checkout: React.FC = () => {
       </CustomerLayout>
     );
   }
+
+  const resultStatus = verificationStatus === 'failed'
+    ? 'error'
+    : verificationStatus === 'success'
+      ? 'success'
+      : 'info';
+  const resultTitle = verificationStatus === 'failed'
+    ? 'Đơn hàng chưa được xác nhận'
+    : verificationStatus === 'success'
+      ? 'Đơn hàng đã được xác nhận'
+      : 'Đã tiếp nhận đơn hàng';
+  const resultAlertType = verificationStatus === 'failed'
+    ? 'error'
+    : verificationStatus === 'success'
+      ? 'success'
+      : 'info';
+  const resultAlertMessage = verificationStatus === 'failed'
+    ? 'Xác minh thanh toán thất bại'
+    : verificationStatus === 'success'
+      ? 'Xác minh thanh toán thành công'
+      : 'Đơn hàng đang chờ xác nhận';
 
   return (
     <CustomerLayout>
@@ -428,12 +516,18 @@ const Checkout: React.FC = () => {
           /* Step 2: Success */
           <div className={styles.successWrap}>
             <Result
-              status="success"
-              title="Đặt hàng thành công! 🎉"
+              status={resultStatus}
+              icon={verificationStatus === 'timeout' || verificationStatus === 'idle' ? <ClockCircleOutlined /> : undefined}
+              title={resultTitle}
               subTitle={
                 <div>
-                  <p>Mã đơn hàng: <strong>#{orderId}</strong></p>
-                  <p>Chúng tôi sẽ liên hệ xác nhận trong vòng 30 phút.</p>
+                  <p>Mã đơn hàng: <strong>{orderCode || `#${orderId}`}</strong></p>
+                  <Alert
+                    type={resultAlertType}
+                    showIcon
+                    message={resultAlertMessage}
+                    description={verificationMessage}
+                  />
                 </div>
               }
               extra={[
@@ -454,6 +548,23 @@ const Checkout: React.FC = () => {
           </div>
         )}
       </div>
+
+      <Modal
+        open={verifyingPayment}
+        footer={null}
+        closable={false}
+        maskClosable={false}
+        centered
+        title="Đang xác minh thanh toán"
+      >
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '12px 0' }}>
+          <Spin size="large" />
+          <div>
+            <p style={{ margin: 0, fontWeight: 600 }}>Vui lòng chờ trong giây lát</p>
+            <p style={{ margin: '6px 0 0' }}>{verificationMessage}</p>
+          </div>
+        </div>
+      </Modal>
     </CustomerLayout>
   );
 };

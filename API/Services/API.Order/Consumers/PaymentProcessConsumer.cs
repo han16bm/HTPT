@@ -8,13 +8,23 @@ namespace API.Order.Consumers;
 
 public class PaymentProcessConsumer : IConsumer<PaymentProcessRequested>
 {
+    private const int DefaultCodSuccessRatePercent = 95;
+    private const int DefaultBankTransferSuccessRatePercent = 90;
+    private const int DefaultProcessingDelaySeconds = 5;
+    private const int MaxProcessingDelaySeconds = 30;
+
     private readonly ILogger<PaymentProcessConsumer> _logger;
     private readonly IUnitOfWork _uow;
+    private readonly IConfiguration _configuration;
 
-    public PaymentProcessConsumer(ILogger<PaymentProcessConsumer> logger, IUnitOfWork uow)
+    public PaymentProcessConsumer(
+        ILogger<PaymentProcessConsumer> logger,
+        IUnitOfWork uow,
+        IConfiguration configuration)
     {
         _logger = logger;
         _uow = uow;
+        _configuration = configuration;
     }
 
     public async Task Consume(ConsumeContext<PaymentProcessRequested> context)
@@ -47,7 +57,70 @@ public class PaymentProcessConsumer : IConsumer<PaymentProcessRequested>
             return;
         }
 
-        var result = SimulateGateway(msg.PaymentMethod, msg.Amount);
+        var delaySeconds = GetIntSetting(
+            "PaymentMock:ProcessingDelaySeconds",
+            DefaultProcessingDelaySeconds,
+            0,
+            MaxProcessingDelaySeconds);
+
+        if (delaySeconds > 0)
+        {
+            _logger.LogInformation("Mock payment delay {DelaySeconds}s for order {OrderCode}",
+                delaySeconds, msg.OrderCode);
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), context.CancellationToken);
+        }
+
+        var currentOrderStatus = await _uow.Orders.Query()
+            .AsNoTracking()
+            .Where(o => o.Id == order.Id)
+            .Select(o => o.OrderStatus)
+            .FirstOrDefaultAsync(context.CancellationToken);
+
+        if (string.Equals(currentOrderStatus, "CANCELLED", StringComparison.OrdinalIgnoreCase))
+        {
+            const string reason = "Đơn hàng đã bị hủy trước khi xác minh thanh toán";
+
+            if (existingPayment == null)
+            {
+                var cancelledPayment = new Payment
+                {
+                    OrderId = order.Id,
+                    PaymentCode = "TT" + DateTime.UtcNow.ToString("yyyyMMddHHmmss"),
+                    Method = msg.PaymentMethod,
+                    Status = "FAILED",
+                    Amount = msg.Amount,
+                    TransactionRef = string.Empty,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                };
+                await _uow.Payments.AddAsync(cancelledPayment, context.CancellationToken);
+            }
+            else
+            {
+                existingPayment.Status = "FAILED";
+                existingPayment.TransactionRef = string.Empty;
+                existingPayment.PaidAt = null;
+                existingPayment.UpdatedAt = DateTime.UtcNow;
+                _uow.Payments.Update(existingPayment);
+            }
+
+            await _uow.SaveChangesAsync(context.CancellationToken);
+
+            await context.Publish(new PaymentFailedEvent
+            {
+                OrderCode = msg.OrderCode,
+                Reason = reason,
+            });
+
+            _logger.LogInformation("Skip payment processing for cancelled order {OrderCode}", msg.OrderCode);
+            return;
+        }
+
+        var result = SimulateGateway(
+            msg.PaymentMethod,
+            msg.Amount,
+            GetIntSetting("PaymentMock:CodSuccessRatePercent", DefaultCodSuccessRatePercent, 0, 100),
+            GetIntSetting("PaymentMock:BankTransferSuccessRatePercent", DefaultBankTransferSuccessRatePercent, 0, 100));
 
         if (existingPayment == null)
         {
@@ -101,33 +174,61 @@ public class PaymentProcessConsumer : IConsumer<PaymentProcessRequested>
         return status == "PAID" || status == "FAILED" || status == "AWAITING";
     }
 
-    // Mock gateway: COD/CASH luôn pass, VNPAY/MOMO 90% pass, BANK_TRANSFER trả AWAITING
-    private static GatewayResult SimulateGateway(string method, decimal amount)
+    // FE hiện chỉ có COD và BANK_TRANSFER. Tỷ lệ và delay lấy từ PaymentMock trong cấu hình.
+    private static GatewayResult SimulateGateway(
+        string method,
+        decimal amount,
+        int codSuccessRatePercent,
+        int bankTransferSuccessRatePercent)
     {
         var normalizedMethod = (method ?? string.Empty).ToUpperInvariant();
         var transactionRef = ("SIM-" + Guid.NewGuid().ToString("N")).Substring(0, 16);
 
         if (normalizedMethod == "COD" || normalizedMethod == "CASH")
         {
-            return new GatewayResult(true, "PENDING", transactionRef, string.Empty);
+            return BuildResultByRate(
+                codSuccessRatePercent,
+                "PENDING",
+                transactionRef,
+                "COD bị từ chối bởi cổng thanh toán mock");
         }
 
         if (normalizedMethod == "BANK_TRANSFER")
         {
-            return new GatewayResult(true, "AWAITING", transactionRef, string.Empty);
-        }
-
-        if (normalizedMethod == "VNPAY" || normalizedMethod == "MOMO")
-        {
-            var randomScore = Random.Shared.Next(100);
-            if (randomScore < 90)
-            {
-                return new GatewayResult(true, "PAID", transactionRef, string.Empty);
-            }
-            return new GatewayResult(false, "FAILED", transactionRef, "Gateway từ chối giao dịch (mock)");
+            return BuildResultByRate(
+                bankTransferSuccessRatePercent,
+                "AWAITING",
+                transactionRef,
+                "Chuyển khoản bị từ chối bởi cổng thanh toán mock");
         }
 
         return new GatewayResult(false, "FAILED", transactionRef, "Phương thức không hỗ trợ: " + method);
+    }
+
+    private static GatewayResult BuildResultByRate(
+        int successRatePercent,
+        string successStatus,
+        string transactionRef,
+        string failureReason)
+    {
+        var normalizedRate = Math.Clamp(successRatePercent, 0, 100);
+        if (normalizedRate == 100 || Random.Shared.Next(100) < normalizedRate)
+        {
+            return new GatewayResult(true, successStatus, transactionRef, string.Empty);
+        }
+
+        return new GatewayResult(false, "FAILED", transactionRef, failureReason);
+    }
+
+    private int GetIntSetting(string key, int fallback, int min, int max)
+    {
+        var rawValue = _configuration[key];
+        if (!int.TryParse(rawValue, out var value))
+        {
+            value = fallback;
+        }
+
+        return Math.Clamp(value, min, max);
     }
 
     private sealed class GatewayResult
